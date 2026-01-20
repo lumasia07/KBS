@@ -31,7 +31,11 @@
         }
     </style>
 
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
+    <title inertia>{{ config('app.name', 'RCEKIN') }}</title>
+
+    <link rel="icon" href="https://cdn.magicpatterns.com/uploads/rZNg7zDhMb7WFGJJjsQmwf/kinshasa_image.png" sizes="any">
+    <link rel="icon" href="https://cdn.magicpatterns.com/uploads/rZNg7zDhMb7WFGJJjsQmwf/kinshasa_image.png" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
