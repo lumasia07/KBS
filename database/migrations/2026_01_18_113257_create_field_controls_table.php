@@ -18,8 +18,7 @@ return new class extends Migration {
             $table->string('location_address');
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
-            $table->foreignId('municipality_id')->constrained('municipalities');
-
+            
             // Control details
             $table->enum('control_type', ['routine', 'targeted', 'complaint_based', 'random']);
             $table->timestamp('control_date');
@@ -55,7 +54,6 @@ return new class extends Migration {
             // Indexes
             $table->index('control_number');
             $table->index(['control_agent_id', 'control_date']);
-            $table->index(['municipality_id', 'status']);
 
             // Regular composite index for latitude/longitude queries
             $table->index(['latitude', 'longitude']);

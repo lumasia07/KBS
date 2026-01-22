@@ -71,7 +71,6 @@ class AdminUserSeeder extends Seeder
             'user_type' => 'control_agent',
             'department' => 'Field Operations',
             'position' => 'Field Control Agent',
-            'municipality_id' => 1, // Assuming first municipality
             'must_change_password' => true,
             'is_active' => true,
         ]);

@@ -25,7 +25,6 @@ return new class extends Migration {
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->foreignId('sector_id')->nullable()->constrained('business_sectors');
-            $table->foreignId('municipality_id')->nullable()->constrained('municipalities');
 
             // Generation details
             $table->foreignId('generated_by')->constrained('users');

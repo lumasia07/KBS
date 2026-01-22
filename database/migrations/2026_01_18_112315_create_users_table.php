@@ -36,8 +36,7 @@ return new class extends Migration {
             $table->string('department', 100)->nullable();
             $table->string('position', 100)->nullable();
 
-            // Location information for field agents - ADD FOREIGN KEY LATER
-            $table->foreignId('municipality_id')->nullable(); // We'll add constraint later
+            // Location assignment
             $table->decimal('assigned_latitude', 10, 8)->nullable();
             $table->decimal('assigned_longitude', 11, 8)->nullable();
             $table->string('assigned_zone', 100)->nullable();
@@ -74,7 +73,6 @@ return new class extends Migration {
             // Indexes
             $table->index('user_type');
             $table->index('employee_id');
-            $table->index(['municipality_id', 'is_active']);
             $table->index('taxpayer_id');
         });
 

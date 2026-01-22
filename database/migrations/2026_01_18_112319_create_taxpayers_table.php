@@ -19,7 +19,6 @@ return new class extends Migration {
 
             // Contact information
             $table->string('physical_address');
-            $table->foreignId('municipality_id')->constrained('municipalities');
             $table->string('email')->unique();
             $table->string('phone_number', 20);
             $table->string('alternate_phone', 20)->nullable();
@@ -56,7 +55,6 @@ return new class extends Migration {
 
             // Indexes
             $table->index('registration_status');
-            $table->index(['municipality_id', 'sector_id']);
             $table->index('created_at');
         });
     }
