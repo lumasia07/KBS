@@ -1,11 +1,7 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
@@ -37,10 +33,12 @@ export default function Login({
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="grid gap-5">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
+                                <label htmlFor="email" className="text-sm font-medium text-slate-700">
+                                    Email address
+                                </label>
+                                <input
                                     id="email"
                                     type="email"
                                     name="email"
@@ -49,47 +47,55 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"
+                                    className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-transparent transition-all"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                <div className="flex items-center justify-between">
+                                    <label htmlFor="password" className="text-sm font-medium text-slate-700">
+                                        Password
+                                    </label>
                                     {canResetPassword && (
-                                        <TextLink
+                                        <Link
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="text-sm text-[#003366] hover:text-[#002244] font-medium hover:underline"
                                             tabIndex={5}
                                         >
                                             Forgot password?
-                                        </TextLink>
+                                        </Link>
                                     )}
                                 </div>
-                                <Input
+                                <input
                                     id="password"
                                     type="password"
                                     name="password"
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="Enter your password"
+                                    className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-transparent transition-all"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
+                                    className="w-4 h-4 rounded border-slate-300 text-[#003366] focus:ring-[#003366]"
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <label htmlFor="remember" className="text-sm text-slate-600">
+                                    Remember me
+                                </label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-2 w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-3.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -100,11 +106,15 @@ export default function Login({
                         </div>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
+                            <div className="text-center text-sm text-slate-600">
                                 Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
+                                <Link
+                                    href="/taxpayer/register"
+                                    tabIndex={5}
+                                    className="text-[#003366] font-semibold hover:text-[#002244] hover:underline"
+                                >
                                     Sign up
-                                </TextLink>
+                                </Link>
                             </div>
                         )}
                     </>
@@ -119,3 +129,4 @@ export default function Login({
         </AuthLayout>
     );
 }
+
