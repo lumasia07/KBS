@@ -1,6 +1,7 @@
 // Welcome page with homepage components
 import { Head } from '@inertiajs/react';
 
+import { Header } from '@/components/homepage/Header';
 import { Hero } from '@/components/homepage/Hero';
 import { FeaturesGrid } from '@/components/homepage/feautresGrid';
 import { HowItWorks } from '@/components/homepage/HowItWorks';
@@ -14,6 +15,7 @@ export default function Welcome({
     return (
         <>
             <Head title="Kinshasa Bureau of Standards" />
+            <Header />
             <Hero />
             <HowItWorks />
             <FeaturesGrid />

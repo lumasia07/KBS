@@ -1,5 +1,6 @@
 import { UserCheck, FileCheck, CreditCard, ArrowRight } from 'lucide-react'
 import React from 'react'
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 
 const features = [
   {
@@ -24,11 +25,14 @@ const features = [
     color: 'bg-emerald-50 text-emerald-700',
   },
 ]
+
 export function FeaturesGrid() {
+  const { ref: sectionRef, isVisible } = useScrollAnimation(0.1)
+
   return (
-    <section className="py-20 bg-white">
+    <section ref={sectionRef} className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className={`text-center max-w-3xl mx-auto mb-16 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
           <span className="text-[#003366] font-semibold tracking-widest text-xs uppercase bg-blue-50 px-3 py-1 rounded-full">
             Core Capabilities
           </span>
@@ -45,14 +49,16 @@ export function FeaturesGrid() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group p-8 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-200"
+              className={`group p-8 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-[#FFD700]/50 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'
+                }`}
+              style={{ animationDelay: isVisible ? `${(index + 1) * 150}ms` : '0ms' }}
             >
               <div
                 className={`w-14 h-14 rounded-xl ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
               >
                 <feature.icon className="w-7 h-7" strokeWidth={1.5} />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">
+              <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-[#003366] transition-colors">
                 {feature.title}
               </h3>
               <p className="text-slate-600 leading-relaxed mb-6">
@@ -68,3 +74,4 @@ export function FeaturesGrid() {
     </section>
   )
 }
+
