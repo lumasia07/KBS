@@ -11,7 +11,13 @@ return new class extends Migration {
             $table->id();
             $table->string('code', 20)->unique();
             $table->string('name', 100);
-            $table->enum('technology', ['qr_code', 'hologram', 'rfid', 'digital_code', 'security_paper']);
+            $table->enum('technology', [
+                'qr_code',
+                'hologram',
+                'rfid',
+                'digital_code',
+                'security_paper'
+            ]);
             $table->text('description')->nullable();
             $table->string('security_features')->nullable();
             $table->decimal('unit_cost', 10, 2);
