@@ -1,29 +1,48 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaxpayerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
+/*
+|--------------------------------------------------------------------------
+| Home/Landing page route
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    return Inertia::render('welcome');
 })->name('home');
 
-// Taxpayer Registration Routes
-Route::get('/taxpayer/register', function () {
-    return Inertia::render('TaxpayerRegistration');
-})->name('taxpayer.register');
+/*
+|--------------------------------------------------------------------------
+| Resource Routes (Better to use this) 
+| You can update taxpayer registration to taxpayer.create and storage route to taxpayer.store 
+| Then uncomment the routes
+|--------------------------------------------------------------------------
+*/
+// Route::resources([
+//     'taxpayer' => TaxpayerController::class,
+// ]);
 
-Route::post('/taxpayer/register', function () {
-    // TODO: Implement taxpayer registration logic
-    return redirect()->route('home')->with('success', 'Registration submitted for review');
-})->name('taxpayer.register.post');
+/*
+|--------------------------------------------------------------------------
+| Taxpayer grouped Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('taxpayer')->group(function () {
+    Route::get('/register', [TaxpayerController::class, 'create'])->name('taxpayer.register');
+    Route::post('/register', [TaxpayerController::class, 'store'])->name('taxpayer.register.post');
+});
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 require __DIR__ . '/settings.php';
