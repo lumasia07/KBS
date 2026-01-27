@@ -15,6 +15,7 @@ class Taxpayer extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // In Taxpayer.php model
     protected $fillable = [
         'tax_identification_number',
         'company_name',
@@ -24,7 +25,12 @@ class Taxpayer extends Model
         'sector_id',
         'company_size_id',
         'physical_address',
-        'municipality_id',
+        'district_id',
+        'commune_id',
+        'quartier_id',
+        'avenue',
+        'number',
+        'plot_number',
         'email',
         'phone_number',
         'alternate_phone',
@@ -44,7 +50,7 @@ class Taxpayer extends Model
         'verification_date',
         'verified_by',
         'api_key',
-        'api_key_expires_at'
+        'api_key_expires_at',
     ];
 
     protected $casts = [
@@ -53,6 +59,21 @@ class Taxpayer extends Model
         'verification_date' => 'date',
         'api_key_expires_at' => 'datetime',
     ];
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function commune()
+    {
+        return $this->belongsTo(Commune::class);
+    }
+
+    public function quartier()
+    {
+        return $this->belongsTo(Quartier::class);
+    }
 
     public function legalForm()
     {
@@ -77,7 +98,13 @@ class Taxpayer extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class, 'taxpayer_products')
-            ->withPivot('registration_date', 'status', 'health_certificate_number', 'health_certificate_expiry', 'notes')
+            ->withPivot(
+                'registration_date',
+                'status',
+                'health_certificate_number',
+                'health_certificate_expiry',
+                'notes'
+            )
             ->withTimestamps();
     }
 

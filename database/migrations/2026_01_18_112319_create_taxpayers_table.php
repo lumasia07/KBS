@@ -17,8 +17,16 @@ return new class extends Migration {
             $table->foreignId('sector_id')->constrained('business_sectors');
             $table->foreignId('company_size_id')->constrained('company_sizes');
 
-            // Contact information
+            // Address information with foreign keys
             $table->string('physical_address');
+            $table->foreignId('district_id')->constrained('districts');
+            $table->foreignId('commune_id')->constrained('communes');
+            $table->foreignId('quartier_id')->nullable()->constrained('quartiers');
+            $table->string('avenue', 100)->nullable();
+            $table->string('number', 20)->nullable();
+            $table->string('plot_number', 50)->nullable();
+
+            // Contact information
             $table->string('email')->unique();
             $table->string('phone_number', 20);
             $table->string('alternate_phone', 20)->nullable();
@@ -56,6 +64,9 @@ return new class extends Migration {
             // Indexes
             $table->index('registration_status');
             $table->index('created_at');
+            $table->index('district_id');
+            $table->index('commune_id');
+            $table->index('quartier_id');
         });
     }
 
