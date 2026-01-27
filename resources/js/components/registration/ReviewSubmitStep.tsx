@@ -5,133 +5,146 @@ interface ReviewSubmitStepProps {
         tax_identification_number: string;
         rccm_number: string;
         company_name: string;
+        email: string;
+        phone_number: string;
         legal_form_id: string;
         sector_id: string;
-        district: string;
-        commune: string;
-        quartier: string;
+        district_id: string;
+        commune_id: string;
+        quartier_id: string;
         avenue: string;
         physical_address: string;
         legal_representative_name: string;
         legal_representative_email: string;
         legal_representative_phone: string;
-        email: string;
+        legal_representative_id_number: string;
+        company_size_id: string;
+    };
+    lookups?: {
+        legalForms: { id: number; name: string; }[];
+        sectors: { id: number; name: string; }[];
+        companySizes: { id: number; name: string; }[];
+        districts: { id: number; name: string; }[];
+        communes: { id: number; name: string; }[];
+        quartiers: { id: number; name: string; }[];
     };
 }
 
-export default function ReviewSubmitStep({ data }: ReviewSubmitStepProps) {
-    const getLegalFormText = (id: string) => {
-        switch (id) {
-            case '1': return 'Sole Proprietorship';
-            case '2': return 'Partnership';
-            case '3': return 'Corporation';
-            case '4': return 'Limited Liability Company';
-            case '5': return 'Non-Profit Organization';
-            default: return 'Not selected';
-        }
-    };
-
-    const getSectorText = (id: string) => {
-        switch (id) {
-            case '1': return 'Manufacturing';
-            case '2': return 'Services';
-            case '3': return 'Retail & Trade';
-            case '4': return 'Agriculture';
-            case '5': return 'Construction';
-            case '6': return 'Technology';
-            case '7': return 'Healthcare';
-            case '8': return 'Education';
-            case '9': return 'Transportation';
-            case '10': return 'Other';
-            default: return 'Not selected';
-        }
+export default function ReviewSubmitStep({ data, lookups }: ReviewSubmitStepProps) {
+    const getLookupName = (list: { id: number; name: string; }[] | undefined, id: string) => {
+        if (!list || !id) return id;
+        const item = list.find(l => l.id.toString() === id.toString());
+        return item ? item.name : id;
     };
 
     return (
         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-            <h2 className="text-2xl font-semibold text-black mb-4">Review Your Information</h2>
+            <h2 className="text-2xl font-semibold text-black mb-6">Review & Submit</h2>
+
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white p-4 rounded-lg border border-slate-200">
-                        <h3 className="font-semibold text-black mb-3">Company Details</h3>
-                        <div className="space-y-2 text-sm">
-                            <div>
-                                <span className="text-purple-600 font-medium">TIN:</span>
-                                <span className="text-black ml-2">{data.tax_identification_number}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">RCCM:</span>
-                                <span className="text-black ml-2">{data.rccm_number}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Company:</span>
-                                <span className="text-black ml-2">{data.company_name}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Legal Form:</span>
-                                <span className="text-black ml-2">{getLegalFormText(data.legal_form_id)}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Sector:</span>
-                                <span className="text-black ml-2">{getSectorText(data.sector_id)}</span>
-                            </div>
+                {/* Company Details */}
+                <div>
+                    <h3 className="text-lg font-medium text-[#003366] border-b border-slate-200 pb-2 mb-3">Company Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span className="block text-slate-500">Tax ID Number</span>
+                            <span className="font-medium text-slate-900">{data.tax_identification_number}</span>
                         </div>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-lg border border-slate-200">
-                        <h3 className="font-semibold text-black mb-3">Location</h3>
-                        <div className="space-y-2 text-sm">
-                            <div>
-                                <span className="text-purple-600 font-medium">District:</span>
-                                <span className="text-black ml-2">{data.district || 'Not specified'}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Commune:</span>
-                                <span className="text-black ml-2">{data.commune || 'Not specified'}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Quartier:</span>
-                                <span className="text-black ml-2">{data.quartier || 'Not specified'}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Avenue:</span>
-                                <span className="text-black ml-2">{data.avenue || 'Not specified'}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Address:</span>
-                                <span className="text-black ml-2">{data.physical_address}</span>
-                            </div>
+                        <div>
+                            <span className="block text-slate-500">RCCM Number</span>
+                            <span className="font-medium text-slate-900">{data.rccm_number}</span>
                         </div>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-lg border border-slate-200 md:col-span-2">
-                        <h3 className="font-semibold text-black mb-3">Account Information</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <span className="text-purple-600 font-medium">Representative:</span>
-                                <span className="text-black ml-2">{data.legal_representative_name}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Email:</span>
-                                <span className="text-black ml-2">{data.legal_representative_email}</span>
-                            </div>
-                            <div>
-                                <span className="text-purple-600 font-medium">Phone:</span>
-                                <span className="text-black ml-2">{data.legal_representative_phone}</span>
-                            </div>
-                            <div className="md:col-span-2">
-                                <span className="text-purple-600 font-medium">Account Email:</span>
-                                <span className="text-black ml-2">{data.email}</span>
-                            </div>
+                        <div className="md:col-span-2">
+                            <span className="block text-slate-500">Company Name</span>
+                            <span className="font-medium text-slate-900">{data.company_name}</span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Company Email</span>
+                            <span className="font-medium text-slate-900">{data.email}</span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Company Phone</span>
+                            <span className="font-medium text-slate-900">{data.phone_number}</span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Legal Form</span>
+                            <span className="font-medium text-slate-900">
+                                {getLookupName(lookups?.legalForms, data.legal_form_id)}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Business Sector</span>
+                            <span className="font-medium text-slate-900">
+                                {getLookupName(lookups?.sectors, data.sector_id)}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Company Size</span>
+                            <span className="font-medium text-slate-900">
+                                {getLookupName(lookups?.companySizes, data.company_size_id)}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-800">
-                        By submitting this registration, you agree to comply with all regulations set by the Kinshasa Bureau of Standards.
-                        Your application will be reviewed and you will be notified of the approval status via email.
-                    </p>
+                {/* Location Details */}
+                <div>
+                    <h3 className="text-lg font-medium text-[#003366] border-b border-slate-200 pb-2 mb-3">Location Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span className="block text-slate-500">District</span>
+                            <span className="font-medium text-slate-900">
+                                {getLookupName(lookups?.districts, data.district_id)}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Commune</span>
+                            <span className="font-medium text-slate-900">
+                                {getLookupName(lookups?.communes, data.commune_id)}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Quartier</span>
+                            <span className="font-medium text-slate-900">
+                                {getLookupName(lookups?.quartiers, data.quartier_id)}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Avenue</span>
+                            <span className="font-medium text-slate-900">{data.avenue}</span>
+                        </div>
+                        <div className="md:col-span-2">
+                            <span className="block text-slate-500">Physical Address</span>
+                            <span className="font-medium text-slate-900">{data.physical_address}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Legal Representative */}
+                <div>
+                    <h3 className="text-lg font-medium text-[#003366] border-b border-slate-200 pb-2 mb-3">Legal Representative</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="md:col-span-2">
+                            <span className="block text-slate-500">Full Name</span>
+                            <span className="font-medium text-slate-900">{data.legal_representative_name}</span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Email Address</span>
+                            <span className="font-medium text-slate-900">{data.legal_representative_email}</span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">Phone Number</span>
+                            <span className="font-medium text-slate-900">{data.legal_representative_phone}</span>
+                        </div>
+                        <div>
+                            <span className="block text-slate-500">ID Number</span>
+                            <span className="font-medium text-slate-900">{data.legal_representative_id_number}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded border border-blue-100 text-sm text-blue-800">
+                    <p>Please review all information carefully before submitting. Once submitted, your application will be pending verification.</p>
                 </div>
             </div>
         </div>

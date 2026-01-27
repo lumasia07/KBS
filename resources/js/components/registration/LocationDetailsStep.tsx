@@ -1,61 +1,102 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputError from '@/components/input-error';
 
+interface District { id: number; name: string; }
+interface Commune { id: number; name: string; district_id: number; }
+interface Quartier { id: number; name: string; commune_id: number; }
+
 interface LocationDetailsStepProps {
     data: {
-        district: string;
-        commune: string;
-        quartier: string;
+        district_id: string;
+        commune_id: string;
+        quartier_id: string;
         avenue: string;
         physical_address: string;
     };
+    districts: District[];
+    communes: Commune[];
+    quartiers: Quartier[];
     setData: (key: string, value: any) => void;
     errors: Record<string, string>;
 }
 
-export default function LocationDetailsStep({ data, setData, errors }: LocationDetailsStepProps) {
+export default function LocationDetailsStep({ data, setData, errors, districts, communes, quartiers }: LocationDetailsStepProps) {
+    const filteredCommunes = useMemo(() => {
+        if (!data.district_id) return [];
+        return communes.filter(c => c.district_id === parseInt(data.district_id));
+    }, [data.district_id, communes]);
+
+    const filteredQuartiers = useMemo(() => {
+        if (!data.commune_id) return [];
+        return quartiers.filter(q => q.commune_id === parseInt(data.commune_id));
+    }, [data.commune_id, quartiers]);
+
     return (
         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
             <h2 className="text-2xl font-semibold text-black mb-4">Location Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <Label htmlFor="district" className="text-sm font-medium text-slate-600">District</Label>
-                    <Input
-                        id="district"
-                        type="text"
-                        value={data.district}
-                        onChange={(e) => setData('district', e.target.value)}
-                        className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter district"
-                    />
-                    <InputError message={errors.district} />
+                    <Label htmlFor="district_id" className="text-sm font-medium text-slate-600">District</Label>
+                    <Select
+                        value={data.district_id?.toString()}
+                        onValueChange={(value) => {
+                            setData('district_id', value);
+                            setData('commune_id', ''); // Reset child fields
+                            setData('quartier_id', '');
+                        }}
+                    >
+                        <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
+                            <SelectValue placeholder="Select district" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                            {districts.map((d) => (
+                                <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <InputError message={errors.district_id} />
                 </div>
                 <div>
-                    <Label htmlFor="commune" className="text-sm font-medium text-slate-600">Commune</Label>
-                    <Input
-                        id="commune"
-                        type="text"
-                        value={data.commune}
-                        onChange={(e) => setData('commune', e.target.value)}
-                        className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter commune"
-                    />
-                    <InputError message={errors.commune} />
+                    <Label htmlFor="commune_id" className="text-sm font-medium text-slate-600">Commune</Label>
+                    <Select
+                        value={data.commune_id?.toString()}
+                        onValueChange={(value) => {
+                            setData('commune_id', value);
+                            setData('quartier_id', '');
+                        }}
+                        disabled={!data.district_id}
+                    >
+                        <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
+                            <SelectValue placeholder="Select commune" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                            {filteredCommunes.map((c) => (
+                                <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <InputError message={errors.commune_id} />
                 </div>
                 <div>
-                    <Label htmlFor="quartier" className="text-sm font-medium text-slate-600">Quartier</Label>
-                    <Input
-                        id="quartier"
-                        type="text"
-                        value={data.quartier}
-                        onChange={(e) => setData('quartier', e.target.value)}
-                        className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter quartier"
-                    />
-                    <InputError message={errors.quartier} />
+                    <Label htmlFor="quartier_id" className="text-sm font-medium text-slate-600">Quartier</Label>
+                    <Select
+                        value={data.quartier_id?.toString()}
+                        onValueChange={(value) => setData('quartier_id', value)}
+                        disabled={!data.commune_id}
+                    >
+                        <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
+                            <SelectValue placeholder="Select quartier" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                            {filteredQuartiers.map((q) => (
+                                <SelectItem key={q.id} value={q.id.toString()}>{q.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <InputError message={errors.quartier_id} />
                 </div>
                 <div>
                     <Label htmlFor="avenue" className="text-sm font-medium text-slate-600">Avenue/Street</Label>

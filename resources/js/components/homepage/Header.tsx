@@ -44,8 +44,8 @@ function NavItem({ label, href, hasDropdown, dropdownItems }: NavItemProps) {
             {hasDropdown && dropdownItems && (
                 <div
                     className={`absolute top-full left-0 pt-2 transition-all duration-300 ease-out ${isOpen
-                            ? 'opacity-100 visible translate-y-0'
-                            : 'opacity-0 invisible -translate-y-2'
+                        ? 'opacity-100 visible translate-y-0'
+                        : 'opacity-0 invisible -translate-y-2'
                         }`}
                 >
                     <div className="bg-white rounded-xl shadow-xl border border-slate-200/80 overflow-hidden min-w-[240px]">
@@ -91,8 +91,8 @@ export function Header() {
 
     const portalsDropdown: DropdownItem[] = [
         { label: 'Taxpayer Portal', href: '/login', description: 'Access your taxpayer account' },
-        { label: 'Agent Portal', href: '/login', description: 'For verification agents' },
-        { label: 'Admin Dashboard', href: '/login', description: 'Administrative access' },
+        { label: 'Agent Portal', href: '/agent/login', description: 'For verification agents' },
+        { label: 'Admin Portal', href: '/portal/login', description: 'Administrative access' },
     ]
 
     return (

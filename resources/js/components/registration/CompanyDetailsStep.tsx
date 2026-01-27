@@ -4,19 +4,30 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputError from '@/components/input-error';
 
+interface LegalForm { id: number; name: string; code?: string; }
+interface Sector { id: number; name: string; }
+
+interface CompanySize { id: number; name: string; }
+
 interface CompanyDetailsStepProps {
     data: {
         tax_identification_number: string;
         rccm_number: string;
         company_name: string;
+        email: string;
+        phone_number: string;
         legal_form_id: string;
         sector_id: string;
+        company_size_id: string;
     };
+    legalForms: LegalForm[];
+    sectors: Sector[];
+    companySizes: CompanySize[];
     setData: (key: string, value: any) => void;
     errors: Record<string, string>;
 }
 
-export default function CompanyDetailsStep({ data, setData, errors }: CompanyDetailsStepProps) {
+export default function CompanyDetailsStep({ data, setData, errors, legalForms, sectors, companySizes }: CompanyDetailsStepProps) {
     return (
         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
             <h2 className="text-2xl font-semibold text-black mb-4">Company Details</h2>
@@ -47,7 +58,7 @@ export default function CompanyDetailsStep({ data, setData, errors }: CompanyDet
                     />
                     <InputError message={errors.rccm_number} />
                 </div>
-                <div className="md:col-span-2">
+                <div>
                     <Label htmlFor="company_name" className="text-sm font-medium text-slate-600">Company Name</Label>
                     <Input
                         id="company_name"
@@ -61,41 +72,78 @@ export default function CompanyDetailsStep({ data, setData, errors }: CompanyDet
                     <InputError message={errors.company_name} />
                 </div>
                 <div>
+                    <Label htmlFor="email" className="text-sm font-medium text-slate-600">Company Email</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
+                        required
+                        className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
+                        placeholder="Enter company email"
+                    />
+                    <InputError message={errors.email} />
+                </div>
+                <div>
+                    <Label htmlFor="phone_number" className="text-sm font-medium text-slate-600">Company Phone</Label>
+                    <Input
+                        id="phone_number"
+                        type="tel"
+                        value={data.phone_number}
+                        onChange={(e) => setData('phone_number', e.target.value)}
+                        required
+                        className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
+                        placeholder="Enter company phone"
+                    />
+                    <InputError message={errors.phone_number} />
+                </div>
+                <div>
                     <Label htmlFor="legal_form_id" className="text-sm font-medium text-slate-600">Legal Form</Label>
-                    <Select value={data.legal_form_id} onValueChange={(value) => setData('legal_form_id', value)}>
+                    <Select value={data.legal_form_id?.toString()} onValueChange={(value) => setData('legal_form_id', value)}>
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select legal form" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
-                            <SelectItem value="1">Sole Proprietorship</SelectItem>
-                            <SelectItem value="2">Partnership</SelectItem>
-                            <SelectItem value="3">Corporation</SelectItem>
-                            <SelectItem value="4">Limited Liability Company</SelectItem>
-                            <SelectItem value="5">Non-Profit Organization</SelectItem>
+                            {legalForms.map((form) => (
+                                <SelectItem key={form.id} value={form.id.toString()}>
+                                    {form.name} {form.code ? `(${form.code})` : ''}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                     <InputError message={errors.legal_form_id} />
                 </div>
                 <div>
                     <Label htmlFor="sector_id" className="text-sm font-medium text-slate-600">Business Sector</Label>
-                    <Select value={data.sector_id} onValueChange={(value) => setData('sector_id', value)}>
+                    <Select value={data.sector_id?.toString()} onValueChange={(value) => setData('sector_id', value)}>
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select business sector" />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
-                            <SelectItem value="1">Manufacturing</SelectItem>
-                            <SelectItem value="2">Services</SelectItem>
-                            <SelectItem value="3">Retail & Trade</SelectItem>
-                            <SelectItem value="4">Agriculture</SelectItem>
-                            <SelectItem value="5">Construction</SelectItem>
-                            <SelectItem value="6">Technology</SelectItem>
-                            <SelectItem value="7">Healthcare</SelectItem>
-                            <SelectItem value="8">Education</SelectItem>
-                            <SelectItem value="9">Transportation</SelectItem>
-                            <SelectItem value="10">Other</SelectItem>
+                            {sectors.map((sector) => (
+                                <SelectItem key={sector.id} value={sector.id.toString()}>
+                                    {sector.name}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                     <InputError message={errors.sector_id} />
+                </div>
+                <div>
+                    <Label htmlFor="company_size_id" className="text-sm font-medium text-slate-600">Company Size</Label>
+                    <Select value={data.company_size_id?.toString()} onValueChange={(value) => setData('company_size_id', value)}>
+                        <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
+                            <SelectValue placeholder="Select company size" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                            {companySizes.map((size) => (
+                                <SelectItem key={size.id} value={size.id.toString()}>
+                                    {size.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <InputError message={errors.company_size_id} />
                 </div>
             </div>
         </div>

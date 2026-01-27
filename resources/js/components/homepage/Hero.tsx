@@ -11,18 +11,12 @@ export function Hero() {
         style={{ backgroundImage: "url('/industry.jpg')" }}
       ></div>
 
-      {/* Yellowish overlay to match brand theme */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-br from-[#FFD700]/30 via-amber-100/40 to-yellow-50/50"></div>
+      {/* Single clean overlay for text readability */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-white/90 via-white/70 to-white/30"></div>
 
-      {/* Light overlay for text readability */}
-      <div className="absolute inset-0 z-[2] bg-gradient-to-r from-white/85 via-white/60 to-transparent"></div>
+      {/* Subtle accent decoration */}
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#FFD700]/10 rounded-full blur-3xl z-[2]"></div>
 
-      {/* Background decoration with golden accents */}
-      <div className="absolute inset-0 z-[3] opacity-60">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#FFD700]/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 -left-24 w-72 h-72 bg-amber-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-yellow-100/40 rounded-full blur-3xl"></div>
-      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Content - now full width, positioned left */}
