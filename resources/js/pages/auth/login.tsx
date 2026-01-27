@@ -12,17 +12,36 @@ interface LoginProps {
     status?: string;
     canResetPassword: boolean;
     canRegister: boolean;
+    portalType?: 'admin' | 'agent' | 'taxpayer';
 }
+
+const portalConfig = {
+    admin: {
+        title: 'Admin Portal Login',
+        description: 'Sign in to access the administrative dashboard',
+    },
+    agent: {
+        title: 'Agent Portal Login',
+        description: 'Sign in to access your field agent dashboard',
+    },
+    taxpayer: {
+        title: 'Log in to your account',
+        description: 'Enter your email and password below to log in',
+    },
+};
 
 export default function Login({
     status,
     canResetPassword,
     canRegister,
+    portalType = 'taxpayer',
 }: LoginProps) {
+    const config = portalConfig[portalType] || portalConfig.taxpayer;
+
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title={config.title}
+            description={config.description}
         >
             <Head title="Log in" />
 

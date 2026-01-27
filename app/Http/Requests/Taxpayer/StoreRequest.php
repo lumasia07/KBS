@@ -114,17 +114,17 @@ class StoreRequest extends FormRequest
 
             // Company Information (optional fields)
             'company_size_id' => [
-                'nullable',
+                'required',
                 'exists:company_sizes,id'
             ],
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 'max:255',
                 'unique:taxpayers,email'
             ],
             'phone_number' => [
-                'nullable',
+                'required',
                 'string',
                 'max:20',
                 'regex:/^\+?[0-9\s\-\(\)]+$/'

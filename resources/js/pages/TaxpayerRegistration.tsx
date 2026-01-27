@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
+import { Toaster, toast } from 'sonner';
 import CompanyDetailsStep from '@/components/registration/CompanyDetailsStep';
 import LocationDetailsStep from '@/components/registration/LocationDetailsStep';
 import LegalRepresentativeStep from '@/components/registration/LegalRepresentativeStep';
@@ -7,7 +8,30 @@ import ReviewSubmitStep from '@/components/registration/ReviewSubmitStep';
 import StepIndicator from '@/components/registration/StepIndicator';
 import NavigationButtons from '@/components/registration/NavigationButtons';
 
-export default function TaxpayerRegistration() {
+interface LegalForm { id: number; name: string; code?: string; }
+interface Sector { id: number; name: string; }
+interface CompanySize { id: number; name: string; }
+interface District { id: number; name: string; }
+interface Commune { id: number; name: string; district_id: number; }
+interface Quartier { id: number; name: string; commune_id: number; }
+
+interface Props {
+    legalForms: LegalForm[];
+    sectors: Sector[];
+    companySizes: CompanySize[];
+    districts: District[];
+    communes: Commune[];
+    quartiers: Quartier[];
+}
+
+export default function TaxpayerRegistration({
+    legalForms,
+    sectors,
+    companySizes,
+    districts,
+    communes,
+    quartiers
+}: Props) {
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 4;
 
@@ -18,11 +42,14 @@ export default function TaxpayerRegistration() {
         company_name: '',
         legal_form_id: '',
         sector_id: '',
+        email: '',
+        phone_number: '',
+        company_size_id: '',
 
         // Step 2: Location
-        district: '',
-        commune: '',
-        quartier: '',
+        district_id: '',
+        commune_id: '',
+        quartier_id: '',
         avenue: '',
         physical_address: '',
 
@@ -30,16 +57,50 @@ export default function TaxpayerRegistration() {
         legal_representative_name: '',
         legal_representative_email: '',
         legal_representative_phone: '',
+        legal_representative_id_number: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/taxpayer/register');
+        post('/taxpayer/register', {
+            onSuccess: () => {
+                toast.success('Registration submitted successfully!');
+            },
+            onError: () => {
+                toast.error('Please correct the errors in the form.');
+            }
+        });
+    };
+
+    const validateStep = (step: number): boolean => {
+        switch (step) {
+            case 1: // Company Details
+                if (!data.tax_identification_number || !data.rccm_number || !data.company_name || !data.email || !data.phone_number || !data.legal_form_id || !data.sector_id || !data.company_size_id) {
+                    return false;
+                }
+                return true;
+            case 2: // Location
+                if (!data.district_id || !data.commune_id || !data.quartier_id || !data.physical_address) {
+                    return false;
+                }
+                return true;
+            case 3: // Legal Representative
+                if (!data.legal_representative_name || !data.legal_representative_email || !data.legal_representative_phone || !data.legal_representative_id_number) {
+                    return false;
+                }
+                return true;
+            default:
+                return true;
+        }
     };
 
     const nextStep = () => {
         if (currentStep < totalSteps) {
-            setCurrentStep(currentStep + 1);
+            if (validateStep(currentStep)) {
+                setCurrentStep(currentStep + 1);
+            } else {
+                toast.error('Please fill in all required fields.');
+            }
         }
     };
 
@@ -65,9 +126,15 @@ export default function TaxpayerRegistration() {
                             tax_identification_number: data.tax_identification_number,
                             rccm_number: data.rccm_number,
                             company_name: data.company_name,
+                            email: data.email,
+                            phone_number: data.phone_number,
                             legal_form_id: data.legal_form_id,
                             sector_id: data.sector_id,
+                            company_size_id: data.company_size_id,
                         }}
+                        legalForms={legalForms}
+                        sectors={sectors}
+                        companySizes={companySizes}
                         setData={setData}
                         errors={errors}
                     />
@@ -76,12 +143,15 @@ export default function TaxpayerRegistration() {
                 return (
                     <LocationDetailsStep
                         data={{
-                            district: data.district,
-                            commune: data.commune,
-                            quartier: data.quartier,
+                            district_id: data.district_id,
+                            commune_id: data.commune_id,
+                            quartier_id: data.quartier_id,
                             avenue: data.avenue,
                             physical_address: data.physical_address,
                         }}
+                        districts={districts}
+                        communes={communes}
+                        quartiers={quartiers}
                         setData={setData}
                         errors={errors}
                     />
@@ -93,6 +163,7 @@ export default function TaxpayerRegistration() {
                             legal_representative_name: data.legal_representative_name,
                             legal_representative_email: data.legal_representative_email,
                             legal_representative_phone: data.legal_representative_phone,
+                            legal_representative_id_number: data.legal_representative_id_number,
                         }}
                         setData={setData}
                         errors={errors}
@@ -105,16 +176,29 @@ export default function TaxpayerRegistration() {
                             tax_identification_number: data.tax_identification_number,
                             rccm_number: data.rccm_number,
                             company_name: data.company_name,
+                            email: data.email,
+                            phone_number: data.phone_number,
                             legal_form_id: data.legal_form_id,
                             sector_id: data.sector_id,
-                            district: data.district,
-                            commune: data.commune,
-                            quartier: data.quartier,
+                            company_size_id: data.company_size_id,
+                            district_id: data.district_id,
+                            commune_id: data.commune_id,
+                            quartier_id: data.quartier_id,
                             avenue: data.avenue,
                             physical_address: data.physical_address,
                             legal_representative_name: data.legal_representative_name,
                             legal_representative_email: data.legal_representative_email,
                             legal_representative_phone: data.legal_representative_phone,
+                            legal_representative_id_number: data.legal_representative_id_number,
+                        }}
+                        // We might want to pass lookups here too to display names instead of IDs
+                        lookups={{
+                            legalForms,
+                            sectors,
+                            companySizes,
+                            districts,
+                            communes,
+                            quartiers
                         }}
                     />
                 );
@@ -124,8 +208,9 @@ export default function TaxpayerRegistration() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex">
+        <div className="min-h-dvh bg-white flex overflow-hidden">
             <Head title="Taxpayer Registration" />
+            <Toaster richColors position="top-right" />
 
             {/* Left Side - Registration Form */}
             <div className="w-full lg:w-3/5 flex flex-col">
@@ -140,7 +225,7 @@ export default function TaxpayerRegistration() {
                     </Link>
                 </div>
 
-                <div className="flex-1 px-6 py-6 lg:px-12 overflow-y-auto">
+                <div className="flex-1 px-6 py-6 lg:px-12 overflow-y-auto h-full scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                     {/* Main Title */}
                     <div className="mb-6">
                         <h1 className="text-3xl font-bold text-black mb-2">Taxpayer Registration</h1>

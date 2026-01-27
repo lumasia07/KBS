@@ -35,14 +35,37 @@ Route::prefix('taxpayer')->group(function () {
     Route::post('/register', [TaxpayerController::class, 'store'])->name('taxpayer.register.post');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes
-|--------------------------------------------------------------------------
-*/
+// Agent Login Route
+Route::get('/agent/login', function () {
+    return Inertia::render('auth/login', ['portalType' => 'agent']);
+})->name('agent.login');
+
+// Admin Portal Login Route
+Route::get('/portal/login', function () {
+    return Inertia::render('auth/login', ['portalType' => 'admin']);
+})->name('portal.login');
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Admin Dashboard
+    Route::get('admin/dashboard', function () {
+        return Inertia::render('admin/dashboard');
+    })->name('admin.dashboard');
+
+    // Taxpayer Dashboard
+    Route::get('taxpayer/dashboard', function () {
+        return Inertia::render('taxpayer/dashboard');
+    })->name('taxpayer.dashboard');
+
+    // Agent Dashboard
+    Route::get('agent/dashboard', function () {
+        return Inertia::render('agent/dashboard');
+    })->name('agent.dashboard');
+
+    // Legacy redirect for old dashboard route
+    Route::get('dashboard', function () {
+        return redirect()->route('admin.dashboard');
+    })->name('dashboard');
 });
 
 require __DIR__ . '/settings.php';
+

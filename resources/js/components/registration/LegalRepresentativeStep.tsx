@@ -8,6 +8,7 @@ interface LegalRepresentativeStepProps {
         legal_representative_name: string;
         legal_representative_email: string;
         legal_representative_phone: string;
+        legal_representative_id_number: string;
     };
     setData: (key: string, value: any) => void;
     errors: Record<string, string>;
@@ -56,6 +57,19 @@ export default function LegalRepresentativeStep({ data, setData, errors }: Legal
                         placeholder="Enter phone number"
                     />
                     <InputError message={errors.legal_representative_phone} />
+                </div>
+                <div>
+                    <Label htmlFor="legal_representative_id_number" className="text-sm font-medium text-slate-600">ID Number (National ID/Passport)</Label>
+                    <Input
+                        id="legal_representative_id_number"
+                        type="text"
+                        value={data.legal_representative_id_number}
+                        onChange={(e) => setData('legal_representative_id_number', e.target.value)}
+                        required
+                        className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
+                        placeholder="Enter ID number"
+                    />
+                    <InputError message={errors.legal_representative_id_number} />
                 </div>
             </div>
         </div>

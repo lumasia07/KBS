@@ -1,5 +1,22 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    LayoutGrid,
+    Users,
+    FileText,
+    CreditCard,
+    ShieldCheck,
+    BarChart3,
+    Settings,
+    HelpCircle,
+    Stamp,
+    Package,
+    ClipboardCheck,
+    MapPin,
+    Target,
+    FileCheck,
+    History,
+    AlertTriangle
+} from 'lucide-react';
 
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -13,40 +30,164 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
+import { type NavItem, type SharedData } from '@/types';
 
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+// Admin navigation items
+const adminNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: '/admin/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Taxpayers',
+        href: '#',
+        icon: Users,
+    },
+    {
+        title: 'Stamp Orders',
+        href: '#',
+        icon: Stamp,
+    },
+    {
+        title: 'Payments',
+        href: '#',
+        icon: CreditCard,
+    },
+    {
+        title: 'Field Control',
+        href: '#',
+        icon: ShieldCheck,
+    },
+    {
+        title: 'Reports',
+        href: '#',
+        icon: BarChart3,
+    },
+];
+
+// Taxpayer navigation items
+const taxpayerNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/taxpayer/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'My Orders',
+        href: '#',
+        icon: Package,
+    },
+    {
+        title: 'Stamp Inventory',
+        href: '#',
+        icon: Stamp,
+    },
+    {
+        title: 'Payments',
+        href: '#',
+        icon: CreditCard,
+    },
+    {
+        title: 'Compliance',
+        href: '#',
+        icon: FileCheck,
+    },
+    {
+        title: 'Order History',
+        href: '#',
+        icon: History,
+    },
+];
+
+// Agent navigation items
+const agentNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/agent/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Inspections',
+        href: '#',
+        icon: ClipboardCheck,
+    },
+    {
+        title: 'Verify Stamps',
+        href: '#',
+        icon: Stamp,
+    },
+    {
+        title: 'My Route',
+        href: '#',
+        icon: MapPin,
+    },
+    {
+        title: 'Violations',
+        href: '#',
+        icon: AlertTriangle,
+    },
+    {
+        title: 'Performance',
+        href: '#',
+        icon: Target,
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Settings',
+        href: '/settings/profile',
+        icon: Settings,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        title: 'Help & Support',
+        href: '/help',
+        icon: HelpCircle,
     },
 ];
 
+function getNavItemsForUserType(userType: string | undefined): NavItem[] {
+    switch (userType) {
+        case 'taxpayer':
+            return taxpayerNavItems;
+        case 'control_agent':
+            return agentNavItems;
+        case 'admin':
+        case 'finance':
+        default:
+            return adminNavItems;
+    }
+}
+
+function getDashboardUrlForUserType(userType: string | undefined): string {
+    switch (userType) {
+        case 'taxpayer':
+            return '/taxpayer/dashboard';
+        case 'control_agent':
+            return '/agent/dashboard';
+        case 'admin':
+        case 'finance':
+        default:
+            return '/admin/dashboard';
+    }
+}
+
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
+    const userType = auth?.user?.user_type as string | undefined;
+    const navItems = getNavItemsForUserType(userType);
+    const dashboardUrl = getDashboardUrlForUserType(userType);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={dashboardUrl} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -55,7 +196,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>

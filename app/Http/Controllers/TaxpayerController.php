@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Throwable;
+use App\Models\BusinessSector;
+use App\Models\Commune;
+use App\Models\CompanySize;
+use App\Models\District;
+use App\Models\LegalForm;
+use App\Models\Quartier;
 
 class TaxpayerController extends Controller
 {
@@ -63,7 +69,14 @@ class TaxpayerController extends Controller
      */
     public function create()
     {
-        return Inertia::render('TaxpayerRegistration');
+        return Inertia::render('TaxpayerRegistration', [
+            'legalForms' => LegalForm::select('id', 'name', 'code')->get(),
+            'sectors' => BusinessSector::select('id', 'name')->get(),
+            'companySizes' => CompanySize::select('id', 'name')->get(),
+            'districts' => District::select('id', 'name')->get(),
+            'communes' => Commune::select('id', 'name', 'district_id')->get(),
+            'quartiers' => Quartier::select('id', 'name', 'commune_id')->get(),
+        ]);
     }
 
     /**
@@ -93,10 +106,12 @@ class TaxpayerController extends Controller
             // Load relationships
             $taxpayer = $this->loadTaxpayerRelationships($taxpayer);
 
-            return $this->success([
-                'taxpayer' => $taxpayer,
-                'api_key' => $taxpayer->api_key // Show only once on creation
-            ], 'Taxpayer created successfully', 201);
+            // return $this->success([
+            //     'taxpayer' => $taxpayer,
+            //     'api_key' => $taxpayer->api_key // Show only once on creation
+            // ], 'Taxpayer created successfully', 201);
+
+            return redirect()->route('home')->with('success', 'Taxpayer created successfully. Please wait for verification.');
 
         } catch (Throwable $e) {
             DB::rollBack();
