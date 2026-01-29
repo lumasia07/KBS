@@ -266,3 +266,10 @@
 .animate-on-scroll-scale.is-visible {
     animation: fadeInScale 0.8s ease-out forwards;
 }
+
+button,
+.button,
+.btn,
+.cursor-pointer {
+    cursor: pointer;
+}
