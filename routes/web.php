@@ -56,6 +56,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('taxpayer/dashboard');
     })->name('taxpayer.dashboard');
 
+    // Taxpayer Order Page
+    Route::get('taxpayer/order', function () {
+        return Inertia::render('taxpayer/order');
+    })->name('taxpayer.order');
+
     // Agent Dashboard
     Route::get('agent/dashboard', function () {
         return Inertia::render('agent/dashboard');
