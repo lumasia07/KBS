@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Taxpayer\StoreRequest;
 use App\Http\Requests\Taxpayer\UpdateRequest;
+use App\Mail\TaxpayerRegistrationMail;
 use App\Models\Product;
 use App\Models\Taxpayer;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,6 +20,9 @@ use App\Models\CompanySize;
 use App\Models\District;
 use App\Models\LegalForm;
 use App\Models\Quartier;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\Facades\DataTables;
 
 class TaxpayerController extends Controller
 {
@@ -59,9 +63,166 @@ class TaxpayerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Implement as needed
+        // Check if it's an AJAX request for DataTables
+        if ($request->ajax() || $request->has('draw')) {
+            return $this->datatable($request);
+        }
+
+        // Return Inertia view for non-AJAX requests
+        return Inertia::render('Taxpayer/Index', [
+            'initialData' => $this->getIndexData(),
+            'filters' => $request->only(['search', 'status', 'sector']),
+        ]);
+    }
+
+    /**
+     * Get data for DataTables
+     */
+    private function datatable(Request $request)
+    {
+        $query = Taxpayer::with(['legalForm', 'sector', 'district', 'commune'])
+            ->select('taxpayers.*');
+
+        // Apply filters
+        if ($request->has('search') && !empty($request->search['value'])) {
+            $search = $request->search['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'LIKE', "%{$search}%")
+                    ->orWhere('tax_identification_number', 'LIKE', "%{$search}%")
+                    ->orWhere('trade_register_number', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('phone_number', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('registration_status', $request->status);
+        }
+
+        // Filter by sector
+        if ($request->filled('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+
+        // Apply ordering
+        if ($request->has('order')) {
+            $columns = $request->columns;
+            foreach ($request->order as $order) {
+                $columnIndex = $order['column'];
+                $columnName = $columns[$columnIndex]['data'] ?? $columns[$columnIndex]['name'];
+                $direction = $order['dir'];
+
+                // Map frontend column names to database columns
+                $columnMap = [
+                    'company_name' => 'company_name',
+                    'tax_identification_number' => 'tax_identification_number',
+                    'legal_form' => 'legal_form_id',
+                    'sector' => 'sector_id',
+                    'registration_status' => 'registration_status',
+                    'registration_date' => 'registration_date',
+                    'email' => 'email',
+                    'phone_number' => 'phone_number',
+                ];
+
+                if (isset($columnMap[$columnName])) {
+                    $query->orderBy($columnMap[$columnName], $direction);
+                }
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        return DataTables::eloquent($query)
+            ->addColumn('actions', function (Taxpayer $taxpayer) {
+                return [
+                    'view' => route('taxpayers.show', $taxpayer->id),
+                    'edit' => route('taxpayers.edit', $taxpayer->id),
+                    'verify' => $taxpayer->registration_status === 'pending' ? route('taxpayers.verify', $taxpayer->id) : null,
+                    'reject' => $taxpayer->registration_status === 'pending' ? route('taxpayers.reject', $taxpayer->id) : null,
+                    'delete' => route('taxpayers.destroy', $taxpayer->id),
+                ];
+            })
+            ->addColumn('legal_form', function (Taxpayer $taxpayer) {
+                return $taxpayer->legalForm->name ?? '-';
+            })
+            ->addColumn('sector', function (Taxpayer $taxpayer) {
+                return $taxpayer->sector->name ?? '-';
+            })
+            ->addColumn('location', function (Taxpayer $taxpayer) {
+                $location = [];
+                if ($taxpayer->district)
+                    $location[] = $taxpayer->district->name;
+                if ($taxpayer->commune)
+                    $location[] = $taxpayer->commune->name;
+                return implode(', ', $location) ?: '-';
+            })
+            ->addColumn('registration_date_formatted', function (Taxpayer $taxpayer) {
+                return $taxpayer->registration_date
+                    ? $taxpayer->registration_date->format('d/m/Y')
+                    : '-';
+            })
+            ->addColumn('status_badge', function (Taxpayer $taxpayer) {
+                $statusColors = [
+                    'pending' => 'warning',
+                    'verified' => 'success',
+                    'rejected' => 'danger',
+                    'suspended' => 'secondary',
+                ];
+
+                return [
+                    'text' => ucfirst($taxpayer->registration_status),
+                    'color' => $statusColors[$taxpayer->registration_status] ?? 'secondary'
+                ];
+            })
+            ->filterColumn('legal_form', function ($query, $keyword) {
+                $query->whereHas('legalForm', function ($q) use ($keyword) {
+                    $q->where('name', 'LIKE', "%{$keyword}%");
+                });
+            })
+            ->filterColumn('sector', function ($query, $keyword) {
+                $query->whereHas('sector', function ($q) use ($keyword) {
+                    $q->where('name', 'LIKE', "%{$keyword}%");
+                });
+            })
+            ->rawColumns(['actions'])
+            ->make(true);
+    }
+
+    /**
+     * Get data for Inertia view
+     */
+    private function getIndexData()
+    {
+        return [
+            'taxpayers' => Taxpayer::with(['legalForm', 'sector', 'district'])
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(function ($taxpayer) {
+                    return [
+                        'id' => $taxpayer->id,
+                        'company_name' => $taxpayer->company_name,
+                        'tax_identification_number' => $taxpayer->tax_identification_number,
+                        'legal_form' => $taxpayer->legalForm->name ?? '-',
+                        'sector' => $taxpayer->sector->name ?? '-',
+                        'registration_status' => $taxpayer->registration_status,
+                        'email' => $taxpayer->email,
+                        'phone_number' => $taxpayer->phone_number,
+                        'registration_date' => $taxpayer->registration_date?->format('d/m/Y'),
+                    ];
+                }),
+            'statuses' => ['pending', 'verified', 'rejected', 'suspended'],
+            'sectors' => BusinessSector::select('id', 'name')->get(),
+            'stats' => [
+                'total' => Taxpayer::count(),
+                'pending' => Taxpayer::where('registration_status', 'pending')->count(),
+                'verified' => Taxpayer::where('registration_status', 'verified')->count(),
+                'rejected' => Taxpayer::where('registration_status', 'rejected')->count(),
+            ],
+        ];
     }
 
     /**
@@ -72,7 +233,7 @@ class TaxpayerController extends Controller
         return Inertia::render('TaxpayerRegistration', [
             'legalForms' => LegalForm::select('id', 'name', 'code')->get(),
             'sectors' => BusinessSector::select('id', 'name')->get(),
-            'companySizes' => CompanySize::select('id', 'name')->get(),
+            'companySizes' => CompanySize::select('id', 'category')->get(),
             'districts' => District::select('id', 'name')->get(),
             'communes' => Commune::select('id', 'name', 'district_id')->get(),
             'quartiers' => Quartier::select('id', 'name', 'commune_id')->get(),
@@ -90,32 +251,75 @@ class TaxpayerController extends Controller
             $validatedData = $request->validated();
 
             // Generate API credentials
-            $validatedData['api_key'] = $this->generateApiKey();
-            $validatedData['api_key_expires_at'] = now()->addYear();
+            $taxpayerApiKey = $this->generateApiKey();
+            $taxpayerApiKeyExpiresAt = now()->addYear();
+            $taxpayerEmail = $this->generateTaxpayerEmail($validatedData['company_name']);
+            $taxpayerPassword = Str::random(8);
+
+            $validatedData['api_key'] = $taxpayerApiKey;
+            $validatedData['api_key_expires_at'] = $taxpayerApiKeyExpiresAt;
+            $validatedData['email'] = $taxpayerEmail;
+            $validatedData['registration_date'] = now()->toDateString();
+            $validatedData['registration_status'] = 'pending';
 
             // Create taxpayer
             $taxpayer = Taxpayer::create($validatedData);
 
-            // Attach products if provided
-            if ($request->filled('products')) {
-                $this->attachProductsToTaxpayer($taxpayer, $request->products);
+            if ($taxpayer) {
+                // Attach products if provided
+                if ($request->filled('products')) {
+                    $this->attachProductsToTaxpayer(
+                        $taxpayer,
+                        $request->products
+                    );
+                }
+
+                // Create admin user
+                $user = $taxpayer->users()->create([
+                    'first_name' => $validatedData['company_name'],
+                    'last_name' => 'Admin',
+                    'email' => $taxpayerEmail,
+                    'department' => 'Administration',
+                    'password' => bcrypt($taxpayerPassword),
+                    'is_active' => true,
+                ]);
+
+                // Send email notification
+                if (config('mail.enabled', true)) {
+                    Mail::to($validatedData['contact_email'] ?? $taxpayerEmail)->send(
+                        new TaxpayerRegistrationMail(
+                            $taxpayer,
+                            $taxpayerPassword
+                        )
+                    );
+                }
             }
 
             DB::commit();
 
-            // Load relationships
-            $taxpayer = $this->loadTaxpayerRelationships($taxpayer);
+            if ($request->wantsJson()) {
+                return $this->success($taxpayer, 'Taxpayer created successfully');
+            }
 
-            // return $this->success([
-            //     'taxpayer' => $taxpayer,
-            //     'api_key' => $taxpayer->api_key // Show only once on creation
-            // ], 'Taxpayer created successfully', 201);
-
-            return redirect()->route('home')->with('success', 'Taxpayer created successfully. Please wait for verification.');
+            return redirect()->route('taxpayers.index')->with(
+                'success',
+                'Taxpayer created successfully. Please wait for verification.'
+            );
 
         } catch (Throwable $e) {
             DB::rollBack();
-            return $this->failure($e, 'Failed to create taxpayer');
+            Log::error('Taxpayer creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            if ($request->wantsJson()) {
+                return $this->failure($e, 'Failed to create taxpayer');
+            }
+
+            return back()->withInput()->withErrors([
+                'error' => 'Failed to create taxpayer. Please try again.'
+            ]);
         }
     }
 
@@ -126,13 +330,30 @@ class TaxpayerController extends Controller
     {
         try {
             $taxpayer = Taxpayer::findOrFail($id);
-            $taxpayer = $this->loadTaxpayerRelationships($taxpayer);
+            $taxpayer = $this->loadTaxpayerRelationships($taxpayer, true);
 
-            return $this->success($taxpayer);
+            if (request()->wantsJson()) {
+                return $this->success($taxpayer);
+            }
+
+            return Inertia::render('Taxpayer/Show', [
+                'taxpayer' => $taxpayer,
+                'products' => $taxpayer->products,
+                'users' => $taxpayer->users,
+                'orders' => $taxpayer->orders()->latest()->take(10)->get(),
+                'payments' => $taxpayer->payments()->latest()->take(10)->get(),
+            ]);
+
         } catch (ModelNotFoundException $e) {
-            return $this->notFound();
+            if (request()->wantsJson()) {
+                return $this->notFound();
+            }
+            return redirect()->route('taxpayers.index')->with('error', 'Taxpayer not found.');
         } catch (Throwable $e) {
-            return $this->failure($e, 'Failed to fetch taxpayer');
+            if (request()->wantsJson()) {
+                return $this->failure($e, 'Failed to fetch taxpayer');
+            }
+            return redirect()->route('taxpayers.index')->with('error', 'Failed to fetch taxpayer details.');
         }
     }
 
@@ -141,7 +362,35 @@ class TaxpayerController extends Controller
      */
     public function edit(string $id)
     {
-        // Implement as needed
+        try {
+            $taxpayer = Taxpayer::findOrFail($id);
+            $taxpayer = $this->loadTaxpayerRelationships($taxpayer, true);
+
+            return Inertia::render('Taxpayer/Edit', [
+                'taxpayer' => $taxpayer,
+                'legalForms' => LegalForm::select('id', 'name', 'code')->get(),
+                'sectors' => BusinessSector::select('id', 'name')->get(),
+                'companySizes' => CompanySize::select('id', 'category')->get(),
+                'districts' => District::select('id', 'name')->get(),
+                'communes' => Commune::select('id', 'name', 'district_id')->get(),
+                'quartiers' => Quartier::select('id', 'name', 'commune_id')->get(),
+                'products' => Product::active()->select('id', 'name', 'code')->get(),
+                'existingProducts' => $taxpayer->products->map(function ($product) {
+                    return [
+                        'product_id' => $product->id,
+                        'name' => $product->name,
+                        'code' => $product->code,
+                        'pivot' => $product->pivot,
+                    ];
+                }),
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('taxpayers.index')->with('error', 'Taxpayer not found.');
+        } catch (Throwable $e) {
+            Log::error('Error loading taxpayer edit: ' . $e->getMessage());
+            return redirect()->route('taxpayers.index')->with('error', 'Failed to load edit form.');
+        }
     }
 
     /**
@@ -161,8 +410,8 @@ class TaxpayerController extends Controller
             }
 
             // // Handle API key regeneration
-            // if ($request->boolean('regenerate_api_key') && Auth::user()->can('regenerate-api-key')) {
-            //     $validatedData = $this->regenerateApiKeyForTaxpayer($taxpayer, $validatedData);
+            // if ($request->boolean('regenerate_api_key') && Auth::user()->can('regenerate-api-key', $taxpayer)) {
+            //     $validatedData = array_merge($validatedData, $this->regenerateApiKeyForTaxpayer($taxpayer, $validatedData));
             // }
 
             // Update taxpayer
@@ -178,13 +427,33 @@ class TaxpayerController extends Controller
             $taxpayer->refresh();
             $taxpayer = $this->loadTaxpayerRelationships($taxpayer, true);
 
-            return $this->success($taxpayer, 'Taxpayer updated successfully');
+            if ($request->wantsJson()) {
+                return $this->success($taxpayer, 'Taxpayer updated successfully');
+            }
+
+            return redirect()->route('taxpayers.show', $taxpayer->id)
+                ->with('success', 'Taxpayer updated successfully');
 
         } catch (ModelNotFoundException $e) {
-            return $this->notFound();
+            DB::rollBack();
+            if ($request->wantsJson()) {
+                return $this->notFound();
+            }
+            return back()->with('error', 'Taxpayer not found.');
         } catch (Throwable $e) {
             DB::rollBack();
-            return $this->failure($e, 'Failed to update taxpayer');
+            Log::error('Taxpayer update failed: ' . $e->getMessage(), [
+                'taxpayer_id' => $id,
+                'request' => $request->all()
+            ]);
+
+            if ($request->wantsJson()) {
+                return $this->failure($e, 'Failed to update taxpayer');
+            }
+
+            return back()->withInput()->withErrors([
+                'error' => 'Failed to update taxpayer. Please try again.'
+            ]);
         }
     }
 
@@ -201,12 +470,30 @@ class TaxpayerController extends Controller
 
             DB::commit();
 
-            return $this->success(null, 'Taxpayer deleted successfully');
+            if (request()->wantsJson()) {
+                return $this->success(null, 'Taxpayer deleted successfully');
+            }
+
+            return redirect()->route('taxpayers.index')
+                ->with('success', 'Taxpayer deleted successfully');
+
         } catch (ModelNotFoundException $e) {
-            return $this->notFound();
+            DB::rollBack();
+            if (request()->wantsJson()) {
+                return $this->notFound();
+            }
+            return back()->with('error', 'Taxpayer not found.');
         } catch (Throwable $e) {
             DB::rollBack();
-            return $this->failure($e, 'Failed to delete taxpayer');
+            Log::error('Taxpayer deletion failed: ' . $e->getMessage(), [
+                'taxpayer_id' => $id
+            ]);
+
+            if (request()->wantsJson()) {
+                return $this->failure($e, 'Failed to delete taxpayer');
+            }
+
+            return back()->with('error', 'Failed to delete taxpayer. Please try again.');
         }
     }
 
@@ -222,17 +509,37 @@ class TaxpayerController extends Controller
         try {
             $taxpayer = Taxpayer::findOrFail($id);
 
+            if ($taxpayer->registration_status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending taxpayers can be verified'
+                ], 400);
+            }
+
             $taxpayer->update([
                 'registration_status' => 'verified',
                 'verification_date' => now()->toDateString(),
                 'verified_by' => Auth::id(),
             ]);
 
-            return $this->success($taxpayer, 'Taxpayer verified successfully');
+            if (request()->wantsJson()) {
+                return $this->success($taxpayer, 'Taxpayer verified successfully');
+            }
+
+            return back()->with('success', 'Taxpayer verified successfully');
+
         } catch (ModelNotFoundException $e) {
-            return $this->notFound();
+            if (request()->wantsJson()) {
+                return $this->notFound();
+            }
+            return back()->with('error', 'Taxpayer not found');
         } catch (Throwable $e) {
-            return $this->failure($e, 'Failed to verify taxpayer');
+            Log::error('Taxpayer verification failed: ' . $e->getMessage());
+
+            if (request()->wantsJson()) {
+                return $this->failure($e, 'Failed to verify taxpayer');
+            }
+            return back()->with('error', 'Failed to verify taxpayer');
         }
     }
 
@@ -248,16 +555,36 @@ class TaxpayerController extends Controller
         try {
             $taxpayer = Taxpayer::findOrFail($id);
 
+            if ($taxpayer->registration_status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending taxpayers can be rejected'
+                ], 400);
+            }
+
             $taxpayer->update([
                 'registration_status' => 'rejected',
                 'rejection_reason' => $request->rejection_reason,
             ]);
 
-            return $this->success($taxpayer, 'Taxpayer rejected successfully');
+            if (request()->wantsJson()) {
+                return $this->success($taxpayer, 'Taxpayer rejected successfully');
+            }
+
+            return back()->with('success', 'Taxpayer rejected successfully');
+
         } catch (ModelNotFoundException $e) {
-            return $this->notFound();
+            if (request()->wantsJson()) {
+                return $this->notFound();
+            }
+            return back()->with('error', 'Taxpayer not found');
         } catch (Throwable $e) {
-            return $this->failure($e, 'Failed to reject taxpayer');
+            Log::error('Taxpayer rejection failed: ' . $e->getMessage());
+
+            if (request()->wantsJson()) {
+                return $this->failure($e, 'Failed to reject taxpayer');
+            }
+            return back()->with('error', 'Failed to reject taxpayer');
         }
     }
 
@@ -268,6 +595,13 @@ class TaxpayerController extends Controller
     {
         try {
             $taxpayer = Taxpayer::findOrFail($id);
+
+            // if (!Auth::user()->can('regenerate-api-key', $taxpayer)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'You do not have permission to regenerate API key'
+            //     ], 403);
+            // }
 
             $newApiKey = $this->generateApiKey();
 
@@ -280,9 +614,11 @@ class TaxpayerController extends Controller
                 'api_key' => $newApiKey,
                 'api_key_expires_at' => $taxpayer->api_key_expires_at,
             ], 'API key regenerated successfully');
+
         } catch (ModelNotFoundException $e) {
             return $this->notFound();
         } catch (Throwable $e) {
+            Log::error('API key regeneration failed: ' . $e->getMessage());
             return $this->failure($e, 'Failed to regenerate API key');
         }
     }
@@ -296,7 +632,16 @@ class TaxpayerController extends Controller
      */
     private function generateApiKey(): string
     {
-        return Str::random(64);
+        return Str::random(32);
+    }
+
+    private function generateTaxpayerEmail(string $companyName)
+    {
+        $domain = config('app.domain', 'taxsystem.local');
+        $slug = Str::slug($companyName);
+        $random = Str::random(6);
+
+        return "{$slug}.{$random}@{$domain}";
     }
 
     /**
@@ -338,15 +683,15 @@ class TaxpayerController extends Controller
         if ($validatedData['registration_status'] === 'verified') {
             $validatedData['verification_date'] = now()->toDateString();
             $validatedData['verified_by'] = Auth::id();
-        }
-
-        // Clear verification data if moving away from verified status
-        if (
-            $taxpayer->registration_status === 'verified' &&
-            $validatedData['registration_status'] !== 'verified'
-        ) {
+            $validatedData['rejection_reason'] = null;
+        } elseif ($validatedData['registration_status'] === 'rejected') {
             $validatedData['verification_date'] = null;
             $validatedData['verified_by'] = null;
+        } else {
+            // For other status changes, clear verification and rejection data
+            $validatedData['verification_date'] = null;
+            $validatedData['verified_by'] = null;
+            $validatedData['rejection_reason'] = null;
         }
 
         return $validatedData;
@@ -357,9 +702,10 @@ class TaxpayerController extends Controller
      */
     private function regenerateApiKeyForTaxpayer(Taxpayer $taxpayer, array $validatedData): array
     {
-        $validatedData['api_key'] = $this->generateApiKey();
-        $validatedData['api_key_expires_at'] = now()->addYear();
-        return $validatedData;
+        return [
+            'api_key' => $this->generateApiKey(),
+            'api_key_expires_at' => now()->addYear(),
+        ];
     }
 
     /**
@@ -378,8 +724,8 @@ class TaxpayerController extends Controller
             }
 
             $productData[$product['product_id']] = [
-                'registration_date' => $product['registration_date'],
-                'status' => 'active',
+                'registration_date' => $product['registration_date'] ?? now()->toDateString(),
+                'status' => $product['status'] ?? 'active',
                 'health_certificate_number' => $product['health_certificate_number'] ?? null,
                 'health_certificate_expiry' => $product['health_certificate_expiry'] ?? null,
                 'notes' => $product['notes'] ?? null,
@@ -398,7 +744,7 @@ class TaxpayerController extends Controller
     {
         foreach ($products as $product) {
             $productId = $product['product_id'];
-            $action = $product['action'];
+            $action = $product['action'] ?? 'attach';
 
             switch ($action) {
                 case 'attach':
@@ -431,7 +777,7 @@ class TaxpayerController extends Controller
         }
 
         $taxpayer->products()->attach($productId, [
-            'registration_date' => $product['registration_date'],
+            'registration_date' => $product['registration_date'] ?? now()->toDateString(),
             'status' => $product['status'] ?? 'active',
             'health_certificate_number' => $product['health_certificate_number'] ?? null,
             'health_certificate_expiry' => $product['health_certificate_expiry'] ?? null,
@@ -454,7 +800,9 @@ class TaxpayerController extends Controller
             'health_certificate_number' => $product['health_certificate_number'] ?? null,
             'health_certificate_expiry' => $product['health_certificate_expiry'] ?? null,
             'notes' => $product['notes'] ?? null,
-        ]);
+        ], function ($value) {
+            return !is_null($value);
+        });
 
         if (!empty($updateData)) {
             $taxpayer->products()->updateExistingPivot($productId, $updateData);

@@ -16,8 +16,6 @@ class DatabaseSeeder extends Seeder
             PermissionsSeeder::class,
             KinshasaLocationsSeeder::class,
             AdminUserSeeder::class,
-            TaxpayerSeeder::class,
-            AgentSeeder::class,
         ]);
     }
 }
