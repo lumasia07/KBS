@@ -72,7 +72,7 @@ const orderHistory = [
 
 // Quick actions for taxpayer - bank app style
 const quickActions = [
-    { label: 'New Order', icon: Package, href: '#', color: 'bg-emerald-500' },
+    { label: 'New Order', icon: Package, href: '/taxpayer/order', color: 'bg-emerald-500' },
     { label: 'Pay', icon: CreditCard, href: '#', color: 'bg-blue-500' },
     { label: 'Certificates', icon: FileCheck, href: '#', color: 'bg-purple-500' },
     { label: 'History', icon: History, href: '#', color: 'bg-orange-500' },
