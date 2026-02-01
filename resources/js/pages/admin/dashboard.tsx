@@ -24,58 +24,46 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Mock stats data
-const stats = [
-    {
-        title: 'Total Taxpayers',
-        value: '2,847',
-        change: '+12.5%',
-        trend: 'up',
-        icon: Users,
-        description: 'Registered enterprises',
-    },
-    {
-        title: 'Pending Orders',
-        value: '156',
-        change: '+8.2%',
-        trend: 'up',
-        icon: FileText,
-        description: 'Awaiting approval',
-    },
-    {
-        title: 'Revenue (CDF)',
-        value: '45.2M',
-        change: '+23.1%',
-        trend: 'up',
-        icon: CreditCard,
-        description: 'This month',
-    },
-    {
-        title: 'Active Stamps',
-        value: '12,459',
-        change: '-2.4%',
-        trend: 'down',
-        icon: Stamp,
-        description: 'In circulation',
-    },
-];
+// Map icon strings to components
+const iconMap: Record<string, any> = {
+    Users,
+    FileText,
+    CreditCard,
+    Stamp
+};
 
-// Chart data for donut
-const orderStatusData = [
-    { label: 'Approved', value: 65, color: '#10B981' },
-    { label: 'Pending', value: 25, color: '#F59E0B' },
-    { label: 'Rejected', value: 10, color: '#EF4444' },
-];
+type OrderStatusData = {
+    label: string;
+    value: number;
+    color: string;
+}[];
 
-// Monthly revenue data
-const monthlyRevenue = [
-    { month: 'Jan', value: 24 },
-    { month: 'Feb', value: 48 },
-    { month: 'Mar', value: 32 },
-    { month: 'Apr', value: 65 },
-    { month: 'May', value: 42 },
-    { month: 'Jun', value: 78 },
-];
+type MonthlyRevenueData = {
+    month: string;
+    value: number;
+}[];
+
+interface DashboardProps {
+    stats: {
+        title: string;
+        value: string;
+        change: string;
+        trend: 'up' | 'down';
+        icon: string;
+        description: string;
+    }[];
+    orderStatusData: OrderStatusData;
+    monthlyRevenue: MonthlyRevenueData;
+    recentTransactions: {
+        company: string;
+        action: string;
+        amount: string;
+        time: string;
+        status: 'success' | 'pending';
+    }[];
+}
+
+
 
 // Quick actions
 const quickActions = [
@@ -86,7 +74,7 @@ const quickActions = [
 ];
 
 // Donut Chart Component
-function DonutChart({ data, size = 120 }: { data: typeof orderStatusData; size?: number }) {
+function DonutChart({ data, size = 120 }: { data: OrderStatusData; size?: number }) {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let cumulativePercent = 0;
 
@@ -131,7 +119,7 @@ function DonutChart({ data, size = 120 }: { data: typeof orderStatusData; size?:
 }
 
 // Bar Chart Component
-function BarChart({ data }: { data: typeof monthlyRevenue }) {
+function BarChart({ data }: { data: MonthlyRevenueData }) {
     const maxValue = Math.max(...data.map(d => d.value));
 
     return (
@@ -150,7 +138,7 @@ function BarChart({ data }: { data: typeof monthlyRevenue }) {
     );
 }
 
-export default function Dashboard() {
+export default function Dashboard({ stats, orderStatusData, monthlyRevenue, recentTransactions }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin Dashboard" />
@@ -170,38 +158,41 @@ export default function Dashboard() {
 
                 {/* Stats Grid - Blue Theme */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {stats.map((stat, index) => (
-                        <div
-                            key={index}
-                            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003366] to-[#002244] p-6 shadow-lg hover:shadow-xl transition-all duration-300 group"
-                        >
-                            {/* Decorative circle */}
-                            <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full" />
-                            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full" />
+                    {stats.map((stat, index) => {
+                        const Icon = iconMap[stat.icon] || AlertCircle;
+                        return (
+                            <div
+                                key={index}
+                                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003366] to-[#002244] p-6 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                            >
+                                {/* Decorative circle */}
+                                <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full" />
+                                <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full" />
 
-                            <div className="relative flex items-start justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-white/70">{stat.title}</p>
-                                    <p className="text-3xl font-bold text-white mt-2">{stat.value}</p>
-                                    <div className="flex items-center gap-1 mt-2">
-                                        {stat.trend === 'up' ? (
-                                            <TrendingUp className="w-4 h-4 text-emerald-400" />
-                                        ) : (
-                                            <TrendingDown className="w-4 h-4 text-red-400" />
-                                        )}
-                                        <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {stat.change}
-                                        </span>
-                                        <span className="text-xs text-white/50">vs last month</span>
+                                <div className="relative flex items-start justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-white/70">{stat.title}</p>
+                                        <p className="text-3xl font-bold text-white mt-2">{stat.value}</p>
+                                        <div className="flex items-center gap-1 mt-2">
+                                            {stat.trend === 'up' ? (
+                                                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                                            ) : (
+                                                <TrendingDown className="w-4 h-4 text-red-400" />
+                                            )}
+                                            <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                {stat.change}
+                                            </span>
+                                            <span className="text-xs text-white/50">vs last month</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white/10 p-3 rounded-xl group-hover:bg-white/20 transition-colors">
+                                        <Icon className="w-6 h-6 text-white" />
                                     </div>
                                 </div>
-                                <div className="bg-white/10 p-3 rounded-xl group-hover:bg-white/20 transition-colors">
-                                    <stat.icon className="w-6 h-6 text-white" />
-                                </div>
+                                <p className="relative text-xs text-white/50 mt-3">{stat.description}</p>
                             </div>
-                            <p className="relative text-xs text-white/50 mt-3">{stat.description}</p>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Charts Section */}
@@ -301,12 +292,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <div className="divide-y divide-slate-100">
-                            {[
-                                { company: 'SODECO SARL', action: 'Payment received', amount: '+2,500,000 CDF', time: '5 min ago', status: 'success' },
-                                { company: 'RAWBANK', action: 'Order placed', amount: '500 stamps', time: '12 min ago', status: 'pending' },
-                                { company: 'CONGO TECH', action: 'Registration fee', amount: '+150,000 CDF', time: '1 hour ago', status: 'success' },
-                                { company: 'BRACONGO', action: 'Verification', amount: '50 stamps', time: '2 hours ago', status: 'success' },
-                            ].map((tx, index) => (
+                            {recentTransactions.map((tx, index) => (
                                 <div key={index} className="p-4 hover:bg-slate-50 transition-colors">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">

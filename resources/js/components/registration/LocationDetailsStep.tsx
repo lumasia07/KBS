@@ -51,7 +51,7 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select district" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                        <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {districts.map((d) => (
                                 <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>
                             ))}
@@ -72,7 +72,7 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select commune" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                        <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {filteredCommunes.map((c) => (
                                 <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
                             ))}
@@ -90,7 +90,7 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select quartier" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                        <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {filteredQuartiers.map((q) => (
                                 <SelectItem key={q.id} value={q.id.toString()}>{q.name}</SelectItem>
                             ))}

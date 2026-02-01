@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { ShoppingCart, History, FileText, ArrowLeft } from 'lucide-react';
 import { Toaster } from 'sonner';
 
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { ProductGrid, OrderCart, OrderForm } from '@/components/order';
+import { ProductGrid, OrderCart, OrderForm, OrderHistory } from '@/components/order';
 import { useOrderStore } from '@/stores/useOrderStore';
 import type { BreadcrumbItem } from '@/types';
 
@@ -31,6 +31,14 @@ export default function TaxpayerOrder() {
         fetchOrderHistory,
         getCartGrandTotal,
     } = useOrderStore();
+
+    const [view, setView] = useState<'create' | 'history'>(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('view') === 'history' ? 'history' : 'create';
+        }
+        return 'create';
+    });
 
     useEffect(() => {
         fetchProducts();
@@ -87,18 +95,20 @@ export default function TaxpayerOrder() {
                     {currentStep === 'products' && (
                         <div className="flex items-center gap-3">
                             <Button
-                                variant="outline"
-                                className="border-slate-200 text-slate-600 hover:border-[#003366] hover:text-[#003366]"
+                                variant={view === 'history' ? 'default' : 'outline'}
+                                className={view === 'history' ? "bg-[#003366] text-white hover:bg-[#002244]" : "border-slate-200 text-slate-600 hover:border-[#003366] hover:text-[#003366]"}
+                                onClick={() => setView('history')}
                             >
                                 <History className="w-4 h-4 mr-2" />
                                 Order History
                             </Button>
                             <Button
-                                variant="outline"
-                                className="border-slate-200 text-slate-600 hover:border-[#003366] hover:text-[#003366]"
+                                variant={view === 'create' ? 'default' : 'outline'} // Highlight if active (or use tabs style)
+                                className={view === 'create' ? "bg-[#003366] text-white hover:bg-[#002244]" : "border-slate-200 text-slate-600 hover:border-[#003366] hover:text-[#003366]"}
+                                onClick={() => setView('create')}
                             >
                                 <FileText className="w-4 h-4 mr-2" />
-                                My Documents
+                                New Order
                             </Button>
                             <Button
                                 onClick={() => setCartOpen(true)}
@@ -122,10 +132,14 @@ export default function TaxpayerOrder() {
                 </div>
 
                 {/* Main Content */}
-                {currentStep === 'products' ? (
-                    <ProductGrid />
+                {view === 'history' ? (
+                    <OrderHistory />
                 ) : (
-                    <OrderForm />
+                    currentStep === 'products' ? (
+                        <ProductGrid />
+                    ) : (
+                        <OrderForm />
+                    )
                 )}
             </div>
 

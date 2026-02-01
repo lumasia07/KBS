@@ -247,6 +247,10 @@ class TaxpayerController extends Controller
     {
         DB::beginTransaction();
 
+        $taxpayer = null;
+        $taxpayerPassword = null;
+        $emailRecipient = null;
+
         try {
             $validatedData = $request->validated();
 
@@ -261,6 +265,9 @@ class TaxpayerController extends Controller
             $validatedData['email'] = $taxpayerEmail;
             $validatedData['registration_date'] = now()->toDateString();
             $validatedData['registration_status'] = 'pending';
+
+            // Store email recipient for later
+            $emailRecipient = $validatedData['contact_email'] ?? $taxpayerEmail;
 
             // Create taxpayer
             $taxpayer = Taxpayer::create($validatedData);
@@ -281,30 +288,12 @@ class TaxpayerController extends Controller
                     'email' => $taxpayerEmail,
                     'department' => 'Administration',
                     'password' => bcrypt($taxpayerPassword),
+                    'user_type' => 'taxpayer',
                     'is_active' => true,
                 ]);
-
-                // Send email notification
-                if (config('mail.enabled', true)) {
-                    Mail::to($validatedData['contact_email'] ?? $taxpayerEmail)->send(
-                        new TaxpayerRegistrationMail(
-                            $taxpayer,
-                            $taxpayerPassword
-                        )
-                    );
-                }
             }
 
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return $this->success($taxpayer, 'Taxpayer created successfully');
-            }
-
-            return redirect()->route('taxpayers.index')->with(
-                'success',
-                'Taxpayer created successfully. Please wait for verification.'
-            );
 
         } catch (Throwable $e) {
             DB::rollBack();
@@ -321,6 +310,34 @@ class TaxpayerController extends Controller
                 'error' => 'Failed to create taxpayer. Please try again.'
             ]);
         }
+
+        // Send email notification AFTER successful transaction commit
+        // This ensures DB changes are saved even if email fails
+        if ($taxpayer && config('mail.enabled', true)) {
+            try {
+                Mail::to($emailRecipient)->send(
+                    new TaxpayerRegistrationMail(
+                        $taxpayer,
+                        $taxpayerPassword
+                    )
+                );
+            } catch (Throwable $e) {
+                // Log email failure but don't fail the registration
+                Log::warning('Registration email failed to send: ' . $e->getMessage(), [
+                    'taxpayer_id' => $taxpayer->id,
+                    'email' => $emailRecipient
+                ]);
+            }
+        }
+
+        if ($request->wantsJson()) {
+            return $this->success($taxpayer, 'Taxpayer created successfully');
+        }
+
+        return redirect()->route('login')->with(
+            'success',
+            'Registration successful! Please check your email for login credentials.'
+        );
     }
 
     /**
