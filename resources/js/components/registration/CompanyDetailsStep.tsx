@@ -7,7 +7,7 @@ import InputError from '@/components/input-error';
 interface LegalForm { id: number; name: string; code?: string; }
 interface Sector { id: number; name: string; }
 
-interface CompanySize { id: number; name: string; }
+interface CompanySize { id: number; category: string; }
 
 interface CompanyDetailsStepProps {
     data: {
@@ -103,7 +103,7 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select legal form" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                        <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {legalForms.map((form) => (
                                 <SelectItem key={form.id} value={form.id.toString()}>
                                     {form.name} {form.code ? `(${form.code})` : ''}
@@ -119,7 +119,7 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select business sector" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                        <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {sectors.map((sector) => (
                                 <SelectItem key={sector.id} value={sector.id.toString()}>
                                     {sector.name}
@@ -135,10 +135,10 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
                             <SelectValue placeholder="Select company size" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-[#003366] text-slate-900">
+                        <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {companySizes.map((size) => (
                                 <SelectItem key={size.id} value={size.id.toString()}>
-                                    {size.name}
+                                    {size.category}
                                 </SelectItem>
                             ))}
                         </SelectContent>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaxpayerController;
+use App\Http\Controllers\TaxpayerProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -47,9 +48,14 @@ Route::get('/portal/login', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Dashboard
-    Route::get('admin/dashboard', function () {
-        return Inertia::render('admin/dashboard');
-    })->name('admin.dashboard');
+    Route::get('admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Admin Orders
+    Route::prefix('admin/orders')->name('admin.orders.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminOrderController::class, 'index'])->name('index');
+        Route::post('/{order}/approve', [App\Http\Controllers\AdminOrderController::class, 'approve'])->name('approve');
+        Route::post('/{order}/reject', [App\Http\Controllers\AdminOrderController::class, 'reject'])->name('reject');
+    });
 
     // Taxpayer Dashboard
     Route::get('taxpayer/dashboard', function () {
@@ -57,9 +63,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('taxpayer.dashboard');
 
     // Taxpayer Order Page
-    Route::get('taxpayer/order', function () {
-        return Inertia::render('taxpayer/order');
-    })->name('taxpayer.order');
+    // Taxpayer Order Page
+    Route::get('taxpayer/order', [App\Http\Controllers\TaxpayerOrderController::class, 'index'])->name('taxpayer.order');
+
+    // Taxpayer Order API Routes
+    Route::prefix('taxpayer/orders')->name('taxpayer.orders.')->group(function () {
+        Route::get('/products', [App\Http\Controllers\TaxpayerOrderController::class, 'products'])->name('products');
+        Route::post('/', [App\Http\Controllers\TaxpayerOrderController::class, 'store'])->name('store');
+        Route::get('/history', [App\Http\Controllers\TaxpayerOrderController::class, 'history'])->name('history');
+    });
+
+    // Taxpayer Coming Soon Features
+    Route::get('taxpayer/inventory', function () {
+        return Inertia::render('taxpayer/coming-soon');
+    })->name('taxpayer.inventory');
+
+    Route::get('taxpayer/payments', function () {
+        return Inertia::render('taxpayer/coming-soon');
+    })->name('taxpayer.payments');
+
+    Route::get('taxpayer/compliance', function () {
+        return Inertia::render('taxpayer/coming-soon');
+    })->name('taxpayer.compliance');
+
+    // Taxpayer Product Catalogue (RESTful routes)
+    Route::prefix('taxpayer/products')->name('taxpayer.products.')->group(function () {
+        Route::get('/', [TaxpayerProductController::class, 'index'])->name('index');
+        Route::get('/create', [TaxpayerProductController::class, 'create'])->name('create');
+        Route::post('/', [TaxpayerProductController::class, 'store'])->name('store');
+        Route::patch('/{productId}', [TaxpayerProductController::class, 'update'])->name('update');
+        Route::delete('/{productId}', [TaxpayerProductController::class, 'destroy'])->name('destroy');
+    });
 
     // Agent Dashboard
     Route::get('agent/dashboard', function () {

@@ -5,3 +5,4 @@ export { OrderCart } from './OrderCart';
 export { OrderSummary } from './OrderSummary';
 export { OrderForm } from './OrderForm';
 export { OrderConfirmation } from './OrderConfirmation';
+export { OrderHistory } from './OrderHistory';

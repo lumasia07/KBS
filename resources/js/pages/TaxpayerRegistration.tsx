@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { Toaster, toast } from 'sonner';
 import CompanyDetailsStep from '@/components/registration/CompanyDetailsStep';
@@ -7,6 +7,9 @@ import LegalRepresentativeStep from '@/components/registration/LegalRepresentati
 import ReviewSubmitStep from '@/components/registration/ReviewSubmitStep';
 import StepIndicator from '@/components/registration/StepIndicator';
 import NavigationButtons from '@/components/registration/NavigationButtons';
+import { Header } from '@/components/homepage/Header';
+import { Footer } from '@/components/homepage/Footer';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface LegalForm { id: number; name: string; code?: string; }
 interface Sector { id: number; name: string; }
@@ -24,6 +27,48 @@ interface Props {
     quartiers: Quartier[];
 }
 
+// Map form fields to their step number
+const fieldToStepMap: Record<string, number> = {
+    tax_identification_number: 1,
+    rccm_number: 1,
+    company_name: 1,
+    legal_form_id: 1,
+    sector_id: 1,
+    email: 1,
+    phone_number: 1,
+    company_size_id: 1,
+    district_id: 2,
+    commune_id: 2,
+    quartier_id: 2,
+    avenue: 2,
+    physical_address: 2,
+    legal_representative_name: 3,
+    legal_representative_email: 3,
+    legal_representative_phone: 3,
+    legal_representative_id_number: 3,
+};
+
+// Map field keys to user-friendly labels
+const fieldLabels: Record<string, string> = {
+    tax_identification_number: 'Tax Identification Number',
+    rccm_number: 'RCCM Number',
+    company_name: 'Company Name',
+    legal_form_id: 'Legal Form',
+    sector_id: 'Business Sector',
+    email: 'Company Email',
+    phone_number: 'Company Phone',
+    company_size_id: 'Company Size',
+    district_id: 'District',
+    commune_id: 'Commune',
+    quartier_id: 'Quartier',
+    avenue: 'Avenue/Street',
+    physical_address: 'Physical Address',
+    legal_representative_name: 'Legal Representative Name',
+    legal_representative_email: 'Legal Representative Email',
+    legal_representative_phone: 'Legal Representative Phone',
+    legal_representative_id_number: 'Legal Representative ID',
+};
+
 export default function TaxpayerRegistration({
     legalForms,
     sectors,
@@ -35,7 +80,7 @@ export default function TaxpayerRegistration({
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 4;
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
         // Step 1: Company Details
         tax_identification_number: '',
         rccm_number: '',
@@ -60,31 +105,78 @@ export default function TaxpayerRegistration({
         legal_representative_id_number: '',
     });
 
+    // Display validation errors when they change
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            const errorCount = Object.keys(errors).length;
+            const errorsByStep: Record<number, string[]> = {};
+
+            // Group errors by step
+            Object.keys(errors).forEach((field) => {
+                const step = fieldToStepMap[field] || 1;
+                if (!errorsByStep[step]) {
+                    errorsByStep[step] = [];
+                }
+                errorsByStep[step].push(fieldLabels[field] || field);
+            });
+
+            // Find the first step with errors
+            const firstStepWithError = Math.min(...Object.keys(errorsByStep).map(Number));
+
+            // Navigate to the first step with errors
+            if (firstStepWithError && firstStepWithError !== currentStep) {
+                setCurrentStep(firstStepWithError);
+            }
+
+            // Show detailed toast with error summary
+            toast.error(
+                <div className="space-y-2">
+                    <div className="font-semibold flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4" />
+                        {errorCount} validation error{errorCount > 1 ? 's' : ''} found
+                    </div>
+                    {Object.entries(errorsByStep).map(([step, fields]) => (
+                        <div key={step} className="text-sm">
+                            <span className="font-medium">Step {step}:</span> {fields.join(', ')}
+                        </div>
+                    ))}
+                </div>,
+                { duration: 8000 }
+            );
+        }
+    }, [errors]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        clearErrors();
         post('/taxpayer/register', {
             onSuccess: () => {
-                toast.success('Registration submitted successfully!');
+                toast.success(
+                    <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Registration submitted successfully! Check your email for credentials.
+                    </div>
+                );
             },
-            onError: () => {
-                toast.error('Please correct the errors in the form.');
+            onError: (formErrors) => {
+                // Errors are handled by the useEffect above
             }
         });
     };
 
     const validateStep = (step: number): boolean => {
         switch (step) {
-            case 1: // Company Details
+            case 1:
                 if (!data.tax_identification_number || !data.rccm_number || !data.company_name || !data.email || !data.phone_number || !data.legal_form_id || !data.sector_id || !data.company_size_id) {
                     return false;
                 }
                 return true;
-            case 2: // Location
+            case 2:
                 if (!data.district_id || !data.commune_id || !data.quartier_id || !data.physical_address) {
                     return false;
                 }
                 return true;
-            case 3: // Legal Representative
+            case 3:
                 if (!data.legal_representative_name || !data.legal_representative_email || !data.legal_representative_phone || !data.legal_representative_id_number) {
                     return false;
                 }
@@ -94,12 +186,41 @@ export default function TaxpayerRegistration({
         }
     };
 
+    const getMissingFieldsForStep = (step: number): string[] => {
+        const missing: string[] = [];
+        const stepFields: Record<number, string[]> = {
+            1: ['tax_identification_number', 'rccm_number', 'company_name', 'email', 'phone_number', 'legal_form_id', 'sector_id', 'company_size_id'],
+            2: ['district_id', 'commune_id', 'quartier_id', 'physical_address'],
+            3: ['legal_representative_name', 'legal_representative_email', 'legal_representative_phone', 'legal_representative_id_number'],
+        };
+
+        const fields = stepFields[step] || [];
+        fields.forEach((field) => {
+            if (!data[field as keyof typeof data]) {
+                missing.push(fieldLabels[field] || field);
+            }
+        });
+
+        return missing;
+    };
+
     const nextStep = () => {
         if (currentStep < totalSteps) {
             if (validateStep(currentStep)) {
                 setCurrentStep(currentStep + 1);
             } else {
-                toast.error('Please fill in all required fields.');
+                const missingFields = getMissingFieldsForStep(currentStep);
+                toast.error(
+                    <div className="space-y-1">
+                        <div className="font-semibold">Please fill in required fields:</div>
+                        <ul className="list-disc list-inside text-sm">
+                            {missingFields.map((field) => (
+                                <li key={field}>{field}</li>
+                            ))}
+                        </ul>
+                    </div>,
+                    { duration: 5000 }
+                );
             }
         }
     };
@@ -191,7 +312,6 @@ export default function TaxpayerRegistration({
                             legal_representative_phone: data.legal_representative_phone,
                             legal_representative_id_number: data.legal_representative_id_number,
                         }}
-                        // We might want to pass lookups here too to display names instead of IDs
                         lookups={{
                             legalForms,
                             sectors,
@@ -208,32 +328,44 @@ export default function TaxpayerRegistration({
     };
 
     return (
-        <div className="min-h-dvh bg-white flex overflow-hidden">
+        <div className="min-h-dvh bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
             <Head title="Taxpayer Registration" />
             <Toaster richColors position="top-right" />
 
-            {/* Left Side - Registration Form */}
-            <div className="w-full lg:w-3/5 flex flex-col">
-                {/* Logo positioned at top left */}
-                <div className="px-6 pt-4 pb-2">
-                    <Link href="/">
-                        <img
-                            src="https://cdn.magicpatterns.com/uploads/nRbgAZNugWHkS5qXQRobNd/image.png"
-                            alt="Kinshasa Bureau of Standards Logo"
-                            className="h-10 w-auto"
-                        />
-                    </Link>
-                </div>
+            {/* Homepage Header */}
+            <Header />
 
-                <div className="flex-1 px-6 py-6 lg:px-12 overflow-y-auto h-full scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            {/* Main Content */}
+            <main className="flex-1">
+                <div className="max-w-4xl mx-auto px-6 py-8">
                     {/* Main Title */}
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold text-black mb-2">Taxpayer Registration</h1>
-                        <p className="text-base text-[#003366]">Register your business with the Kinshasa Bureau of Standards</p>
+                    <div className="mb-8 text-center">
+                        <h1 className="text-3xl md:text-4xl font-bold text-[#003366] mb-3">Taxpayer Registration</h1>
+                        <p className="text-base md:text-lg text-slate-600">Register your business with the Kinshasa Bureau of Standards</p>
                     </div>
 
                     {/* Step Indicator */}
                     <StepIndicator steps={steps} currentStep={currentStep} />
+
+                    {/* Validation Error Summary Banner */}
+                    {Object.keys(errors).length > 0 && (
+                        <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <h3 className="font-semibold text-red-800">Please correct the following errors:</h3>
+                                    <ul className="mt-2 space-y-1 text-sm text-red-700">
+                                        {Object.entries(errors).map(([field, message]) => (
+                                            <li key={field} className="flex items-start gap-2">
+                                                <span className="font-medium">{fieldLabels[field] || field}:</span>
+                                                <span>{message}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6 mt-6">
                         {renderCurrentStep()}
@@ -250,42 +382,20 @@ export default function TaxpayerRegistration({
                     </form>
 
                     {/* Login link */}
-                    <div className="text-center text-sm text-slate-600 mt-8 pb-6">
+                    <div className="text-center text-sm text-slate-600 mt-8 mb-12">
                         Already have an account?{' '}
                         <Link
                             href="/login"
-                            className="text-[#003366] font-semibold hover:text-[#002244] hover:underline"
+                            className="text-[#003366] font-semibold hover:text-[#002244] hover:underline transition-colors"
                         >
                             Log in
                         </Link>
                     </div>
                 </div>
-            </div>
+            </main>
 
-            {/* Right Side - Industry Image (Desktop only) */}
-            <div className="hidden lg:block lg:w-2/5 relative overflow-hidden">
-                {/* Industry background image */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: "url('/industry.jpg')" }}
-                ></div>
-
-                {/* Dark overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#003366]/70 via-[#003366]/50 to-[#002244]/60"></div>
-
-                {/* Golden accent overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#FFD700]/10 to-transparent"></div>
-
-                {/* Decorative content */}
-                <div className="absolute bottom-12 left-8 right-8 z-10">
-                    <p className="text-white text-2xl font-bold mb-2">
-                        Join the KBS System
-                    </p>
-                    <p className="text-white/80 text-sm leading-relaxed">
-                        Register your enterprise and gain access to the official stamping system for compliance and verification.
-                    </p>
-                </div>
-            </div>
+            {/* Homepage Footer */}
+            <Footer />
         </div>
     );
 }

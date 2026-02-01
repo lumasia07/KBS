@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import axios from 'axios';
 import type {
     Product,
     OrderItem,
@@ -12,213 +13,15 @@ import type {
     OrderStatus,
 } from '@/types/order';
 
-// Mock products data - will be replaced with API fetch
-const mockProducts: Product[] = [
-    {
-        id: 1,
-        code: 'BEER-001',
-        name: 'Beer (Local)',
-        description: 'Locally brewed beer products',
-        category: 'Beverages',
-        unit_type: 'bottle',
-        stamp_price_per_unit: 150,
-        requires_health_certificate: true,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 2,
-        code: 'BEER-002',
-        name: 'Beer (Imported)',
-        description: 'Imported beer products',
-        category: 'Beverages',
-        unit_type: 'bottle',
-        stamp_price_per_unit: 250,
-        requires_health_certificate: true,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 3,
-        code: 'SPIRITS-001',
-        name: 'Spirits (Local)',
-        description: 'Locally produced spirits and liquor',
-        category: 'Beverages',
-        unit_type: 'bottle',
-        stamp_price_per_unit: 300,
-        requires_health_certificate: true,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 4,
-        code: 'SPIRITS-002',
-        name: 'Spirits (Imported)',
-        description: 'Imported spirits and liquor',
-        category: 'Beverages',
-        unit_type: 'bottle',
-        stamp_price_per_unit: 500,
-        requires_health_certificate: true,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 5,
-        code: 'WINE-001',
-        name: 'Wine',
-        description: 'All wine products',
-        category: 'Beverages',
-        unit_type: 'bottle',
-        stamp_price_per_unit: 200,
-        requires_health_certificate: false,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 6,
-        code: 'TOBACCO-001',
-        name: 'Cigarettes',
-        description: 'Cigarette products',
-        category: 'Tobacco',
-        unit_type: 'pack',
-        stamp_price_per_unit: 100,
-        requires_health_certificate: false,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 7,
-        code: 'TOBACCO-002',
-        name: 'Cigars',
-        description: 'Cigar products',
-        category: 'Tobacco',
-        unit_type: 'piece',
-        stamp_price_per_unit: 350,
-        requires_health_certificate: false,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-    {
-        id: 8,
-        code: 'PHARMA-001',
-        name: 'Pharmaceuticals',
-        description: 'Pharmaceutical products requiring stamps',
-        category: 'Pharmaceuticals',
-        unit_type: 'unit',
-        stamp_price_per_unit: 75,
-        requires_health_certificate: true,
-        is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-    },
-];
+export interface TableParams {
+    page: number;
+    pageSize: number;
+    search: string;
+    sortColumn: string;
+    sortDirection: 'asc' | 'desc';
+}
 
-// Mock order history
-const mockOrderHistory: StampOrder[] = [
-    {
-        id: 'ord-001',
-        order_number: 'KBS-2024-00156',
-        taxpayer_id: 1,
-        product_id: 1,
-        stamp_type_id: 1,
-        quantity: 1000,
-        packaging_type: 'roll',
-        unit_price: 150,
-        total_amount: 150000,
-        tax_amount: 24000,
-        penalty_amount: 0,
-        grand_total: 174000,
-        status: 'delivered',
-        payment_reference: 'PAY-2024-001',
-        payment_date: '2024-01-15T10:30:00Z',
-        payment_method: 'mobile_money',
-        payment_provider: 'M-Pesa',
-        delivery_method: 'pickup',
-        delivery_address: null,
-        estimated_delivery_date: '2024-01-17T00:00:00Z',
-        actual_delivery_date: '2024-01-17T14:00:00Z',
-        delivery_confirmation_code: 'CONF-001',
-        import_declaration_path: null,
-        marketing_authorization_path: null,
-        certificate_of_conformity_path: null,
-        submitted_by: 1,
-        approved_by: 2,
-        rejection_reason: null,
-        created_at: '2024-01-14T08:00:00Z',
-        updated_at: '2024-01-17T14:00:00Z',
-    },
-    {
-        id: 'ord-002',
-        order_number: 'KBS-2024-00189',
-        taxpayer_id: 1,
-        product_id: 3,
-        stamp_type_id: 1,
-        quantity: 500,
-        packaging_type: 'sheet',
-        unit_price: 300,
-        total_amount: 150000,
-        tax_amount: 24000,
-        penalty_amount: 0,
-        grand_total: 174000,
-        status: 'processing',
-        payment_reference: 'PAY-2024-002',
-        payment_date: '2024-01-20T09:00:00Z',
-        payment_method: 'bank_transfer',
-        payment_provider: 'Rawbank',
-        delivery_method: 'delivery',
-        delivery_address: '123 Avenue Lumumba, Kinshasa',
-        estimated_delivery_date: '2024-01-25T00:00:00Z',
-        actual_delivery_date: null,
-        delivery_confirmation_code: null,
-        import_declaration_path: null,
-        marketing_authorization_path: null,
-        certificate_of_conformity_path: null,
-        submitted_by: 1,
-        approved_by: 2,
-        rejection_reason: null,
-        created_at: '2024-01-19T11:00:00Z',
-        updated_at: '2024-01-20T09:00:00Z',
-    },
-    {
-        id: 'ord-003',
-        order_number: 'KBS-2024-00201',
-        taxpayer_id: 1,
-        product_id: 6,
-        stamp_type_id: 2,
-        quantity: 2000,
-        packaging_type: 'roll',
-        unit_price: 100,
-        total_amount: 200000,
-        tax_amount: 32000,
-        penalty_amount: 0,
-        grand_total: 232000,
-        status: 'pending_verification',
-        payment_reference: null,
-        payment_date: null,
-        payment_method: null,
-        payment_provider: null,
-        delivery_method: 'pickup',
-        delivery_address: null,
-        estimated_delivery_date: null,
-        actual_delivery_date: null,
-        delivery_confirmation_code: null,
-        import_declaration_path: null,
-        marketing_authorization_path: null,
-        certificate_of_conformity_path: null,
-        submitted_by: 1,
-        approved_by: null,
-        rejection_reason: null,
-        created_at: '2024-01-22T14:30:00Z',
-        updated_at: '2024-01-22T14:30:00Z',
-    },
-];
+// Mocks removed
 
 interface OrderState {
     // Products
@@ -245,6 +48,8 @@ interface OrderState {
     // Order history
     orderHistory: StampOrder[];
     ordersLoading: boolean;
+    tableParams: TableParams;
+    totalRecords: number;
 
     // Actions - Products
     fetchProducts: () => Promise<void>;
@@ -274,6 +79,7 @@ interface OrderState {
     resetOrder: () => void;
 
     // Actions - Order history
+    setTableParam: (key: keyof TableParams, value: any) => void;
     fetchOrderHistory: () => Promise<void>;
 
     // Computed values
@@ -313,13 +119,25 @@ export const useOrderStore = create<OrderState>()(
 
             orderHistory: [],
             ordersLoading: false,
+            tableParams: {
+                page: 1,
+                pageSize: 10,
+                search: '',
+                sortColumn: 'created_at',
+                sortDirection: 'desc',
+            },
+            totalRecords: 0,
 
             // Product actions
             fetchProducts: async () => {
                 set({ productsLoading: true });
-                // Simulate API call - replace with actual API when backend is ready
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                set({ products: mockProducts, productsLoading: false });
+                try {
+                    const response = await axios.get('/taxpayer/orders/products');
+                    set({ products: response.data, productsLoading: false });
+                } catch (error) {
+                    console.error('Failed to fetch products', error);
+                    set({ products: [], productsLoading: false });
+                }
             },
 
             setCategory: (category) => set({ selectedCategory: category }),
@@ -423,58 +241,47 @@ export const useOrderStore = create<OrderState>()(
 
             // Order submission
             submitOrder: async () => {
-                const { cartItems, delivery, paymentMethod, getCartTotal, getCartTax, getCartGrandTotal } = get();
+                const { cartItems, delivery, paymentMethod, orderNotes } = get();
 
                 if (cartItems.length === 0) return null;
 
                 set({ isSubmitting: true });
 
-                // Simulate API call
-                await new Promise((resolve) => setTimeout(resolve, 1500));
+                try {
+                    // Map cart items to backend expectation
+                    const items = cartItems.map(item => ({
+                        product_id: item.product.id,
+                        quantity: item.quantity,
+                        packaging_type: item.packaging_type
+                    }));
 
-                const orderNumber = `KBS-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 100000)).padStart(5, '0')}`;
+                    const payload = {
+                        items,
+                        delivery_method: delivery.method,
+                        delivery_address: delivery.address,
+                        payment_method: paymentMethod,
+                        order_notes: orderNotes
+                    };
 
-                const newOrder: StampOrder = {
-                    id: `ord-${Date.now()}`,
-                    order_number: orderNumber,
-                    taxpayer_id: 1, // Will come from auth
-                    product_id: cartItems[0].product.id,
-                    stamp_type_id: null,
-                    quantity: cartItems.reduce((sum, item) => sum + item.quantity, 0),
-                    packaging_type: cartItems[0].packaging_type,
-                    unit_price: cartItems[0].unit_price,
-                    total_amount: getCartTotal(),
-                    tax_amount: getCartTax(),
-                    penalty_amount: 0,
-                    grand_total: getCartGrandTotal(),
-                    status: 'submitted' as OrderStatus,
-                    payment_reference: null,
-                    payment_date: null,
-                    payment_method: paymentMethod,
-                    payment_provider: null,
-                    delivery_method: delivery.method,
-                    delivery_address: delivery.address || null,
-                    estimated_delivery_date: null,
-                    actual_delivery_date: null,
-                    delivery_confirmation_code: null,
-                    import_declaration_path: null,
-                    marketing_authorization_path: null,
-                    certificate_of_conformity_path: null,
-                    submitted_by: 1,
-                    approved_by: null,
-                    rejection_reason: null,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                };
+                    const response = await axios.post('/taxpayer/orders', payload);
+                    const newOrder = response.data.order; // Assuming backend returns the order
 
-                set({
-                    isSubmitting: false,
-                    submittedOrder: newOrder,
-                    currentStep: 'confirmation',
-                    orderHistory: [newOrder, ...get().orderHistory],
-                });
+                    set({
+                        isSubmitting: false,
+                        submittedOrder: newOrder,
+                        currentStep: 'confirmation',
+                    });
 
-                return newOrder;
+                    // Refresh history
+                    get().fetchOrderHistory();
+
+                    return newOrder;
+
+                } catch (error) {
+                    console.error('Submit order failed', error);
+                    set({ isSubmitting: false });
+                    return null;
+                }
             },
 
             resetOrder: () =>
@@ -488,11 +295,41 @@ export const useOrderStore = create<OrderState>()(
                     submittedOrder: null,
                 }),
 
+            setTableParam: (key, value) => {
+                const { tableParams } = get();
+                set({ tableParams: { ...tableParams, [key]: value } });
+                get().fetchOrderHistory(); // Refresh on param change
+            },
+
             // Order history
             fetchOrderHistory: async () => {
+                const { tableParams } = get();
                 set({ ordersLoading: true });
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                set({ orderHistory: mockOrderHistory, ordersLoading: false });
+
+                const params = {
+                    draw: Date.now(),
+                    start: (tableParams.page - 1) * tableParams.pageSize,
+                    length: tableParams.pageSize,
+                    search: {
+                        value: tableParams.search,
+                        regex: false
+                    },
+                    // Basic column definition to simple sorting might require more match.
+                    // For now sending simplified params hoping Yajra accepts them or uses defaults.
+                };
+
+                try {
+                    const response = await axios.get('/taxpayer/orders/history', { params });
+                    // DataTables response: { data: [], recordsTotal: 0, recordsFiltered: 0, ... }
+                    set({
+                        orderHistory: response.data.data,
+                        totalRecords: response.data.recordsTotal,
+                        ordersLoading: false
+                    });
+                } catch (error) {
+                    console.error('Failed to fetch order history', error);
+                    set({ orderHistory: [], totalRecords: 0, ordersLoading: false });
+                }
             },
 
             // Computed values

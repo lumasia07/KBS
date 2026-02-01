@@ -48,8 +48,8 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Stamp Orders',
-        href: '#',
-        icon: Stamp,
+        href: '/admin/orders',
+        icon: FileText,
     },
     {
         title: 'Payments',
@@ -76,28 +76,33 @@ const taxpayerNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'My Orders',
-        href: '#',
+        title: 'My Products',
+        href: '/taxpayer/products',
         icon: Package,
     },
     {
+        title: 'My Orders',
+        href: '/taxpayer/order',
+        icon: FileText,
+    },
+    {
         title: 'Stamp Inventory',
-        href: '#',
+        href: '/taxpayer/inventory',
         icon: Stamp,
     },
     {
         title: 'Payments',
-        href: '#',
+        href: '/taxpayer/payments',
         icon: CreditCard,
     },
     {
         title: 'Compliance',
-        href: '#',
+        href: '/taxpayer/compliance',
         icon: FileCheck,
     },
     {
         title: 'Order History',
-        href: '#',
+        href: '/taxpayer/order?view=history',
         icon: History,
     },
 ];
