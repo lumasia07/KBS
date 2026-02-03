@@ -15,7 +15,8 @@ import {
     Target,
     FileCheck,
     History,
-    AlertTriangle
+    AlertTriangle,
+    Printer
 } from 'lucide-react';
 
 import { NavFooter } from '@/components/nav-footer';
@@ -43,7 +44,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Taxpayers',
-        href: '#',
+        href: '/admin/taxpayers',
         icon: Users,
     },
     {
@@ -65,6 +66,11 @@ const adminNavItems: NavItem[] = [
         title: 'Reports',
         href: '#',
         icon: BarChart3,
+    },
+    {
+        title: 'Production',
+        href: '/admin/production',
+        icon: Printer,
     },
 ];
 

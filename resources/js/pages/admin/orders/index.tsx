@@ -36,7 +36,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 interface Order {
-    id: number;
+    id: string; // UUID
     order_number: string;
     taxpayer_name: string;
     product_name: string;
@@ -70,7 +70,7 @@ export default function AdminOrderIndex() {
         pageSize: 10,
         search: ''
     });
-    const [processingId, setProcessingId] = useState<number | null>(null);
+    const [processingId, setProcessingId] = useState<string | null>(null);
 
     // Modal States
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -117,14 +117,18 @@ export default function AdminOrderIndex() {
     };
 
     const confirmApprove = async () => {
+        console.log('confirmApprove called', selectedOrder);
         if (!selectedOrder) return;
         setProcessingId(selectedOrder.id);
         try {
+            console.log('Sending request to', `/admin/orders/${selectedOrder.id}/approve`);
             await axios.post(`/admin/orders/${selectedOrder.id}/approve`);
+            console.log('Request successful');
             toast.success('Order approved successfully');
             fetchOrders();
             setApproveOpen(false);
         } catch (error: any) {
+            console.error('Request failed', error);
             toast.error(error.response?.data?.message || 'Failed to approve order');
         } finally {
             setProcessingId(null);
@@ -165,7 +169,9 @@ export default function AdminOrderIndex() {
         switch (status) {
             case 'delivered':
             case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-            case 'processing': return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'approved':
+            case 'in_production':
+            case 'ready_for_delivery': return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'submitted':
             case 'pending': return 'bg-amber-100 text-amber-800 border-amber-200';
             case 'cancelled':

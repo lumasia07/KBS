@@ -57,6 +57,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{order}/reject', [App\Http\Controllers\AdminOrderController::class, 'reject'])->name('reject');
     });
 
+    // Admin Production (Sticker Generation)
+    Route::prefix('admin/production')->name('admin.production.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminProductionController::class, 'index'])->name('index');
+        Route::post('/{order}/generate', [App\Http\Controllers\AdminProductionController::class, 'generate'])->name('generate');
+    });
+
+    // Admin Taxpayers
+    Route::prefix('admin/taxpayers')->name('admin.taxpayers.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminTaxpayerController::class, 'index'])->name('index');
+        Route::post('/{taxpayer}/approve', [App\Http\Controllers\AdminTaxpayerController::class, 'approve'])->name('approve');
+        Route::post('/{taxpayer}/reject', [App\Http\Controllers\AdminTaxpayerController::class, 'reject'])->name('reject');
+    });
+
     // Taxpayer Dashboard
     Route::get('taxpayer/dashboard', function () {
         return Inertia::render('taxpayer/dashboard');
