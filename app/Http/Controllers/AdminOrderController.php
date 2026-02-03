@@ -50,7 +50,7 @@ class AdminOrderController extends Controller
         }
 
         $order->update([
-            'status' => 'processing',
+            'status' => 'approved',
         ]);
 
         return response()->json(['message' => 'Order approved successfully.']);
