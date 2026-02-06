@@ -70,6 +70,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{taxpayer}/reject', [App\Http\Controllers\AdminTaxpayerController::class, 'reject'])->name('reject');
     });
 
+    // Admin Field Controls
+    Route::prefix('admin/field-controls')->name('admin.field-controls.')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminFieldControlController::class, 'index'])->name('index');
+        Route::get('/{control}', [App\Http\Controllers\AdminFieldControlController::class, 'show'])->name('show');
+        Route::post('/{control}/approve', [App\Http\Controllers\AdminFieldControlController::class, 'approve'])->name('approve');
+        Route::post('/{control}/reject', [App\Http\Controllers\AdminFieldControlController::class, 'reject'])->name('reject');
+    });
+
     // Taxpayer Dashboard
     Route::get('taxpayer/dashboard', function () {
         return Inertia::render('taxpayer/dashboard');
@@ -108,10 +116,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{productId}', [TaxpayerProductController::class, 'destroy'])->name('destroy');
     });
 
-    // Agent Dashboard
-    Route::get('agent/dashboard', function () {
-        return Inertia::render('agent/dashboard');
-    })->name('agent.dashboard');
+    // Agent Routes
+    Route::prefix('agent')->name('agent.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\AgentFieldControlController::class, 'dashboard'])->name('dashboard');
+        
+        // Agent Inspections
+        Route::prefix('inspections')->name('inspections.')->group(function () {
+            Route::get('/', [App\Http\Controllers\AgentFieldControlController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\AgentFieldControlController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\AgentFieldControlController::class, 'store'])->name('store');
+            Route::get('/{control}', [App\Http\Controllers\AgentFieldControlController::class, 'show'])->name('show');
+        });
+    });
 
     // Legacy redirect for old dashboard route
     Route::get('dashboard', function () {
