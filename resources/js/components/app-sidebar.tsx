@@ -59,7 +59,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Field Control',
-        href: '#',
+        href: '/admin/field-controls',
         icon: ShieldCheck,
     },
     {
@@ -121,18 +121,13 @@ const agentNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Inspections',
-        href: '#',
+        title: 'My Inspections',
+        href: '/agent/inspections',
         icon: ClipboardCheck,
     },
     {
-        title: 'Verify Stamps',
-        href: '#',
-        icon: Stamp,
-    },
-    {
-        title: 'My Route',
-        href: '#',
+        title: 'New Inspection',
+        href: '/agent/inspections/create',
         icon: MapPin,
     },
     {
