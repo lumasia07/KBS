@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\StampOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 
-class AdminProductionController extends Controller
+class ProductionController extends Controller
 {
     /**
      * Display a listing of orders ready for production.
@@ -45,10 +46,10 @@ class AdminProductionController extends Controller
     {
         // Update status to in_production
         $order->update(['status' => 'in_production']);
-        
+
         // In a real app, this would dispatch a Job to generate serials
         // Here we just return a success message or mock data for the UI
-        
+
         return response()->json([
             'message' => 'Production batch started successfully.',
             'batch_id' => 'BATCH-' . Date('Ymd') . '-' . $order->id,

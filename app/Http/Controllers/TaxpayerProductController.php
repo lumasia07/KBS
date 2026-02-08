@@ -18,34 +18,13 @@ use Throwable;
 class TaxpayerProductController extends Controller
 {
     /* ------------------------------------------------------------------
-     | Response Helpers
-     * ------------------------------------------------------------------ */
-    
-    private function success($data, string $message = null, int $status = 200)
-    {
-        return response()->json([
-            'success' => true,
-            'message' => $message ?? 'Operation completed successfully',
-            'data' => $data,
-        ], $status);
-    }
-
-    private function failure(string $message, int $status = 400)
-    {
-        return response()->json([
-            'success' => false,
-            'message' => $message,
-        ], $status);
-    }
-
-    /* ------------------------------------------------------------------
      | Auth Helpers
      * ------------------------------------------------------------------ */
 
     private function getAuthenticatedTaxpayer(): ?Taxpayer
     {
         $user = Auth::user();
-        
+
         if (!$user || !$user->taxpayer_id) {
             return null;
         }
@@ -60,20 +39,17 @@ class TaxpayerProductController extends Controller
     /**
      * Display taxpayer's product catalogue page
      */
-    /**
-     * Display taxpayer's product catalogue page
-     */
     public function index()
     {
         $taxpayer = $this->getAuthenticatedTaxpayer();
-        
+
         if (!$taxpayer) {
             return redirect()->route('taxpayer.dashboard')
                 ->withErrors(['error' => 'Your account is not linked to a taxpayer record. Please contact support.']);
         }
 
         $myProducts = $this->formatTaxpayerProducts($taxpayer);
-        
+
         return Inertia::render('taxpayer/products/index', [
             'myProducts' => $myProducts,
         ]);
@@ -85,7 +61,7 @@ class TaxpayerProductController extends Controller
     public function create()
     {
         $taxpayer = $this->getAuthenticatedTaxpayer();
-        
+
         if (!$taxpayer) {
             return redirect()->route('login');
         }
@@ -103,7 +79,7 @@ class TaxpayerProductController extends Controller
     public function store(Request $request)
     {
         $taxpayer = $this->getAuthenticatedTaxpayer();
-        
+
         if (!$taxpayer) {
             return back()->withErrors(['error' => 'Unauthorized']);
         }
@@ -143,7 +119,7 @@ class TaxpayerProductController extends Controller
     public function update(Request $request, int $productId)
     {
         $taxpayer = $this->getAuthenticatedTaxpayer();
-        
+
         if (!$taxpayer) {
             return back()->withErrors(['error' => 'Unauthorized']);
         }
@@ -180,7 +156,7 @@ class TaxpayerProductController extends Controller
     public function destroy(int $productId)
     {
         $taxpayer = $this->getAuthenticatedTaxpayer();
-        
+
         if (!$taxpayer) {
             return back()->withErrors(['error' => 'Unauthorized']);
         }
@@ -227,7 +203,7 @@ class TaxpayerProductController extends Controller
     private function getAvailableProducts(Taxpayer $taxpayer): array
     {
         $existingProductIds = $taxpayer->products->pluck('id')->toArray();
-        
+
         return Product::where('is_active', true)
             ->whereNotIn('id', $existingProductIds)
             ->select('id', 'code', 'name', 'category', 'unit_type', 'requires_health_certificate')

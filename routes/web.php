@@ -1,8 +1,12 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductionController;
+
 use App\Http\Controllers\TaxpayerController;
 use App\Http\Controllers\TaxpayerProductController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,17 +18,6 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
-
-/*
-|--------------------------------------------------------------------------
-| Resource Routes (Better to use this) 
-| You can update taxpayer registration to taxpayer.create and storage route to taxpayer.store 
-| Then uncomment the routes
-|--------------------------------------------------------------------------
-*/
-// Route::resources([
-//     'taxpayer' => TaxpayerController::class,
-// ]);
 
 /*
 |--------------------------------------------------------------------------
@@ -48,26 +41,26 @@ Route::get('/portal/login', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Dashboard
-    Route::get('admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Admin Orders
     Route::prefix('admin/orders')->name('admin.orders.')->group(function () {
-        Route::get('/', [App\Http\Controllers\AdminOrderController::class, 'index'])->name('index');
-        Route::post('/{order}/approve', [App\Http\Controllers\AdminOrderController::class, 'approve'])->name('approve');
-        Route::post('/{order}/reject', [App\Http\Controllers\AdminOrderController::class, 'reject'])->name('reject');
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::post('/{order}/approve', [OrderController::class, 'approve'])->name('approve');
+        Route::post('/{order}/reject', [OrderController::class, 'reject'])->name('reject');
     });
 
     // Admin Production (Sticker Generation)
     Route::prefix('admin/production')->name('admin.production.')->group(function () {
-        Route::get('/', [App\Http\Controllers\AdminProductionController::class, 'index'])->name('index');
-        Route::post('/{order}/generate', [App\Http\Controllers\AdminProductionController::class, 'generate'])->name('generate');
+        Route::get('/', [ProductionController::class, 'index'])->name('index');
+        Route::post('/{order}/generate', [ProductionController::class, 'generate'])->name('generate');
     });
 
     // Admin Taxpayers
     Route::prefix('admin/taxpayers')->name('admin.taxpayers.')->group(function () {
-        Route::get('/', [App\Http\Controllers\AdminTaxpayerController::class, 'index'])->name('index');
-        Route::post('/{taxpayer}/approve', [App\Http\Controllers\AdminTaxpayerController::class, 'approve'])->name('approve');
-        Route::post('/{taxpayer}/reject', [App\Http\Controllers\AdminTaxpayerController::class, 'reject'])->name('reject');
+        Route::get('/', [TaxpayerController::class, 'index'])->name('index');
+        Route::post('/{taxpayer}/approve', [TaxpayerController::class, 'approve'])->name('approve');
+        Route::post('/{taxpayer}/reject', [TaxpayerController::class, 'reject'])->name('reject');
     });
 
     // Taxpayer Dashboard

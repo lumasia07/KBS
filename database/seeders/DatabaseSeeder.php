@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             BusinessSectorsSeeder::class,
             CompanySizesSeeder::class,
             LegalFormsSeeder::class,
+            CategorySeeder::class,
             StampTypesSeeder::class,
             PermissionsSeeder::class,
             KinshasaLocationsSeeder::class,

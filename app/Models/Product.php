@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -14,7 +15,7 @@ class Product extends Model
         'code',
         'name',
         'description',
-        'category',
+        'category_id',
         'unit_type',
         'stamp_price_per_unit',
         'requires_health_certificate',
@@ -42,5 +43,10 @@ class Product extends Model
     public function stamps()
     {
         return $this->hasMany(Stamp::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }

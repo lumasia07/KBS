@@ -130,7 +130,7 @@ export default function AdminTaxpayersIndex() {
         if (!selectedTaxpayer) return;
         setProcessingId(selectedTaxpayer.id);
         try {
-            await axios.post(`/admin/taxpayers/${selectedTaxpayer.id}/reject`, { reason: rejectionReason });
+            await axios.post(`/admin/taxpayers/${selectedTaxpayer.id}/reject`, { rejection_reason: rejectionReason });
             toast.success('Taxpayer rejected successfully');
             fetchTaxpayers();
             setRejectOpen(false);

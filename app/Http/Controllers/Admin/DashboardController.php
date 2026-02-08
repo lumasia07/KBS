@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Stamp;
 use App\Models\StampOrder;
@@ -11,13 +12,13 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
-class AdminDashboardController extends Controller
+class DashboardController extends Controller
 {
     public function index()
     {
         // 1. KPI Stats
         $totalTaxpayers = Taxpayer::count();
-        
+
         // Count orders that need attention (submitted/pending)
         $pendingOrders = StampOrder::whereIn('status', ['submitted', 'pending'])->count();
 
@@ -27,7 +28,7 @@ class AdminDashboardController extends Controller
         // Let's sum everything not cancelled/rejected.
         $revenue = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
             ->sum('grand_total');
-        
+
         // For 'active', check if we have stamps. If not, use proxy.
         $activeStamps = Stamp::where('status', 'active')->count();
         if ($activeStamps === 0) {
@@ -39,7 +40,7 @@ class AdminDashboardController extends Controller
         // Calculate trends (Simple comparison with last month)
         // This requires more complex queries. For MVP, we can mock the trend % or calculate it.
         // Let's just pass 0% or calculate if easy.
-        
+
         $stats = [
             [
                 'title' => 'Total Taxpayers',
@@ -79,10 +80,10 @@ class AdminDashboardController extends Controller
         $orderStatusCounts = StampOrder::select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->get();
-        
+
         $totalOrders = $orderStatusCounts->sum('total');
-        
-        $orderStatusData = $orderStatusCounts->map(function($item) use ($totalOrders) {
+
+        $orderStatusData = $orderStatusCounts->map(function ($item) use ($totalOrders) {
             $colors = [
                 'delivered' => '#10B981',
                 'completed' => '#10B981',
@@ -92,7 +93,7 @@ class AdminDashboardController extends Controller
                 'cancelled' => '#EF4444',
                 'rejected' => '#EF4444',
             ];
-            
+
             return [
                 'label' => ucfirst($item->status),
                 'value' => $totalOrders > 0 ? round(($item->total / $totalOrders) * 100) : 0,
@@ -112,24 +113,24 @@ class AdminDashboardController extends Controller
                 // Let's use get() then map for portability if dataset is small.
                 // Or simplified DB::raw.
                 // Let's try flexible approach:
-                 DB::raw('SUM(grand_total) as value')
+                DB::raw('SUM(grand_total) as value')
             )
             ->where('created_at', '>=', now()->subMonths(6))
-             // Group by date format is tricky across DBs without specific driver knowledge
-             // Let's stick to reliable collection method for MVP
+            // Group by date format is tricky across DBs without specific driver knowledge
+            // Let's stick to reliable collection method for MVP
         ;
-        
+
         // Portable Collection Method for Monthly Revenue
         $revenueData = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
             ->where('created_at', '>=', now()->subMonths(6))
             ->get()
-            ->groupBy(function($date) {
+            ->groupBy(function ($date) {
                 return Carbon::parse($date->created_at)->format('M'); // Jan, Feb
             })
             ->map(function ($row) {
                 return $row->sum('grand_total') / 1000000; // In Millions
             });
-            
+
         // Ensure ordering by months
         $months = [];
         for ($i = 5; $i >= 0; $i--) {
@@ -146,7 +147,7 @@ class AdminDashboardController extends Controller
             ->latest()
             ->take(5)
             ->get()
-            ->map(function($order) {
+            ->map(function ($order) {
                 return [
                     'company' => $order->taxpayer->company_name ?? 'Unknown',
                     'action' => 'Order placed',

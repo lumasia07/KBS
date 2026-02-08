@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\StampOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\DataTables;
 
-class AdminOrderController extends Controller
+class OrderController extends Controller
 {
     /**
      * Display a listing of orders.
@@ -76,7 +77,7 @@ class AdminOrderController extends Controller
 
         return response()->json(['message' => 'Order rejected successfully.']);
     }
-    
+
     /**
      * Mark order as Delivered (Optional for this flow but useful)
      */
