@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { Toaster, toast } from 'sonner';
+import { Header } from '@/components/homepage/Header';
+import { Footer } from '@/components/homepage/Footer';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
+
 import CompanyDetailsStep from '@/components/registration/CompanyDetailsStep';
 import LocationDetailsStep from '@/components/registration/LocationDetailsStep';
 import LegalRepresentativeStep from '@/components/registration/LegalRepresentativeStep';
 import ReviewSubmitStep from '@/components/registration/ReviewSubmitStep';
 import StepIndicator from '@/components/registration/StepIndicator';
 import NavigationButtons from '@/components/registration/NavigationButtons';
-import { Header } from '@/components/homepage/Header';
-import { Footer } from '@/components/homepage/Footer';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface LegalForm { id: number; name: string; code?: string; }
 interface Sector { id: number; name: string; }
@@ -339,7 +340,7 @@ export default function TaxpayerRegistration({
             <main className="flex-1">
                 <div className="max-w-4xl mx-auto px-6 py-8">
                     {/* Main Title */}
-                    <div className="mb-8 text-center">
+                    <div className="my-8 text-center">
                         <h1 className="text-3xl md:text-4xl font-bold text-[#003366] mb-3">Taxpayer Registration</h1>
                         <p className="text-base md:text-lg text-slate-600">Register your business with the Kinshasa Bureau of Standards</p>
                     </div>
