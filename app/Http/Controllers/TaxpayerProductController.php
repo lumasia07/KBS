@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Taxpayer;
 use Illuminate\Http\Request;
@@ -18,21 +19,6 @@ use Throwable;
 class TaxpayerProductController extends Controller
 {
     /* ------------------------------------------------------------------
-     | Auth Helpers
-     * ------------------------------------------------------------------ */
-
-    private function getAuthenticatedTaxpayer(): ?Taxpayer
-    {
-        $user = Auth::user();
-
-        if (!$user || !$user->taxpayer_id) {
-            return null;
-        }
-
-        return Taxpayer::with(['products'])->find($user->taxpayer_id);
-    }
-
-    /* ------------------------------------------------------------------
      | Product Catalogue Actions
      * ------------------------------------------------------------------ */
 
@@ -41,14 +27,15 @@ class TaxpayerProductController extends Controller
      */
     public function index()
     {
-        $taxpayer = $this->getAuthenticatedTaxpayer();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        if (!$taxpayer) {
+        if (!$user->taxpayer) {
             return redirect()->route('taxpayer.dashboard')
                 ->withErrors(['error' => 'Your account is not linked to a taxpayer record. Please contact support.']);
         }
 
-        $myProducts = $this->formatTaxpayerProducts($taxpayer);
+        $myProducts = $this->formatTaxpayerProducts($user->taxpayer);
 
         return Inertia::render('taxpayer/products/index', [
             'myProducts' => $myProducts,
@@ -60,16 +47,17 @@ class TaxpayerProductController extends Controller
      */
     public function create()
     {
-        $taxpayer = $this->getAuthenticatedTaxpayer();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        if (!$taxpayer) {
-            return redirect()->route('login');
-        }
+        $availableProducts = $this->getAvailableProducts($user->taxpayer);
 
-        $availableProducts = $this->getAvailableProducts($taxpayer);
+        // Get categories from the Category model
+        $categories = Category::all()->pluck('name', 'id')->toArray();
 
         return Inertia::render('taxpayer/products/create', [
             'availableProducts' => $availableProducts,
+            'categories' => $categories,
         ]);
     }
 
@@ -78,11 +66,8 @@ class TaxpayerProductController extends Controller
      */
     public function store(Request $request)
     {
-        $taxpayer = $this->getAuthenticatedTaxpayer();
-
-        if (!$taxpayer) {
-            return back()->withErrors(['error' => 'Unauthorized']);
-        }
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
@@ -90,6 +75,8 @@ class TaxpayerProductController extends Controller
             'health_certificate_expiry' => 'nullable|date',
             'notes' => 'nullable|string|max:500',
         ]);
+
+        $taxpayer = $user->taxpayer;
 
         // Check if already attached
         if ($taxpayer->products()->where('product_id', $validated['product_id'])->exists()) {
@@ -118,11 +105,10 @@ class TaxpayerProductController extends Controller
      */
     public function update(Request $request, int $productId)
     {
-        $taxpayer = $this->getAuthenticatedTaxpayer();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        if (!$taxpayer) {
-            return back()->withErrors(['error' => 'Unauthorized']);
-        }
+        $taxpayer = $user->taxpayer;
 
         // Check if product exists in catalogue
         if (!$taxpayer->products()->where('product_id', $productId)->exists()) {
@@ -155,11 +141,10 @@ class TaxpayerProductController extends Controller
      */
     public function destroy(int $productId)
     {
-        $taxpayer = $this->getAuthenticatedTaxpayer();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        if (!$taxpayer) {
-            return back()->withErrors(['error' => 'Unauthorized']);
-        }
+        $taxpayer = $user->taxpayer;
 
         // Check if product exists in catalogue
         if (!$taxpayer->products()->where('product_id', $productId)->exists()) {
@@ -180,21 +165,24 @@ class TaxpayerProductController extends Controller
      */
     private function formatTaxpayerProducts(Taxpayer $taxpayer): array
     {
-        return $taxpayer->products->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'code' => $product->code,
-                'name' => $product->name,
-                'category' => $product->category,
-                'unit_type' => $product->unit_type,
-                'requires_health_certificate' => $product->requires_health_certificate,
-                'registration_date' => $product->pivot->registration_date,
-                'status' => $product->pivot->status,
-                'health_certificate_number' => $product->pivot->health_certificate_number,
-                'health_certificate_expiry' => $product->pivot->health_certificate_expiry,
-                'notes' => $product->pivot->notes,
-            ];
-        })->toArray();
+        return $taxpayer->products()
+            ->with('category')
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'category' => $product->category ? $product->category->name : 'Uncategorized',
+                    'unit_type' => $product->unit_type,
+                    'requires_health_certificate' => $product->requires_health_certificate,
+                    'registration_date' => $product->pivot->registration_date,
+                    'status' => $product->pivot->status,
+                    'health_certificate_number' => $product->pivot->health_certificate_number,
+                    'health_certificate_expiry' => $product->pivot->health_certificate_expiry,
+                    'notes' => $product->pivot->notes,
+                ];
+            })->toArray();
     }
 
     /**
@@ -204,11 +192,21 @@ class TaxpayerProductController extends Controller
     {
         $existingProductIds = $taxpayer->products->pluck('id')->toArray();
 
-        return Product::where('is_active', true)
+        return Product::with('category')
+            ->where('is_active', true)
             ->whereNotIn('id', $existingProductIds)
-            ->select('id', 'code', 'name', 'category', 'unit_type', 'requires_health_certificate')
             ->orderBy('name')
             ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'category' => $product->category ? $product->category->name : 'Uncategorized',
+                    'unit_type' => $product->unit_type,
+                    'requires_health_certificate' => $product->requires_health_certificate,
+                ];
+            })
             ->toArray();
     }
 }
