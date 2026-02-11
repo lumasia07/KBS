@@ -12,6 +12,8 @@ export interface Product {
     health_certificate_number?: string;
     health_certificate_expiry?: string;
     notes?: string;
+    certificate_path?: string;
+    rejection_reason?: string;
 }
 
 interface TaxpayerProductState {

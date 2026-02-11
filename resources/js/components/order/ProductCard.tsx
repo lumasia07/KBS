@@ -52,7 +52,7 @@ export function ProductCard({ product }: ProductCardProps) {
                         <Package className="w-6 h-6 text-white" />
                     </div>
                     <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
-                        {product.category}
+                        {typeof product.category === 'object' && product.category ? (product.category as any).name : (product.category || 'Uncategorized')}
                     </Badge>
                 </div>
 
@@ -101,8 +101,8 @@ export function ProductCard({ product }: ProductCardProps) {
                                 key={option.value}
                                 onClick={() => setPackaging(option.value)}
                                 className={`flex-1 py-2 px-3 text-xs font-medium rounded-lg transition-colors ${packaging === option.value
-                                        ? 'bg-[#003366] text-white'
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    ? 'bg-[#003366] text-white'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                     }`}
                             >
                                 {option.label}

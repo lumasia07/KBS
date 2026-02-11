@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductionController;
+use App\Http\Controllers\Admin\ProductRequestController;
 
 use App\Http\Controllers\TaxpayerController;
 use App\Http\Controllers\TaxpayerProductController;
@@ -69,6 +70,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{control}', [App\Http\Controllers\AdminFieldControlController::class, 'show'])->name('show');
         Route::post('/{control}/approve', [App\Http\Controllers\AdminFieldControlController::class, 'approve'])->name('approve');
         Route::post('/{control}/reject', [App\Http\Controllers\AdminFieldControlController::class, 'reject'])->name('reject');
+    });
+
+    // Admin Product Requests
+    Route::prefix('admin/products/requests')->name('admin.products.requests.')->group(function () {
+        Route::get('/', [ProductRequestController::class, 'index'])->name('index');
+        Route::post('/{id}/approve', [ProductRequestController::class, 'approve'])->name('approve');
+        Route::patch('/{id}/reject', [ProductRequestController::class, 'reject'])->name('reject');
     });
 
     // Taxpayer Dashboard

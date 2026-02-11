@@ -68,36 +68,52 @@ class TaxpayerProductController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        $taxpayer = $user->taxpayer;
 
         $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'unit_type' => 'required|string|in:unit,pack,carton,liter,kilogram,other',
+            'description' => 'nullable|string|max:1000',
+            'certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // Max 5MB
             'health_certificate_number' => 'nullable|string|max:255',
             'health_certificate_expiry' => 'nullable|date',
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $taxpayer = $user->taxpayer;
+        // auto-generate product code
+        $productCode = 'PROD-' . strtoupper(uniqid());
 
-        // Check if already attached
-        if ($taxpayer->products()->where('product_id', $validated['product_id'])->exists()) {
-            return back()->withErrors(['error' => 'Product already in your catalogue']);
+        // Create the product (inactive by default, pending approval)
+        $product = Product::create([
+            'code' => $productCode,
+            'name' => $validated['name'],
+            'category_id' => $validated['category_id'], 
+            'unit_type' => $validated['unit_type'],
+            // Price is now determined by Admin
+            'stamp_price_per_unit' => null,
+            'description' => $validated['description'] ?? null,
+            'requires_health_certificate' => true,
+            'is_active' => false,
+        ]);
+
+        // Handle file upload
+        $certificatePath = null;
+        if ($request->hasFile('certificate')) {
+            $certificatePath = $request->file('certificate')->store('certificates', 'public');
         }
 
-        // Check if product is active
-        $product = Product::where('is_active', true)->find($validated['product_id']);
-        if (!$product) {
-            return back()->withErrors(['error' => 'Product not available']);
-        }
-
-        $taxpayer->products()->attach($validated['product_id'], [
+        // Attach to taxpayer with pending status
+        $taxpayer->products()->attach($product->id, [
             'registration_date' => now()->toDateString(),
-            'status' => 'active',
+            'status' => 'pending',
             'health_certificate_number' => $validated['health_certificate_number'] ?? null,
             'health_certificate_expiry' => $validated['health_certificate_expiry'] ?? null,
+            'certificate_path' => $certificatePath,
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return back()->with('success', 'Product added to your catalogue successfully');
+        return redirect()->route('taxpayer.products.index')->with('success', 'Product request submitted for approval.');
     }
 
     /**
@@ -111,10 +127,6 @@ class TaxpayerProductController extends Controller
         $taxpayer = $user->taxpayer;
 
         // Check if product exists in catalogue
-        if (!$taxpayer->products()->where('product_id', $productId)->exists()) {
-            return back()->withErrors(['error' => 'Product not in your catalogue']);
-        }
-
         $validated = $request->validate([
             'health_certificate_number' => 'nullable|string|max:255',
             'health_certificate_expiry' => 'nullable|date',
@@ -173,13 +185,15 @@ class TaxpayerProductController extends Controller
                     'id' => $product->id,
                     'code' => $product->code,
                     'name' => $product->name,
-                    'category' => $product->category ? $product->category->name : 'Uncategorized',
+                    'category' => $product->category?->name ?? 'Uncategorized',
                     'unit_type' => $product->unit_type,
                     'requires_health_certificate' => $product->requires_health_certificate,
                     'registration_date' => $product->pivot->registration_date,
                     'status' => $product->pivot->status,
                     'health_certificate_number' => $product->pivot->health_certificate_number,
                     'health_certificate_expiry' => $product->pivot->health_certificate_expiry,
+                    'certificate_path' => $product->pivot->certificate_path ? asset('storage/' . $product->pivot->certificate_path) : null,
+                    'rejection_reason' => $product->pivot->rejection_reason,
                     'notes' => $product->pivot->notes,
                 ];
             })->toArray();
@@ -192,9 +206,9 @@ class TaxpayerProductController extends Controller
     {
         $existingProductIds = $taxpayer->products->pluck('id')->toArray();
 
-        return Product::with('category')
-            ->where('is_active', true)
+        return Product::where('is_active', true)
             ->whereNotIn('id', $existingProductIds)
+            ->with('category')
             ->orderBy('name')
             ->get()
             ->map(function ($product) {
@@ -202,7 +216,7 @@ class TaxpayerProductController extends Controller
                     'id' => $product->id,
                     'code' => $product->code,
                     'name' => $product->name,
-                    'category' => $product->category ? $product->category->name : 'Uncategorized',
+                    'category' => $product->category?->name ?? 'Uncategorized',
                     'unit_type' => $product->unit_type,
                     'requires_health_certificate' => $product->requires_health_certificate,
                 ];

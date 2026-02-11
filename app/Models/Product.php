@@ -20,21 +20,21 @@ class Product extends Model
         'category_id',
         'unit_type',
         'stamp_price_per_unit',
-        'is_active'
+        'is_active',
+        'requires_health_certificate'
     ];
 
     protected $casts = [
         'stamp_price_per_unit' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'requires_health_certificate' => 'boolean'
     ];
 
-    /**
-     * Product category
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
+
 
     /**
      * Product certificates
