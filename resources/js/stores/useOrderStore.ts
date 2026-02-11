@@ -348,18 +348,25 @@ export const useOrderStore = create<OrderState>()(
             getFilteredProducts: () => {
                 const { products, selectedCategory, searchQuery } = get();
                 return products.filter((product) => {
-                    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+                    const categoryName = typeof product.category === 'object' && product.category ? (product.category as any).name : String(product.category || 'Uncategorized');
+                    const matchesCategory = !selectedCategory || categoryName === selectedCategory;
+
+                    const query = searchQuery.toLowerCase();
                     const matchesSearch =
                         !searchQuery ||
-                        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        product.code.toLowerCase().includes(searchQuery.toLowerCase());
+                        product.name.toLowerCase().includes(query) ||
+                        product.code.toLowerCase().includes(query);
+
                     return matchesCategory && matchesSearch && product.is_active;
                 });
             },
 
             getCategories: () => {
                 const { products } = get();
-                return [...new Set(products.map((p) => p.category))];
+                const categories = products.map((p) =>
+                    typeof p.category === 'object' && p.category ? (p.category as any).name : String(p.category || 'Uncategorized')
+                );
+                return [...new Set(categories)].filter(Boolean);
             },
 
             requiresHealthCertificate: () => {

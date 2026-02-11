@@ -20,6 +20,18 @@ class TaxpayerProduct extends Pivot
         'status',
         'health_certificate_number',
         'health_certificate_expiry',
-        'notes'
+        'notes',
+        'certificate_path',
+        'rejection_reason'
     ];
+
+    public function taxpayer()
+    {
+        return $this->belongsTo(Taxpayer::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

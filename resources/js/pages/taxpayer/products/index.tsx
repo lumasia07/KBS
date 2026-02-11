@@ -13,21 +13,8 @@ import {
     X
 } from 'lucide-react';
 import { toast } from 'sonner';
-
+import { useTaxpayerProductStore, type Product } from '@/stores/taxpayer-product-store';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { useTaxpayerProductStore, Product } from '@/stores/taxpayer-product-store';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Taxpayer Portal',
-        href: '/taxpayer/dashboard',
-    },
-    {
-        title: 'My Products',
-        href: '/taxpayer/products',
-    },
-];
 
 interface Props {
     myProducts: Product[];
@@ -36,6 +23,17 @@ interface Props {
 export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Dashboard',
+            href: '/taxpayer/dashboard',
+        },
+        {
+            title: 'My Products',
+            href: '/taxpayer/products',
+        },
+    ];
 
     // Zustand Store
     const { products, setProducts, removeProduct, updateProduct } = useTaxpayerProductStore();
@@ -67,7 +65,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                     health_certificate_number: editForm.data.health_certificate_number,
                     health_certificate_expiry: editForm.data.health_certificate_expiry,
                     notes: editForm.data.notes,
-                    status: editForm.data.status,
+                    status: editForm.data.status as any,
                 });
 
                 setShowEditModal(false);
@@ -107,6 +105,17 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
             status: product.status || 'active',
         });
         setShowEditModal(true);
+    };
+
+    const getStatusColor = (status: string | undefined) => {
+        switch (status) {
+            case 'active': return 'bg-emerald-100 text-emerald-700';
+            case 'pending': return 'bg-blue-100 text-blue-700';
+            case 'rejected': return 'bg-red-100 text-red-700';
+            case 'suspended': return 'bg-amber-100 text-amber-700';
+            case 'expired': return 'bg-slate-100 text-slate-700';
+            default: return 'bg-slate-100 text-slate-600';
+        }
     };
 
     return (
@@ -149,11 +158,11 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                             <CheckCircle2 className="w-8 h-8 text-white/30" />
                         </div>
                     </div>
-                    <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white shadow-md">
+                    <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Requires Health Cert</p>
-                                <p className="text-2xl font-bold">{products.filter(p => p.requires_health_certificate).length}</p>
+                                <p className="text-xs text-white/70">Pending Approval</p>
+                                <p className="text-2xl font-bold">{products.filter(p => p.status === 'pending').length}</p>
                             </div>
                             <FileCheck className="w-8 h-8 text-white/30" />
                         </div>
@@ -186,9 +195,8 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                                     <tr>
                                         <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Product</th>
                                         <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Category</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Health Certificate</th>
+                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Certificate</th>
                                         <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Status</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Registered</th>
                                         <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Actions</th>
                                     </tr>
                                 </thead>
@@ -199,45 +207,43 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                                                 <div>
                                                     <p className="text-sm font-medium text-slate-900">{product.name}</p>
                                                     <p className="text-xs text-slate-500">{product.code}</p>
+                                                    <p className="text-xs text-slate-400 capitalize">{product.unit_type}</p>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
-                                                    {product.category || 'N/A'}
+                                                <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 capitalize">
+                                                    {(typeof product.category === 'object' && product.category !== null ? String((product.category as any).name || '') : String(product.category || '')) || 'N/A'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {product.requires_health_certificate ? (
-                                                    product.health_certificate_number ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                                            <div>
-                                                                <p className="text-xs font-medium text-slate-900">{product.health_certificate_number}</p>
-                                                                {product.health_certificate_expiry && (
-                                                                    <p className="text-xs text-slate-500">Expires: {product.health_certificate_expiry}</p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center gap-2 text-amber-600">
-                                                            <AlertCircle className="w-4 h-4" />
-                                                            <span className="text-xs">Required</span>
-                                                        </div>
-                                                    )
+                                                {product.certificate_path ? (
+                                                    <a
+                                                        href={product.certificate_path}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-2 text-[#003366] hover:underline"
+                                                    >
+                                                        <FileCheck className="w-4 h-4" />
+                                                        <span className="text-xs">View Cert</span>
+                                                    </a>
                                                 ) : (
-                                                    <span className="text-xs text-slate-400">Not required</span>
+                                                    <span className="text-xs text-slate-400">No file</span>
+                                                )}
+                                                {product.health_certificate_number && (
+                                                    <p className="text-xs text-slate-500 mt-1">#{product.health_certificate_number}</p>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${product.status === 'active'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : 'bg-slate-100 text-slate-600'
-                                                    }`}>
-                                                    {product.status || 'active'}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-slate-500">
-                                                {product.registration_date || 'N/A'}
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`inline-flex items-center w-fit px-2.5 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(product.status)}`}>
+                                                        {product.status}
+                                                    </span>
+                                                    {product.status === 'rejected' && product.rejection_reason && (
+                                                        <span className="text-xs text-red-600 max-w-[150px] truncate" title={product.rejection_reason}>
+                                                            {product.rejection_reason}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">

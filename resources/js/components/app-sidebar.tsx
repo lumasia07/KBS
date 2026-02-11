@@ -53,6 +53,11 @@ const adminNavItems: NavItem[] = [
         icon: FileText,
     },
     {
+        title: 'Product Requests',
+        href: '/admin/products/requests',
+        icon: Package,
+    },
+    {
         title: 'Payments',
         href: '#',
         icon: CreditCard,

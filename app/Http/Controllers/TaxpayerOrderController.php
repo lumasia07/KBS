@@ -43,7 +43,7 @@ class TaxpayerOrderController extends Controller
                     'code' => $product->code,
                     'name' => $product->name,
                     'description' => $product->description,
-                    'category' => $product->category,
+                    'category' => $product->category ? $product->category->name : 'Uncategorized',
                     'unit_type' => $product->unit_type,
                     'stamp_price_per_unit' => (float) $product->stamp_price_per_unit,
                     'requires_health_certificate' => (boolean) $product->requires_health_certificate,
