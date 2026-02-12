@@ -10,21 +10,14 @@ jobs:
     name: FTP-Deploy-Action
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v1.0.3
+    - name: Check out the code
+      uses: actions/checkout@v2
       with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd /home3/hencangr/kibs
-          git pull origin main
-          export NVM_DIR=~/.nvm
-          source ~/.nvm/nvm.sh
-          npm install
-          npm run build
-          composer install --no-dev --optimize-autoloader
-          php artisan migrate
-          php artisan optimize:clear
+        fetch-depth: 2
+
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
