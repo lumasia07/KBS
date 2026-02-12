@@ -26,12 +26,12 @@ interface LocationDetailsStepProps {
 export default function LocationDetailsStep({ data, setData, errors, districts, communes, quartiers }: LocationDetailsStepProps) {
     const filteredCommunes = useMemo(() => {
         if (!data.district_id) return [];
-        return communes.filter(c => c.district_id === parseInt(data.district_id));
+        return communes.filter(c => c.district_id.toString() === data.district_id.toString());
     }, [data.district_id, communes]);
 
     const filteredQuartiers = useMemo(() => {
         if (!data.commune_id) return [];
-        return quartiers.filter(q => q.commune_id === parseInt(data.commune_id));
+        return quartiers.filter(q => q.commune_id.toString() === data.commune_id.toString());
     }, [data.commune_id, quartiers]);
 
     return (
