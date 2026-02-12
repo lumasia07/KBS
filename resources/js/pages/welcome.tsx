@@ -3,7 +3,6 @@ import { Head } from '@inertiajs/react';
 
 import { Header } from '@/components/homepage/Header';
 import { Hero } from '@/components/homepage/Hero';
-import { FeaturesGrid } from '@/components/homepage/feautresGrid';
 import { HowItWorks } from '@/components/homepage/HowItWorks';
 import { Footer } from '@/components/homepage/Footer';
 
@@ -18,7 +17,6 @@ export default function Welcome({
             <Header />
             <Hero />
             <HowItWorks />
-            <FeaturesGrid />
             <Footer />
         </>
     );
