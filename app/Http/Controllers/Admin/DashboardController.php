@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payment;
+use App\Models\Complaint;
+use App\Models\FieldControl;
 use App\Models\Stamp;
 use App\Models\StampOrder;
+use App\Models\StampType;
 use App\Models\Taxpayer;
-use Illuminate\Http\Request;
+use App\Models\TaxpayerProduct;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -16,163 +18,165 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. KPI Stats
+        // ── 1. KPI Stats with real month-over-month trends ──
+        $now = Carbon::now();
+        $startOfThisMonth = $now->copy()->startOfMonth();
+        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+
         $totalTaxpayers = Taxpayer::count();
+        $taxpayersLastMonth = Taxpayer::where('created_at', '<', $startOfThisMonth)->count();
 
-        // Count orders that need attention (submitted/pending)
         $pendingOrders = StampOrder::whereIn('status', ['submitted', 'pending'])->count();
+        $pendingOrdersLastMonth = StampOrder::whereIn('status', ['submitted', 'pending'])
+            ->where('created_at', '<=', $endOfLastMonth)->count();
 
-        // Calculate Revenue (Approximation based on grand_total of valid orders)
-        // Adjust statuses based on your workflow. Assuming 'submitted' might be unpaid, 
-        // but for now we sum all non-cancelled for visibility, or strictly paid ones.
-        // Let's sum everything not cancelled/rejected.
-        $revenue = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
-            ->sum('grand_total');
+        $revenue = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])->sum('grand_total');
+        $revenueThisMonth = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
+            ->where('created_at', '>=', $startOfThisMonth)->sum('grand_total');
+        $revenueLastMonth = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
+            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('grand_total');
 
-        // For 'active', check if we have stamps. If not, use proxy.
         $activeStamps = Stamp::where('status', 'active')->count();
         if ($activeStamps === 0) {
-            // Proxy: Sum quantity of approved/delivered orders
-            $activeStamps = StampOrder::whereIn('status', ['delivered', 'completed'])
-                ->sum('quantity');
+            $activeStamps = StampOrder::whereIn('status', ['delivered', 'completed'])->sum('quantity');
         }
-
-        // Calculate trends (Simple comparison with last month)
-        // This requires more complex queries. For MVP, we can mock the trend % or calculate it.
-        // Let's just pass 0% or calculate if easy.
+        $activeStampsLastMonth = Stamp::where('status', 'active')
+            ->where('created_at', '<', $startOfThisMonth)->count();
 
         $stats = [
             [
                 'title' => 'Total Taxpayers',
                 'value' => number_format($totalTaxpayers),
-                'change' => '+0%', // Placeholder
-                'trend' => 'up',
+                'change' => $this->calcTrend($totalTaxpayers, $taxpayersLastMonth),
+                'trend' => $totalTaxpayers >= $taxpayersLastMonth ? 'up' : 'down',
                 'description' => 'Registered enterprises',
-                'icon' => 'Users' // Frontend maps this string to Icon component
+                'icon' => 'Users',
             ],
             [
                 'title' => 'Pending Orders',
                 'value' => number_format($pendingOrders),
-                'change' => '0%',
-                'trend' => 'up',
+                'change' => $this->calcTrend($pendingOrders, $pendingOrdersLastMonth),
+                'trend' => $pendingOrders <= $pendingOrdersLastMonth ? 'up' : 'down',
                 'description' => 'Awaiting approval',
-                'icon' => 'FileText'
+                'icon' => 'FileText',
             ],
             [
                 'title' => 'Revenue (CDF)',
                 'value' => $this->formatMoney($revenue),
-                'change' => '+0%',
-                'trend' => 'up',
+                'change' => $this->calcTrend($revenueThisMonth, $revenueLastMonth),
+                'trend' => $revenueThisMonth >= $revenueLastMonth ? 'up' : 'down',
                 'description' => 'Total Revenue',
-                'icon' => 'CreditCard'
+                'icon' => 'CreditCard',
             ],
             [
                 'title' => 'Active Stamps',
                 'value' => number_format($activeStamps),
-                'change' => '0%',
-                'trend' => 'down',
+                'change' => $this->calcTrend($activeStamps, $activeStampsLastMonth),
+                'trend' => $activeStamps >= $activeStampsLastMonth ? 'up' : 'down',
                 'description' => 'In circulation',
-                'icon' => 'Stamp'
-            ]
+                'icon' => 'Stamp',
+            ],
         ];
 
-        // 2. Charts - Order Status
+        // ── 2. Order Status Donut ──
         $orderStatusCounts = StampOrder::select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->get();
-
+            ->groupBy('status')->get();
         $totalOrders = $orderStatusCounts->sum('total');
 
-        $orderStatusData = $orderStatusCounts->map(function ($item) use ($totalOrders) {
-            $colors = [
-                'delivered' => '#10B981',
-                'completed' => '#10B981',
-                'submitted' => '#F59E0B',
-                'pending' => '#F59E0B',
-                'processing' => '#3B82F6',
-                'cancelled' => '#EF4444',
-                'rejected' => '#EF4444',
-            ];
+        $statusColors = [
+            'delivered' => '#10B981', 'completed' => '#10B981',
+            'approved'  => '#3B82F6', 'in_production' => '#6366F1',
+            'submitted' => '#F59E0B', 'pending' => '#F59E0B',
+            'processing' => '#3B82F6',
+            'cancelled' => '#EF4444', 'rejected' => '#EF4444',
+        ];
 
-            return [
-                'label' => ucfirst($item->status),
-                'value' => $totalOrders > 0 ? round(($item->total / $totalOrders) * 100) : 0,
-                'color' => $colors[$item->status] ?? '#64748B'
-            ];
-        })->values();
+        $orderStatusData = $orderStatusCounts->map(fn($item) => [
+            'label' => ucfirst(str_replace('_', ' ', $item->status)),
+            'value' => $totalOrders > 0 ? round(($item->total / $totalOrders) * 100) : 0,
+            'count' => $item->total,
+            'color' => $statusColors[$item->status] ?? '#64748B',
+        ])->values();
 
-        // 3. Charts - Monthly Revenue
-        // Group by Month (last 6 months)
-        $monthlyRevenue = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
-            ->select(
-                DB::raw("to_char(created_at, 'Mon') as month"), // Oracle/Postgres syntax?
-                // User is on WSL Ubuntu, likely standard Laravel/MySQL or Postgres.
-                // If using SQLite/MySQL, syntax differs.
-                // Safer to use Carbon loop or check driver.
-                // Assuming standardized DB usage allowed. 
-                // Let's use get() then map for portability if dataset is small.
-                // Or simplified DB::raw.
-                // Let's try flexible approach:
-                DB::raw('SUM(grand_total) as value')
-            )
-            ->where('created_at', '>=', now()->subMonths(6))
-            // Group by date format is tricky across DBs without specific driver knowledge
-            // Let's stick to reliable collection method for MVP
-        ;
-
-        // Portable Collection Method for Monthly Revenue
+        // ── 3. Monthly Revenue (last 6 months) ──
         $revenueData = StampOrder::whereNotIn('status', ['cancelled', 'rejected'])
-            ->where('created_at', '>=', now()->subMonths(6))
+            ->where('created_at', '>=', $now->copy()->subMonths(6)->startOfMonth())
             ->get()
-            ->groupBy(function ($date) {
-                return Carbon::parse($date->created_at)->format('M'); // Jan, Feb
-            })
-            ->map(function ($row) {
-                return $row->sum('grand_total') / 1000000; // In Millions
-            });
+            ->groupBy(fn($o) => Carbon::parse($o->created_at)->format('M'))
+            ->map(fn($rows) => $rows->sum('grand_total') / 1000000);
 
-        // Ensure ordering by months
         $months = [];
         for ($i = 5; $i >= 0; $i--) {
-            $month = now()->subMonths($i)->format('M');
-            $months[] = [
-                'month' => $month,
-                'value' => round($revenueData->get($month, 0), 1)
-            ];
+            $m = $now->copy()->subMonths($i)->format('M');
+            $months[] = ['month' => $m, 'value' => round($revenueData->get($m, 0), 1)];
         }
 
-        // 4. Recent Transactions
-        // Mix of recent orders
-        $recentTransactions = StampOrder::with('taxpayer')
-            ->latest()
-            ->take(5)
+        $revenueTrend = $this->calcTrend($revenueThisMonth, $revenueLastMonth);
+
+        // ── 4. Quick Action counts (real data) ──
+        $quickActions = [
+            'pendingOrders'        => StampOrder::whereIn('status', ['submitted', 'pending'])->count(),
+            'pendingVerifications'  => StampOrder::where('status', 'approved')->count(),
+            'activeComplaints'     => Complaint::where('status', 'open')->count(),
+            'newRegistrations'     => Taxpayer::where('registration_status', 'pending')->count(),
+            'pendingProducts'      => TaxpayerProduct::where('status', 'pending')->count(),
+        ];
+
+        // ── 5. Stamp Distribution by Type ──
+        $stampDistribution = StampType::withCount('stamps')
+            ->where('is_active', true)
             ->get()
-            ->map(function ($order) {
-                return [
-                    'company' => $order->taxpayer->company_name ?? 'Unknown',
-                    'action' => 'Order placed',
-                    'amount' => number_format($order->quantity) . ' stamps',
-                    'time' => $order->created_at->diffForHumans(),
-                    'status' => in_array($order->status, ['delivered', 'completed']) ? 'success' : 'pending'
-                ];
-            });
+            ->map(fn($type) => [
+                'label' => $type->name,
+                'count' => $type->stamps_count,
+            ]);
+
+        $totalStampCount = $stampDistribution->sum('count');
+        $typeColors = ['#003366', '#0052A3', '#FFD700', '#10B981', '#6366F1', '#EC4899'];
+        $stampDistribution = $stampDistribution->values()->map(function ($item, $idx) use ($totalStampCount, $typeColors) {
+            return [
+                'label' => $item['label'],
+                'value' => $totalStampCount > 0 ? round(($item['count'] / $totalStampCount) * 100) : 0,
+                'color' => $typeColors[$idx % count($typeColors)],
+            ];
+        });
+
+        // ── 6. Recent Transactions ──
+        $recentTransactions = StampOrder::with('taxpayer')
+            ->latest()->take(5)->get()
+            ->map(fn($order) => [
+                'company' => $order->taxpayer->company_name ?? 'Unknown',
+                'action'  => 'Order ' . str_replace('_', ' ', $order->status),
+                'amount'  => number_format($order->quantity) . ' stamps',
+                'time'    => $order->created_at->diffForHumans(),
+                'status'  => in_array($order->status, ['delivered', 'completed']) ? 'success' : 'pending',
+            ]);
 
         return Inertia::render('admin/dashboard', [
-            'stats' => $stats,
-            'orderStatusData' => $orderStatusData,
-            'monthlyRevenue' => $months,
-            'recentTransactions' => $recentTransactions
+            'stats'              => $stats,
+            'orderStatusData'    => $orderStatusData,
+            'monthlyRevenue'     => $months,
+            'revenueTrend'       => $revenueTrend,
+            'quickActions'       => $quickActions,
+            'stampDistribution'  => $stampDistribution,
+            'recentTransactions' => $recentTransactions,
         ]);
     }
 
-    private function formatMoney($amount)
+    private function calcTrend(float $current, float $previous): string
     {
-        if ($amount >= 1000000) {
-            return round($amount / 1000000, 1) . 'M';
+        if ($previous == 0) {
+            return $current > 0 ? '+100%' : '0%';
         }
-        if ($amount >= 1000) {
-            return round($amount / 1000, 1) . 'K';
-        }
+        $pct = round((($current - $previous) / $previous) * 100, 1);
+        return ($pct >= 0 ? '+' : '') . $pct . '%';
+    }
+
+    private function formatMoney(float $amount): string
+    {
+        if ($amount >= 1000000) return round($amount / 1000000, 1) . 'M';
+        if ($amount >= 1000) return round($amount / 1000, 1) . 'K';
         return number_format($amount);
     }
 }
