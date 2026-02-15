@@ -11,6 +11,8 @@ class ProductCertificate extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'product_certificates';
+
     protected $fillable = [
         'product_id',
         'certificate_type_id',
@@ -18,8 +20,8 @@ class ProductCertificate extends Model
         'issue_date',
         'expiry_date',
         'issuing_authority',
-        'issuing_country', // Added this
-        'remarks', // Added this
+        'issuing_country',
+        'remarks',
         'file_path',
         'is_valid'
     ];
@@ -31,7 +33,7 @@ class ProductCertificate extends Model
     ];
 
     /**
-     * The product this certificate belongs to
+     * Get the product that owns this certificate
      */
     public function product(): BelongsTo
     {
@@ -39,7 +41,7 @@ class ProductCertificate extends Model
     }
 
     /**
-     * The certificate type
+     * Get the certificate type
      */
     public function certificateType(): BelongsTo
     {
@@ -59,7 +61,7 @@ class ProductCertificate extends Model
     }
 
     /**
-     * Check if certificate is valid (not expired and marked as valid)
+     * Check if certificate is currently valid
      */
     public function isValid(): bool
     {
@@ -96,5 +98,37 @@ class ProductCertificate extends Model
         return $query->where('is_valid', true)
             ->whereNotNull('expiry_date')
             ->whereBetween('expiry_date', [now(), now()->addDays($days)]);
+    }
+
+    /**
+     * Get the remaining days until expiry
+     */
+    public function getRemainingDaysAttribute(): ?int
+    {
+        if (!$this->expiry_date) {
+            return null;
+        }
+
+        return now()->diffInDays($this->expiry_date, false);
+    }
+
+    /**
+     * Get formatted status
+     */
+    public function getStatusAttribute(): string
+    {
+        if (!$this->is_valid) {
+            return 'Invalid';
+        }
+
+        if ($this->isExpired()) {
+            return 'Expired';
+        }
+
+        if ($this->expiry_date && $this->expiry_date->diffInDays(now()) <= 30) {
+            return 'Expiring Soon';
+        }
+
+        return 'Valid';
     }
 }

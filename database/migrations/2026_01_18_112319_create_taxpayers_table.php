@@ -48,7 +48,13 @@ return new class extends Migration {
             $table->string('operational_contact_phone', 20)->nullable();
 
             // Status and verification
-            $table->enum('registration_status', ['pending', 'verified', 'rejected', 'suspended', 'active'])->default('pending');
+            $table->enum('registration_status', [
+                'pending',
+                'verified',
+                'rejected',
+                'suspended',
+                'active'
+            ])->default('pending');
             $table->text('rejection_reason')->nullable();
             $table->date('registration_date')->nullable();
             $table->date('verification_date')->nullable();
@@ -68,10 +74,75 @@ return new class extends Migration {
             $table->index('commune_id');
             $table->index('quartier_id');
         });
+
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('code', 20)->unique();
+            $table->string('name', 200);
+            $table->text('description')->nullable();
+            $table->boolean('requires_health_certificate')->default(false);
+            $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
+            $table->enum('unit_type', [
+                'unit',
+                'pack',
+                'carton',
+                'liter',
+                'kilogram',
+                'other'
+            ]);
+            $table->decimal('stamp_price_per_unit', 10, 2)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        // Table for storing product certificates
+        Schema::create('product_certificates', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('certificate_type_id')->constrained()->onDelete('cascade');
+            $table->string('certificate_number')->nullable();
+            $table->date('issue_date');
+            $table->date('expiry_date')->nullable();
+            $table->string('issuing_authority');
+            $table->string('issuing_country')->nullable();
+            $table->text('remarks')->nullable();
+            $table->string('file_path')->nullable();
+            $table->boolean('is_valid')->default(true);
+            $table->timestamps();
+            $table->softDeletes();
+
+            // Shorter index name to avoid MySQL 64-character limit
+            $table->unique([
+                'product_id',
+                'certificate_type_id',
+                'certificate_number'
+            ], 'prod_cert_type_num_unique');
+        });
+
+        Schema::create('taxpayer_products', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('taxpayer_id')->constrained('taxpayers')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->date('registration_date');
+            // Changed from enum to string to be more flexible
+            $table->string('status')->default('pending');
+            $table->string('certificate_path')->nullable();
+            $table->text('rejection_reason')->nullable();
+            $table->text('notes')->nullable();
+            $table->string('health_certificate_number')->nullable();
+            $table->date('health_certificate_expiry')->nullable();
+            $table->timestamps();
+
+            $table->unique(['taxpayer_id', 'product_id']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('taxpayer_products');
+        Schema::dropIfExists('product_certificates');
+        Schema::dropIfExists('products');
         Schema::dropIfExists('taxpayers');
     }
 };

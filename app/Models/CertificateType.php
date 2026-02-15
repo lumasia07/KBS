@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CertificateType extends Model
 {
@@ -36,19 +37,21 @@ class CertificateType extends Model
     }
 
     /**
-     * Products that have this certificate type
+     * Product certificates of this type
      */
-    public function products()
+    public function productCertificates(): HasMany
     {
-        return $this->hasManyThrough(Product::class, ProductCertificate::class);
+        return $this->hasMany(ProductCertificate::class);
     }
 
     /**
-     * All certificates of this type
+     * Products that have this certificate type (through product_certificates)
      */
-    public function certificates()
+    public function products()
     {
-        return $this->hasMany(ProductCertificate::class);
+        return $this->belongsToMany(Product::class, 'product_certificates')
+            ->withPivot(['certificate_number', 'issue_date', 'expiry_date', 'issuing_authority', 'issuing_country', 'remarks', 'file_path', 'is_valid'])
+            ->withTimestamps();
     }
 
     /**
