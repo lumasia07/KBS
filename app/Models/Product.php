@@ -20,48 +20,96 @@ class Product extends Model
         'category_id',
         'unit_type',
         'stamp_price_per_unit',
-        'is_active',
-        'requires_health_certificate'
+        'is_active'
     ];
 
     protected $casts = [
         'stamp_price_per_unit' => 'decimal:2',
-        'is_active' => 'boolean',
-        'requires_health_certificate' => 'boolean'
+        'is_active' => 'boolean'
     ];
 
+    /**
+     * Get the category that the product belongs to
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-
     /**
-     * Product certificates
+     * Get the product certificates
      */
-    public function certificates(): HasMany
+    public function productCertificates(): HasMany
     {
         return $this->hasMany(ProductCertificate::class);
     }
 
     /**
-     * Certificate types via certificates
+     * Get the certificate types through product certificates
      */
     public function certificateTypes(): BelongsToMany
     {
         return $this->belongsToMany(CertificateType::class, 'product_certificates')
-            ->withPivot(['certificate_number', 'issue_date', 'expiry_date', 'issuing_authority', 'is_valid'])
+            ->withPivot([
+                'certificate_number',
+                'issue_date',
+                'expiry_date',
+                'issuing_authority',
+                'issuing_country',
+                'remarks',
+                'file_path',
+                'is_valid'
+            ])
             ->withTimestamps();
     }
 
     /**
-     * Check if product has a specific certificate type
+     * The taxpayers that have this product in their catalogue.
      */
-    public function hasCertificateType($certificateTypeId): bool
+    public function taxpayers(): BelongsToMany
     {
-        return $this->certificates()
+        return $this->belongsToMany(Taxpayer::class, 'taxpayer_products')
+            ->using(TaxpayerProduct::class)
+            ->withPivot([
+                'registration_date',
+                'status',
+                'rejection_reason',
+                'notes',
+                'certificate_path',
+                'health_certificate_number',
+                'health_certificate_expiry'
+            ])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get active taxpayers for this product (approved status)
+     */
+    public function activeTaxpayers()
+    {
+        return $this->taxpayers()->wherePivot('status', 'approved');
+    }
+
+    /**
+     * Get pending taxpayers for this product
+     */
+    public function pendingTaxpayers()
+    {
+        return $this->taxpayers()->wherePivot('status', 'pending');
+    }
+
+    /**
+     * Check if product has a specific valid certificate type
+     */
+    public function hasValidCertificateType($certificateTypeId): bool
+    {
+        return $this->productCertificates()
             ->where('certificate_type_id', $certificateTypeId)
             ->where('is_valid', true)
+            ->where(function ($query) {
+                $query->whereNull('expiry_date')
+                    ->orWhere('expiry_date', '>', now());
+            })
             ->exists();
     }
 
@@ -70,7 +118,12 @@ class Product extends Model
      */
     public function validCertificates()
     {
-        return $this->certificates()->where('is_valid', true);
+        return $this->productCertificates()
+            ->where('is_valid', true)
+            ->where(function ($query) {
+                $query->whereNull('expiry_date')
+                    ->orWhere('expiry_date', '>', now());
+            });
     }
 
     /**
@@ -78,49 +131,58 @@ class Product extends Model
      */
     public function expiredCertificates()
     {
-        return $this->certificates()
+        return $this->productCertificates()
             ->where('is_valid', true)
             ->whereNotNull('expiry_date')
-            ->where('expiry_date', '<', now());
+            ->where('expiry_date', '<=', now());
     }
 
     /**
-     * Check if product has all required certificates
+     * Check if product has all required certificates based on its category
      */
     public function hasAllRequiredCertificates(): bool
     {
-        if (!$this->category || !$this->category->requires_certificate) {
+        if (!$this->category) {
             return true;
         }
 
-        $requiredCertTypes = $this->category->requiredCertificateTypes()->pluck('certificate_type_id');
+        $requiredCertTypes = $this->category->certificateTypes()
+            ->wherePivot('is_required', true)
+            ->get();
 
         if ($requiredCertTypes->isEmpty()) {
             return true;
         }
 
-        $existingValidCertTypes = $this->validCertificates()
-            ->whereIn('certificate_type_id', $requiredCertTypes)
-            ->pluck('certificate_type_id');
+        foreach ($requiredCertTypes as $requiredCert) {
+            if (!$this->hasValidCertificateType($requiredCert->id)) {
+                return false;
+            }
+        }
 
-        return $requiredCertTypes->diff($existingValidCertTypes)->isEmpty();
+        return true;
     }
 
     /**
      * Get missing required certificates
      */
-    public function missingRequiredCertificates()
+    public function getMissingRequiredCertificates()
     {
-        if (!$this->category || !$this->category->requires_certificate) {
+        if (!$this->category) {
             return collect();
         }
 
-        $requiredCertTypes = $this->category->requiredCertificateTypes()->get();
-        $existingValidCertTypes = $this->validCertificates()
-            ->whereIn('certificate_type_id', $requiredCertTypes->pluck('id'))
-            ->pluck('certificate_type_id');
+        $requiredCertTypes = $this->category->certificateTypes()
+            ->wherePivot('is_required', true)
+            ->get();
 
-        return $requiredCertTypes->whereNotIn('id', $existingValidCertTypes);
+        if ($requiredCertTypes->isEmpty()) {
+            return collect();
+        }
+
+        return $requiredCertTypes->reject(function ($certType) {
+            return $this->hasValidCertificateType($certType->id);
+        });
     }
 
     /**
@@ -136,8 +198,12 @@ class Product extends Model
      */
     public function scopeWithValidCertificates($query)
     {
-        return $query->whereHas('certificates', function ($q) {
-            $q->where('is_valid', true);
+        return $query->whereHas('productCertificates', function ($q) {
+            $q->where('is_valid', true)
+                ->where(function ($subQ) {
+                    $subQ->whereNull('expiry_date')
+                        ->orWhere('expiry_date', '>', now());
+                });
         });
     }
 
@@ -147,14 +213,21 @@ class Product extends Model
     public function scopeMissingRequiredCertificates($query)
     {
         return $query->whereHas('category', function ($q) {
-            $q->where('requires_certificate', true);
-        })->whereDoesntHave('certificates', function ($q) {
-            $q->whereIn('certificate_type_id', function ($subquery) {
-                $subquery->select('certificate_type_id')
-                    ->from('category_certificate_type')
-                    ->whereColumn('category_id', 'products.category_id')
-                    ->where('is_required', true);
-            })->where('is_valid', true);
+            $q->whereHas('certificateTypes', function ($subQ) {
+                $subQ->wherePivot('is_required', true);
+            });
+        })->whereDoesntHave('productCertificates', function ($q) {
+            $q->where('is_valid', true)
+                ->where(function ($dateQ) {
+                    $dateQ->whereNull('expiry_date')
+                        ->orWhere('expiry_date', '>', now());
+                })
+                ->whereIn('certificate_type_id', function ($subQuery) {
+                    $subQuery->select('certificate_type_id')
+                        ->from('category_certificate_type')
+                        ->whereColumn('category_id', 'products.category_id')
+                        ->where('is_required', true);
+                });
         });
     }
 }

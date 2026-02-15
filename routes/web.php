@@ -120,7 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Agent Routes
     Route::prefix('agent')->name('agent.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AgentFieldControlController::class, 'dashboard'])->name('dashboard');
-        
+
         // Agent Inspections
         Route::prefix('inspections')->name('inspections.')->group(function () {
             Route::get('/', [App\Http\Controllers\AgentFieldControlController::class, 'index'])->name('index');
@@ -137,4 +137,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__ . '/settings.php';
-
