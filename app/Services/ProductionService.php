@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Admin;
+namespace App\Services;
 
 use App\Models\StampOrder;
 use App\Models\User;
@@ -28,14 +28,13 @@ class ProductionService
 
             // Update order status
             $order->update([
-                'status' => 'production_queued',
+                'status' => 'in_production',
                 'approved_by' => $user->id, // Track who initiated production
             ]);
 
-            // Dispatch the job
-            GenerateStampsJob::dispatch($order, $user, $batchId)
-                ->onQueue('production')
-                ->delay(now()->addSeconds(5)); // Small delay to allow response
+            // Run stamp generation synchronously (dispatchSync) so results are
+            // available immediately without a queue worker.
+            GenerateStampsJob::dispatchSync($order, $user, $batchId);
 
             DB::commit();
 
@@ -88,7 +87,7 @@ class ProductionService
      */
     protected function validateOrderForProduction(StampOrder $order): void
     {
-        if ($order->status !== 'approved') {
+        if (!in_array($order->status, ['approved', 'in_production'])) {
             throw new \Exception('Order must be approved to start production.');
         }
 

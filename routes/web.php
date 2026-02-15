@@ -54,7 +54,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Production (Sticker Generation)
     Route::prefix('admin/production')->name('admin.production.')->group(function () {
         Route::get('/', [ProductionController::class, 'index'])->name('index');
+        Route::get('/progress/{batchId}', [ProductionController::class, 'progress'])->name('progress');
+        Route::get('/{order}/preview', [ProductionController::class, 'preview'])->name('preview');
+        Route::get('/{order}/print', [ProductionController::class, 'printBatch'])->name('print');
         Route::post('/{order}/generate', [ProductionController::class, 'generate'])->name('generate');
+        Route::post('/{order}/ready', [ProductionController::class, 'markReady'])->name('ready');
+        Route::get('/{order}/stamps', [ProductionController::class, 'stamps'])->name('stamps');
+        Route::post('/{order}/cancel', [ProductionController::class, 'cancel'])->name('cancel');
+        Route::get('/{order}', [ProductionController::class, 'show'])->name('show');
     });
 
     // Admin Taxpayers

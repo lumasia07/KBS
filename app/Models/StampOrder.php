@@ -74,7 +74,7 @@ class StampOrder extends Model
 
     public function stamps()
     {
-        return $this->hasMany(Stamp::class);
+        return $this->hasMany(Stamp::class, 'order_id');
     }
 
     public function payments()

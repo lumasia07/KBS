@@ -54,7 +54,7 @@ class Stamp extends Model
 
     public function order()
     {
-        return $this->belongsTo(StampOrder::class);
+        return $this->belongsTo(StampOrder::class, 'order_id');
     }
 
     public function taxpayer()

@@ -94,9 +94,9 @@ class GenerateStampsJob implements ShouldQueue
                 $this->updateProgress($chunk + 1, $chunks);
             }
 
-            // Update order status to produced
+            // Update order status to ready_for_delivery
             $this->order->update([
-                'status' => 'produced',
+                'status' => 'ready_for_delivery',
                 'actual_delivery_date' => now(),
             ]);
 
@@ -114,7 +114,7 @@ class GenerateStampsJob implements ShouldQueue
             ]);
 
             // Update order status to failed
-            $this->order->update(['status' => 'production_failed']);
+            $this->order->update(['status' => 'cancelled']);
 
             throw $e;
         }

@@ -92,7 +92,7 @@ class TaxpayerController extends Controller
             'legalForms' => LegalForm::select('id', 'name', 'code')->get(),
             'sectors' => BusinessSector::select('id', 'name')->get(),
             'companySizes' => CompanySize::select('id', 'category')->get(),
-            'districts' => District::select('id', 'name')->get(),
+            'districts' => District::select('id', 'name')->get()->unique('name')->values(),
             'communes' => Commune::select('id', 'name', 'district_id')->get(),
             'quartiers' => Quartier::select('id', 'name', 'commune_id')->get(),
         ]);

@@ -20,7 +20,9 @@ import {
     Printer,
     Settings,
     QrCode,
-    CheckCircle
+    CheckCircle,
+    Truck,
+    Eye
 } from 'lucide-react';
 import {
     Dialog,
@@ -41,6 +43,7 @@ interface Order {
     product_name: string;
     quantity: number;
     status: string;
+    stamps_count: number;
     created_at: string;
 }
 
@@ -65,6 +68,8 @@ export default function AdminProductionIndex() {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [generating, setGenerating] = useState(false);
     const [generatedStats, setGeneratedStats] = useState<any>(null);
+    const [previewSerial, setPreviewSerial] = useState<{ serial_start: string; serial_end: string } | null>(null);
+    const [loadingPreview, setLoadingPreview] = useState(false);
 
     const fetchOrders = async () => {
         setLoading(true);
@@ -98,10 +103,42 @@ export default function AdminProductionIndex() {
         return () => clearTimeout(timeout);
     }, [params.page, params.search]);
 
-    const handlePreview = (order: Order) => {
+    const orderHasStamps = (order: Order) => order.stamps_count > 0 || order.status === 'ready_for_delivery';
+
+    const handlePreview = async (order: Order) => {
         setSelectedOrder(order);
-        setGeneratedStats(null);
+        setPreviewSerial(null);
         setPreviewOpen(true);
+        setLoadingPreview(true);
+
+        // If this order already has stamps generated, go straight to "produced" state
+        if (orderHasStamps(order)) {
+            setGeneratedStats({
+                serial_start: '...',
+                serial_end: '...',
+                quantity: order.quantity
+            });
+            try {
+                const res = await axios.get(`/admin/production/${order.id}/preview`);
+                setGeneratedStats({
+                    serial_start: res.data.serial_start,
+                    serial_end: res.data.serial_end,
+                    quantity: order.quantity
+                });
+            } catch { /* keep placeholder */ }
+            setLoadingPreview(false);
+            return;
+        }
+
+        setGeneratedStats(null);
+        try {
+            const res = await axios.get(`/admin/production/${order.id}/preview`);
+            setPreviewSerial({ serial_start: res.data.serial_start, serial_end: res.data.serial_end });
+        } catch {
+            setPreviewSerial(null);
+        } finally {
+            setLoadingPreview(false);
+        }
     };
 
     const handleGenerate = async () => {
@@ -109,18 +146,16 @@ export default function AdminProductionIndex() {
         setGenerating(true);
         try {
             const response = await axios.post(`/admin/production/${selectedOrder.id}/generate`);
-            // Mocking the complex serials here for immediate UI feedback if backend is stubbed
-            // If backend returns real data, use that. If not, generate mock for preview.
-            const mockStart = Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
-            const complexStats = {
-                serial_start: response.data.preview_data?.serial_start || mockStart.toString(),
-                serial_end: response.data.preview_data?.serial_end || (mockStart + selectedOrder.quantity).toString(),
-                quantity: selectedOrder.quantity
-            };
+            const preview = response.data.preview_data;
 
-            setGeneratedStats(complexStats);
-            toast.success('Production batch created successfully');
-            // Don't close immediately, showing stats
+            setGeneratedStats({
+                serial_start: preview?.serial_start ?? 'N/A',
+                serial_end: preview?.serial_end ?? 'N/A',
+                quantity: selectedOrder.quantity
+            });
+
+            toast.success(response.data.message || 'Production batch created successfully');
+            fetchOrders(); // Refresh table to show updated status
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Generation failed');
         } finally {
@@ -132,6 +167,7 @@ export default function AdminProductionIndex() {
         switch (status) {
             case 'approved': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
             case 'in_production': return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'ready_for_delivery': return 'bg-purple-100 text-purple-800 border-purple-200';
             default: return 'bg-slate-100 text-slate-800 border-slate-200';
         }
     };
@@ -205,14 +241,36 @@ export default function AdminProductionIndex() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#003366] hover:bg-[#002244] text-white flex items-center gap-2"
-                                                        onClick={() => handlePreview(order)}
-                                                    >
-                                                        <QrCode className="h-4 w-4" />
-                                                        Preview & Generate
-                                                    </Button>
+                                                    {orderHasStamps(order) ? (
+                                                        <>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="border-[#003366] text-[#003366] hover:bg-[#003366]/5 flex items-center gap-2"
+                                                                onClick={() => window.open(`/admin/production/${order.id}/print`, '_blank')}
+                                                            >
+                                                                <Printer className="h-4 w-4" />
+                                                                Print Again
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
+                                                                onClick={() => handlePreview(order)}
+                                                            >
+                                                                <Eye className="h-4 w-4" />
+                                                                View
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        <Button
+                                                            size="sm"
+                                                            className="bg-[#003366] hover:bg-[#002244] text-white flex items-center gap-2"
+                                                            onClick={() => handlePreview(order)}
+                                                        >
+                                                            <QrCode className="h-4 w-4" />
+                                                            Preview & Generate
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -253,7 +311,7 @@ export default function AdminProductionIndex() {
                 <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
                     <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200">
                         <DialogHeader>
-                            <DialogTitle className="text-slate-900">Digital Digital Stamp Preview</DialogTitle>
+                            <DialogTitle className="text-slate-900">Digital Stamp Preview</DialogTitle>
                             <DialogDescription className="text-slate-500">
                                 Anticipated output for Order #{selectedOrder?.order_number}.
                                 Verify security features before generation.
@@ -275,7 +333,7 @@ export default function AdminProductionIndex() {
                                             <QrCode className="w-16 h-16 opacity-80" />
                                         </div>
                                         <div className="mt-2 text-[10px] font-mono font-bold text-[#003366]">
-                                            {generatedStats ? generatedStats.serial_start : 'KBS-PREVIEW'}
+                                            {generatedStats ? generatedStats.serial_start : (loadingPreview ? '...' : (previewSerial?.serial_start ?? 'KBS-2026-XXXXXX'))}
                                         </div>
                                     </div>
 
@@ -317,6 +375,21 @@ export default function AdminProductionIndex() {
                                         <span className="text-slate-500">Estimated Batch Size:</span>
                                         <span className="font-medium">~{Math.ceil(selectedOrder.quantity / 1000)} Rolls</span>
                                     </div>
+                                    {previewSerial && !generatedStats && (
+                                        <div className="mt-3 pt-3 border-t border-slate-200">
+                                            <div className="text-xs font-medium text-slate-600 mb-2">Estimated Serial Range</div>
+                                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                                <div className="bg-white p-2 border rounded">
+                                                    <span className="text-slate-500 block">Start Serial</span>
+                                                    <span className="font-mono font-bold">{previewSerial.serial_start}</span>
+                                                </div>
+                                                <div className="bg-white p-2 border rounded">
+                                                    <span className="text-slate-500 block">End Serial</span>
+                                                    <span className="font-mono font-bold">{previewSerial.serial_end}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                     {generatedStats && (
                                         <div className="mt-4 pt-4 border-t border-slate-200">
                                             <div className="flex items-center gap-2 text-emerald-600 font-medium mb-2">
@@ -350,9 +423,33 @@ export default function AdminProductionIndex() {
                                     Start Production
                                 </Button>
                             ) : (
-                                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                                    Download Batch PDF
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button
+                                        className="bg-[#003366] hover:bg-[#002244] text-white"
+                                        onClick={() => window.open(`/admin/production/${selectedOrder!.id}/print`, '_blank')}
+                                    >
+                                        <Printer className="mr-2 h-4 w-4" />
+                                        Print Batch
+                                    </Button>
+                                    {selectedOrder && selectedOrder.status !== 'ready_for_delivery' && (
+                                        <Button
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                            onClick={async () => {
+                                                try {
+                                                    await axios.post(`/admin/production/${selectedOrder.id}/ready`);
+                                                    toast.success('Order marked as ready for delivery');
+                                                    setPreviewOpen(false);
+                                                    fetchOrders();
+                                                } catch (e: any) {
+                                                    toast.error(e.response?.data?.message || 'Failed to update status');
+                                                }
+                                            }}
+                                        >
+                                            <Truck className="mr-2 h-4 w-4" />
+                                            Ready for Delivery
+                                        </Button>
+                                    )}
+                                </div>
                             )}
                         </DialogFooter>
                     </DialogContent>

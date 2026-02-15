@@ -47,16 +47,16 @@ class KinshasaLocationsSeeder extends Seeder
         ];
 
         foreach ($districts as $districtName => $communes) {
-            $district = District::create(['name' => $districtName]);
+            $district = District::firstOrCreate(['name' => $districtName]);
 
             foreach ($communes as $communeName => $quartiers) {
-                $commune = Commune::create([
+                $commune = Commune::firstOrCreate([
                     'district_id' => $district->id,
                     'name' => $communeName
                 ]);
 
                 foreach ($quartiers as $quartierName) {
-                    Quartier::create([
+                    Quartier::firstOrCreate([
                         'commune_id' => $commune->id,
                         'name' => $quartierName
                     ]);
