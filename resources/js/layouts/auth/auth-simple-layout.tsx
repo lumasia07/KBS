@@ -22,9 +22,9 @@ export default function AuthSimpleLayout({
                 <div className="px-6 pt-4 pb-2">
                     <Link href={home()}>
                         <img
-                            src="https://cdn.magicpatterns.com/uploads/nRbgAZNugWHkS5qXQRobNd/image.png"
+                            src="/KBS_logo.png"
                             alt="Kinshasa Bureau of Standards Logo"
-                            className="h-10 w-auto"
+                            className="h-14 w-auto max-w-[240px] object-contain"
                         />
                     </Link>
                 </div>

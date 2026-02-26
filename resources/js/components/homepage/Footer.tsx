@@ -125,7 +125,7 @@ export function Footer() {
                   {/* <div className="relative floating-logo">
                     <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700] to-amber-400 rounded-full blur-xl opacity-20"></div>
                     <img
-                      src="https://cdn.magicpatterns.com/uploads/nRbgAZNugWHkS5qXQRobNd/image.png"
+                      src="/KBS_logo.png"
                       alt="Kinshasa Bureau of Standards Logo"
                       className="relative h-16 w-auto"
                     />

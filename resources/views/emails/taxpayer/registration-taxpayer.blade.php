@@ -11,7 +11,7 @@
     style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 
     <div style="text-align: center; margin-bottom: 20px;">
-        <img src="https://cdn.magicpatterns.com/uploads/nRbgAZNugWHkS5qXQRobNd/image.png"
+        <img src="{{ $message->embed(public_path('KBS_logo.png')) }}"
             alt="Kinshasa Bureau of Standards" style="max-width: 150px;">
     </div>
 
