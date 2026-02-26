@@ -18,9 +18,11 @@ import {
   Download,
   ArrowUpRight
 } from 'lucide-react'
+import { useI18nStore } from '@/stores/useI18nStore';
 
 export function Footer() {
   const [email, setEmail] = useState('')
+  const { t, language, setLanguage } = useI18nStore();
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,19 +32,19 @@ export function Footer() {
   }
 
   const quickLinks = [
-    { label: 'Stamp Registration', href: '#', icon: <ShieldCheck className="w-4 h-4" /> },
-    { label: 'Tax Calculator', href: '#', icon: <FileText className="w-4 h-4" /> },
-    { label: 'Fee Schedule', href: '#', icon: <Download className="w-4 h-4" /> },
-    { label: 'Verify Document', href: '#', icon: <AlertTriangle className="w-4 h-4" /> },
-    { label: 'Agent Portal', href: '#', icon: <Building2 className="w-4 h-4" /> },
-    { label: 'Live Support', href: '#', icon: <MessageSquare className="w-4 h-4" /> },
+    { label: t('footer.quickLinks.stampRegistration'), href: '#', icon: <ShieldCheck className="w-4 h-4" /> },
+    { label: t('footer.quickLinks.taxCalculator'), href: '#', icon: <FileText className="w-4 h-4" /> },
+    { label: t('footer.quickLinks.feeSchedule'), href: '#', icon: <Download className="w-4 h-4" /> },
+    { label: t('footer.quickLinks.verifyDoc'), href: '#', icon: <AlertTriangle className="w-4 h-4" /> },
+    { label: t('footer.quickLinks.agentPortal'), href: '#', icon: <Building2 className="w-4 h-4" /> },
+    { label: t('footer.quickLinks.liveSupport'), href: '#', icon: <MessageSquare className="w-4 h-4" /> },
   ]
 
   const contactInfo = [
-    { icon: <MapPin className="w-5 h-5" />, text: '123 Government Avenue, Gombe, Kinshasa, DR Congo' },
-    { icon: <Phone className="w-5 h-5" />, text: '+243 81 234 5678 (24/7 Support)' },
-    { icon: <Mail className="w-5 h-5" />, text: 'support@standards.kinshasa.cd' },
-    { icon: <Clock className="w-5 h-5" />, text: 'Mon-Fri: 8:00 AM - 6:00 PM' },
+    { icon: <MapPin className="w-5 h-5" />, text: t('footer.contact.address') },
+    { icon: <Phone className="w-5 h-5" />, text: t('footer.contact.phone') },
+    { icon: <Mail className="w-5 h-5" />, text: t('footer.contact.email') },
+    { icon: <Clock className="w-5 h-5" />, text: t('footer.contact.hours') },
   ]
 
   const socialLinks = [
@@ -53,21 +55,21 @@ export function Footer() {
   ]
 
   const services = [
-    { label: 'Stamp Registration', href: '#' },
-    { label: 'Compliance Verification', href: '#' },
-    { label: 'Business Licensing', href: '#' },
-    { label: 'Tax Payment', href: '#' },
-    { label: 'Document Authentication', href: '#' },
-    { label: 'Regulatory Updates', href: '#' },
+    { label: t('footer.services.items.stampRegistration'), href: '#' },
+    { label: t('footer.services.items.complianceVerification'), href: '#' },
+    { label: t('footer.services.items.businessLicensing'), href: '#' },
+    { label: t('footer.services.items.taxPayment'), href: '#' },
+    { label: t('footer.services.items.documentAuth'), href: '#' },
+    { label: t('footer.services.items.regulatoryUpdates'), href: '#' },
   ]
 
   const resources = [
-    { label: 'Help Center', href: '#' },
-    { label: 'Documentation', href: '#' },
-    { label: 'API Access', href: '#' },
-    { label: 'System Status', href: '#' },
-    { label: 'Security', href: '#' },
-    { label: 'Fraud Report', href: '#' },
+    { label: t('footer.resources.items.helpCenter'), href: '#' },
+    { label: t('footer.resources.items.documentation'), href: '#' },
+    { label: t('footer.resources.items.apiAccess'), href: '#' },
+    { label: t('footer.resources.items.systemStatus'), href: '#' },
+    { label: t('footer.resources.items.security'), href: '#' },
+    { label: t('footer.resources.items.fraudReport'), href: '#' },
   ]
 
   return (
@@ -132,24 +134,22 @@ export function Footer() {
                   </div> */}
                   <div>
                     <h2 className="text-2xl font-bold tracking-tight">
-                      Kinshasa Bureau
+                      {t('footer.about.title')}
                     </h2>
                     <p className="text-lg text-blue-200 font-medium">
-                      of Standards & Regulations
+                      {t('footer.about.subtitle')}
                     </p>
                   </div>
                 </div>
 
                 <p className="text-blue-100 text-sm leading-relaxed">
-                  The official Integrated Stamping System for secure revenue collection,
-                  compliance verification, and digital governance in the Democratic
-                  Republic of Congo.
+                  {t('footer.about.description')}
                 </p>
 
                 {/* Newsletter Subscription */}
                 <div className="pt-4">
                   <h4 className="text-sm font-semibold text-blue-300 uppercase tracking-widest mb-3">
-                    Stay Updated
+                    {t('footer.newsletter.title')}
                   </h4>
                   <form onSubmit={handleSubscribe} className="space-y-3">
                     <div className="flex gap-2">
@@ -157,7 +157,7 @@ export function Footer() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
+                        placeholder={t('footer.newsletter.placeholder') as string}
                         className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 transition-all placeholder:text-blue-300"
                         required
                       />
@@ -165,11 +165,11 @@ export function Footer() {
                         type="submit"
                         className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-amber-500 hover:from-amber-500 hover:to-[#FFD700] text-[#003366] font-bold rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
                       >
-                        Subscribe
+                        {t('footer.newsletter.button')}
                       </button>
                     </div>
                     <p className="text-xs text-blue-300">
-                      Receive updates on regulatory changes and system announcements
+                      {t('footer.newsletter.hint')}
                     </p>
                   </form>
                 </div>
@@ -180,7 +180,7 @@ export function Footer() {
                 <div>
                   <h4 className="text-sm font-semibold text-amber-300 uppercase tracking-widest mb-6 flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4" />
-                    Services
+                    {t('footer.services.title')}
                   </h4>
                   <ul className="space-y-3">
                     {services.map((service, index) => (
@@ -201,7 +201,7 @@ export function Footer() {
                 <div>
                   <h4 className="text-sm font-semibold text-amber-300 uppercase tracking-widest mb-6 flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    Resources
+                    {t('footer.resources.title')}
                   </h4>
                   <ul className="space-y-3">
                     {resources.map((resource, index) => (
@@ -224,7 +224,7 @@ export function Footer() {
               <div>
                 <h4 className="text-sm font-semibold text-amber-300 uppercase tracking-widest mb-6 flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
-                  Contact Information
+                  {t('footer.contact.title')}
                 </h4>
                 <div className="space-y-4">
                   {contactInfo.map((info, index) => (
@@ -245,7 +245,7 @@ export function Footer() {
                 {/* Social Links */}
                 <div className="mt-8 pt-6 border-t border-white/10">
                   <h5 className="text-sm font-semibold text-blue-300 uppercase tracking-widest mb-4">
-                    Connect With Us
+                    {t('footer.social.title')}
                   </h5>
                   <div className="flex gap-3">
                     {socialLinks.map((social, index) => (
@@ -272,38 +272,41 @@ export function Footer() {
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm text-blue-300">
-                      Français | English
-                    </span>
+                    <button onClick={() => setLanguage('fr')} className={`text-sm ${language === 'fr' ? 'text-white' : 'text-blue-300'} hover:text-white transition-colors`}>
+                      Français
+                    </button>
+                    <span className="text-blue-300">|</span>
+                    <button onClick={() => setLanguage('en')} className={`text-sm ${language === 'en' ? 'text-white' : 'text-blue-300'} hover:text-white transition-colors`}>
+                      English
+                    </button>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                     <span className="text-sm text-blue-300">
-                      System Status: <span className="text-green-400 font-medium">Operational</span>
+                      {t('footer.bottom.systemStatus')}: <span className="text-green-400 font-medium">{t('footer.bottom.operational')}</span>
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-6 text-sm">
                   <a href="#" className="text-blue-300 hover:text-white hover:scale-105 transition-all">
-                    Privacy Policy
+                    {t('footer.bottom.privacyPolicy')}
                   </a>
                   <a href="#" className="text-blue-300 hover:text-white hover:scale-105 transition-all">
-                    Terms of Service
+                    {t('footer.bottom.termsOfService')}
                   </a>
                   <a href="#" className="text-blue-300 hover:text-white hover:scale-105 transition-all">
-                    Accessibility
+                    {t('footer.bottom.accessibility')}
                   </a>
                   <a href="#" className="text-blue-300 hover:text-white hover:scale-105 transition-all">
-                    Cookie Policy
+                    {t('footer.bottom.cookiePolicy')}
                   </a>
                 </div>
               </div>
 
               <div className="mt-6 pt-6 border-t border-white/10 text-center">
                 <p className="text-sm text-blue-300">
-                  © {new Date().getFullYear()} Kinshasa Bureau of Standards. All rights reserved. |
-                  VAT: CD-123-456-789 | Registration: RC-KIN-2024-001
+                  {(t('footer.bottom.copyright') as string).replace('{year}', new Date().getFullYear().toString())}
                 </p>
               </div>
             </div>

@@ -11,8 +11,10 @@ import {
     Building,
     Lock,
     LogIn,
-    Sparkles
+    Globe,
+    Check
 } from 'lucide-react'
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface DropdownItem {
     label: string
@@ -127,6 +129,9 @@ export function Header() {
     const [isScrolled, setIsScrolled] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [showSearch, setShowSearch] = useState(false)
+    const [isLangOpen, setIsLangOpen] = useState(false)
+
+    const { t, language, setLanguage } = useI18nStore();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -138,48 +143,48 @@ export function Header() {
 
     const servicesDropdown: DropdownItem[] = [
         {
-            label: 'Stamp Registration',
+            label: t('header.menus.services.stampRegistration'),
             href: '#',
-            description: 'Register for official stamps',
+            description: t('header.menus.services.stampRegistrationDesc'),
             icon: <FileText className="w-4 h-4" />
         },
         {
-            label: 'Compliance Certificates',
+            label: t('header.menus.services.complianceCerts'),
             href: '#',
-            description: 'Request compliance documents',
+            description: t('header.menus.services.complianceCertsDesc'),
             icon: <Shield className="w-4 h-4" />
         },
         {
-            label: 'Verification Services',
+            label: t('header.menus.services.verification'),
             href: '#',
-            description: 'Verify document authenticity',
+            description: t('header.menus.services.verificationDesc'),
             icon: <Lock className="w-4 h-4" />
         },
         {
-            label: 'Business Licensing',
+            label: t('header.menus.services.licensing'),
             href: '#',
-            description: 'Apply for business licenses',
+            description: t('header.menus.services.licensingDesc'),
             icon: <Building className="w-4 h-4" />
         },
     ]
 
     const portalsDropdown: DropdownItem[] = [
         {
-            label: 'Taxpayer Portal',
+            label: t('header.menus.portals.taxpayer'),
             href: '/login',
-            description: 'Access your taxpayer account',
+            description: t('header.menus.portals.taxpayerDesc'),
             icon: <User className="w-4 h-4" />
         },
         {
-            label: 'Agent Portal',
+            label: t('header.menus.portals.agent'),
             href: '/agent/login',
-            description: 'For verification agents',
+            description: t('header.menus.portals.agentDesc'),
             icon: <Shield className="w-4 h-4" />
         },
         {
-            label: 'Admin Portal',
+            label: t('header.menus.portals.admin'),
             href: '/portal/login',
-            description: 'Administrative access',
+            description: t('header.menus.portals.adminDesc'),
             icon: <Lock className="w-4 h-4" />
         },
     ]
@@ -225,7 +230,7 @@ export function Header() {
                                 <img
                                     src="/KBS_logo.png"
                                     alt="Kinshasa Bureau of Standards Logo"
-                                    className="relative h-14 lg:h-26 w-auto max-w-[500px] lg:max-w-[500px] object-contain transition-transform duration-300 group-hover:scale-105"
+                                    className="relative h-14 lg:h-20 w-auto max-w-[500px] lg:max-w-[500px] object-contain transition-transform duration-300 group-hover:scale-105"
 
                                 />
                             </a>
@@ -234,20 +239,20 @@ export function Header() {
                         {/* Desktop Navigation */}
                         <div className="hidden lg:flex items-center gap-1">
                             <div className="flex items-center gap-1">
-                                <NavItem label="Home" href="/" />
+                                <NavItem label={t('header.home')} href="/" />
                                 <NavItem
-                                    label="Services"
+                                    label={t('header.services')}
                                     hasDropdown
                                     dropdownItems={servicesDropdown}
                                 />
                                 <NavItem
-                                    label="Portals"
+                                    label={t('header.portals')}
                                     hasDropdown
                                     dropdownItems={portalsDropdown}
                                 />
-                                <NavItem label="Verify" href="#" />
-                                <NavItem label="Contact" href="#" />
-                                <NavItem label="FAQ" href="#" />
+                                <NavItem label={t('header.verify')} href="#" />
+                                <NavItem label={t('header.contact')} href="#" />
+                                <NavItem label={t('header.faq')} href="#" />
                             </div>
 
                             {/* Search Button */}
@@ -258,6 +263,37 @@ export function Header() {
                                 <Search className="w-5 h-5 text-slate-600" />
                             </button>
 
+                            {/* Language Switcher */}
+                            <div className="relative ml-2">
+                                <button
+                                    onClick={() => setIsLangOpen(!isLangOpen)}
+                                    className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium text-sm"
+                                >
+                                    <Globe className="w-5 h-5 text-slate-600" />
+                                    <span className="uppercase">{language}</span>
+                                </button>
+
+                                {isLangOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setIsLangOpen(false)}></div>
+                                        <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-20 animate-slideDown">
+                                            <button
+                                                onClick={() => { setLanguage('fr'); setIsLangOpen(false); }}
+                                                className={`w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-slate-50 transition-colors ${language === 'fr' ? 'text-amber-500 font-medium' : 'text-slate-700'}`}
+                                            >
+                                                Français {language === 'fr' && <Check className="w-4 h-4" />}
+                                            </button>
+                                            <button
+                                                onClick={() => { setLanguage('en'); setIsLangOpen(false); }}
+                                                className={`w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-slate-50 transition-colors ${language === 'en' ? 'text-amber-500 font-medium' : 'text-slate-700'}`}
+                                            >
+                                                English {language === 'en' && <Check className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
                             {/* Sign In Button */}
                             <div className="ml-4">
                                 <button
@@ -267,7 +303,7 @@ export function Header() {
                                     <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700] to-amber-400 rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
                                     <div className="relative flex items-center gap-2 text-sm font-bold text-white bg-gradient-to-r from-[#003366] to-[#004488] hover:from-[#004488] hover:to-[#003366] px-6 py-2.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95">
                                         <LogIn className="w-4 h-4" />
-                                        <span>Sign In</span>
+                                        <span>{t('header.signIn')}</span>
                                     </div>
                                 </button>
                             </div>
@@ -301,7 +337,7 @@ export function Header() {
                                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search for services, documents, or help..."
+                                    placeholder={t('header.searchPlaceholder')}
                                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all"
                                     autoFocus
                                 />
@@ -325,11 +361,11 @@ export function Header() {
                                 href="/"
                                 className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
                             >
-                                Home
+                                {t('header.home')}
                             </a>
 
                             <div className="px-4 py-3">
-                                <div className="text-sm font-semibold text-slate-400 mb-2">Services</div>
+                                <div className="text-sm font-semibold text-slate-400 mb-2">{t('header.services')}</div>
                                 <div className="space-y-2">
                                     {servicesDropdown.map((item, index) => (
                                         <a
@@ -348,7 +384,7 @@ export function Header() {
                             </div>
 
                             <div className="px-4 py-3">
-                                <div className="text-sm font-semibold text-slate-400 mb-2">Portals</div>
+                                <div className="text-sm font-semibold text-slate-400 mb-2">{t('header.portals')}</div>
                                 <div className="space-y-2">
                                     {portalsDropdown.map((item, index) => (
                                         <a
@@ -370,19 +406,19 @@ export function Header() {
                                 href="#"
                                 className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
                             >
-                                Verify
+                                {t('header.verify')}
                             </a>
                             <a
                                 href="#"
                                 className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
                             >
-                                Contact
+                                {t('header.contact')}
                             </a>
                             <a
                                 href="#"
                                 className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
                             >
-                                FAQ
+                                {t('header.faq')}
                             </a>
 
                             <div className="pt-4 px-4">
@@ -390,7 +426,7 @@ export function Header() {
                                     onClick={() => router.visit('/login')}
                                     className="w-full text-sm font-bold text-white bg-gradient-to-r from-[#003366] to-[#004488] hover:from-[#004488] hover:to-[#003366] px-6 py-3.5 rounded-xl transition-all duration-300 shadow-md"
                                 >
-                                    Sign In to Portal
+                                    {t('header.signInPortal')}
                                 </button>
                             </div>
                         </div>

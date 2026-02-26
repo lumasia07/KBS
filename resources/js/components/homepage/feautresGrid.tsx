@@ -2,33 +2,37 @@ import { UserCheck, FileCheck, CreditCard, ArrowRight, Zap, Shield, Clock, Users
 import React, { useState } from 'react'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 
-const features = [
-  {
-    title: 'Taxpayer Registration',
-    description: 'Digital registration for Assujettis with automated verification workflows. Create your secure profile in minutes.',
-    icon: UserCheck,
-    gradient: 'from-blue-500 to-cyan-400',
-    color: '#3B82F6',
-  },
-  {
-    title: 'Stamp Ordering',
-    description: 'Secure ordering and tracking of revenue stamps directly through the portal. Real-time inventory management.',
-    icon: FileCheck,
-    gradient: 'from-indigo-500 to-purple-400',
-    color: '#8B5CF6',
-  },
-  {
-    title: 'Smart Payments',
-    description: 'Integrated Note de Perception generation with bank and mobile money compatibility. Instant payment reconciliation.',
-    icon: CreditCard,
-    gradient: 'from-emerald-500 to-teal-400',
-    color: '#10B981',
-  },
-]
+import { useI18nStore } from '@/stores/useI18nStore'
 
+// Features defined in component to access `t`
 export function FeaturesGrid() {
   const { ref: sectionRef, isVisible } = useScrollAnimation(0.1)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const { t } = useI18nStore()
+
+  const features = [
+    {
+      title: t('featuresGrid.features.registration.title'),
+      description: t('featuresGrid.features.registration.description'),
+      icon: UserCheck,
+      gradient: 'from-blue-500 to-cyan-400',
+      color: '#3B82F6',
+    },
+    {
+      title: t('featuresGrid.features.ordering.title'),
+      description: t('featuresGrid.features.ordering.description'),
+      icon: FileCheck,
+      gradient: 'from-indigo-500 to-purple-400',
+      color: '#8B5CF6',
+    },
+    {
+      title: t('featuresGrid.features.payments.title'),
+      description: t('featuresGrid.features.payments.description'),
+      icon: CreditCard,
+      gradient: 'from-emerald-500 to-teal-400',
+      color: '#10B981',
+    },
+  ]
 
   return (
     <section ref={sectionRef} className="py-24 bg-slate-50 relative overflow-hidden">
@@ -38,11 +42,11 @@ export function FeaturesGrid() {
 
 
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-slate-900">
-            Simplify Compliance with <span className="text-[#003366]">Digital Efficiency</span>
+            {t('featuresGrid.titlePrefix')} <span className="text-[#003366]">{t('featuresGrid.titleHighlight')}</span>
           </h2>
 
           <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            Modernizing revenue collection and compliance through secure digital infrastructure designed for Kinshasa's businesses.
+            {t('featuresGrid.subtitle')}
           </p>
         </div>
 
@@ -86,7 +90,7 @@ export function FeaturesGrid() {
                 {/* Action Button */}
                 <div className="mt-8 pt-6 border-t border-slate-100">
                   <button className="inline-flex items-center gap-2 text-sm font-semibold text-[#003366] group-hover:text-blue-700 transition-colors">
-                    <span>Explore feature</span>
+                    <span>{t('featuresGrid.exploreFeature')}</span>
                     <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
@@ -95,7 +99,7 @@ export function FeaturesGrid() {
               {/* Floating Badge */}
               <div className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="px-3 py-1.5 bg-amber-400 text-[#003366] text-xs font-bold rounded-full shadow-lg transform rotate-3">
-                  NEW
+                  {t('featuresGrid.newBadge')}
                 </div>
               </div>
             </div>
@@ -106,10 +110,10 @@ export function FeaturesGrid() {
         <div className="mt-20 pt-12 border-t border-slate-200">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { value: '99.8%', label: 'System Uptime', icon: Shield },
-              { value: '5min', label: 'Avg. Processing', icon: Clock },
-              { value: '256-bit', label: 'Encryption', icon: Lock },
-              { value: '24/7', label: 'Support', icon: Users },
+              { value: '99.8%', label: t('featuresGrid.stats.uptime'), icon: Shield },
+              { value: '5min', label: t('featuresGrid.stats.processing'), icon: Clock },
+              { value: '256-bit', label: t('featuresGrid.stats.encryption'), icon: Lock },
+              { value: '24/7', label: t('featuresGrid.stats.support'), icon: Users },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl font-bold text-[#003366] mb-2">{stat.value}</div>

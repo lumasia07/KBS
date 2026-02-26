@@ -10,14 +10,16 @@ import {
   Globe,
   Award
 } from 'lucide-react'
+import { useI18nStore } from '@/stores/useI18nStore';
 
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false)
+  const { t } = useI18nStore();
 
   const features = [
-    { icon: <ShieldCheck className="w-4 h-4" />, text: "Regulatory Compliance", color: "text-emerald-400" },
-    { icon: <Award className="w-4 h-4" />, text: "Quality Standards", color: "text-blue-400" },
-    { icon: <CheckCircle className="w-4 h-4" />, text: "Product Verification", color: "text-amber-400" },
+    { icon: <ShieldCheck className="w-4 h-4" />, text: t('hero.features.compliance'), color: "text-emerald-400" },
+    { icon: <Award className="w-4 h-4" />, text: t('hero.features.standards'), color: "text-blue-400" },
+    { icon: <CheckCircle className="w-4 h-4" />, text: t('hero.features.verification'), color: "text-amber-400" },
   ]
 
   return (
@@ -59,16 +61,14 @@ export function Hero() {
             {/* Main Content */}
             <div className="space-y-6">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-white">
-                Transform Compliance with{' '}
+                {t('hero.titlePrefix')}{' '}
                 <span className="text-amber-400">
-                  Digital Stamping
+                  {t('hero.titleHighlight')}
                 </span>
               </h1>
 
               <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
-                Join Kinshasa's premier digital transformation initiative. Experience secure,
-                automated compliance management that accelerates business growth while ensuring
-                regulatory excellence.
+                {t('hero.subtitle')}
               </p>
             </div>
 
@@ -81,7 +81,7 @@ export function Hero() {
                 className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold bg-[#003366] hover:bg-blue-800 text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 <span className="flex items-center gap-2">
-                  Enter Digital Portal
+                  {t('hero.enterPortal')}
                   <ArrowRight className={`w-5 h-5 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''}`} />
                 </span>
               </button>
@@ -92,7 +92,7 @@ export function Hero() {
               >
                 <span className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5" />
-                  Register Your Business
+                  {t('hero.registerBusiness')}
                 </span>
               </button>
             </div>
