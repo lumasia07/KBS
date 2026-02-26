@@ -215,21 +215,19 @@ export function Header() {
                 : 'bg-white/90 backdrop-blur-lg py-3'
                 }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
+                    <div className="flex items-center justify-between h-16 lg:h-20">
                         {/* Logo Section */}
                         <div className="flex items-center gap-3">
                             <a
                                 href="/"
                                 className="group flex items-center gap-3"
                             >
-                                <div className="relative">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700] to-amber-400 rounded-xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                                    <img
-                                        src="https://cdn.magicpatterns.com/uploads/nRbgAZNugWHkS5qXQRobNd/image.png"
-                                        alt="Kinshasa Bureau of Standards Logo"
-                                        className="relative h-10 w-auto transition-all duration-500 group-hover:scale-105"
-                                    />
-                                </div>
+                                <img
+                                    src="/KBS_logo.png"
+                                    alt="Kinshasa Bureau of Standards Logo"
+                                    className="relative h-14 lg:h-26 w-auto max-w-[500px] lg:max-w-[500px] object-contain transition-transform duration-300 group-hover:scale-105"
+
+                                />
                             </a>
                         </div>
 
@@ -399,7 +397,7 @@ export function Header() {
                     </div>
                 </div>
             </header>
-            <div className="h-16"></div>
+            <div className="h-16 lg:h-20"></div>
         </>
     )
 }
