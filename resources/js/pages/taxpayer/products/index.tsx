@@ -5,10 +5,7 @@ import {
     Plus,
     Trash2,
     Edit3,
-    Search,
     FileCheck,
-    Calendar,
-    AlertCircle,
     CheckCircle2,
     X
 } from 'lucide-react';

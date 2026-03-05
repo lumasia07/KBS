@@ -1,146 +1,224 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FieldControlController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductionController;
 use App\Http\Controllers\Admin\ProductRequestController;
 
 use App\Http\Controllers\TaxpayerController;
 use App\Http\Controllers\TaxpayerProductController;
+use App\Http\Controllers\TaxpayerOrderController;
+use App\Http\Controllers\TaxpayerPaymentController;
 
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\AgentFieldControlController;
+
 
 /*
 |--------------------------------------------------------------------------
-| Home/Landing page route
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+
+/*
+|--------------------------------------------------------------------------
+| Landing Page
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+
 /*
 |--------------------------------------------------------------------------
-| Taxpayer grouped Routes
+| Taxpayer Registration
 |--------------------------------------------------------------------------
 */
-Route::prefix('taxpayer')->group(function () {
-    Route::get('/register', [TaxpayerController::class, 'create'])->name('taxpayer.register');
-    Route::post('/register', [TaxpayerController::class, 'store'])->name('taxpayer.register.post');
+Route::prefix('taxpayer')->name('taxpayer.')->group(function () {
+    Route::get('/register', [TaxpayerController::class, 'create'])->name('register');
+    Route::post('/register', [TaxpayerController::class, 'store'])->name('register.store');
 });
 
-// Agent Login Route
+
+/*
+|--------------------------------------------------------------------------
+| Portal Login Routes
+|--------------------------------------------------------------------------
+*/
 Route::get('/agent/login', function () {
     return Inertia::render('auth/login', ['portalType' => 'agent']);
 })->name('agent.login');
 
-// Admin Portal Login Route
 Route::get('/portal/login', function () {
     return Inertia::render('auth/login', ['portalType' => 'admin']);
 })->name('portal.login');
 
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Admin Dashboard
-    Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
-    // Admin Orders
-    Route::prefix('admin/orders')->name('admin.orders.')->group(function () {
-        Route::get('/', [OrderController::class, 'index'])->name('index');
-        Route::post('/{order}/approve', [OrderController::class, 'approve'])->name('approve');
-        Route::post('/{order}/reject', [OrderController::class, 'reject'])->name('reject');
-    });
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('admin')->name('admin.')->group(function () {
 
-    // Admin Production (Sticker Generation)
-    Route::prefix('admin/production')->name('admin.production.')->group(function () {
-        Route::get('/', [ProductionController::class, 'index'])->name('index');
-        Route::get('/progress/{batchId}', [ProductionController::class, 'progress'])->name('progress');
-        Route::get('/{order}/preview', [ProductionController::class, 'preview'])->name('preview');
-        Route::get('/{order}/print', [ProductionController::class, 'printBatch'])->name('print');
-        Route::post('/{order}/generate', [ProductionController::class, 'generate'])->name('generate');
-        Route::post('/{order}/ready', [ProductionController::class, 'markReady'])->name('ready');
-        Route::get('/{order}/stamps', [ProductionController::class, 'stamps'])->name('stamps');
-        Route::post('/{order}/cancel', [ProductionController::class, 'cancel'])->name('cancel');
-        Route::get('/{order}', [ProductionController::class, 'show'])->name('show');
-    });
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
 
-    // Admin Taxpayers
-    Route::prefix('admin/taxpayers')->name('admin.taxpayers.')->group(function () {
-        Route::get('/', [TaxpayerController::class, 'index'])->name('index');
-        Route::post('/{taxpayer}/approve', [TaxpayerController::class, 'approve'])->name('approve');
-        Route::post('/{taxpayer}/reject', [TaxpayerController::class, 'reject'])->name('reject');
-    });
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Orders
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::post('/{order}/approve', [OrderController::class, 'approve'])->name('approve');
+            Route::post('/{order}/reject', [OrderController::class, 'reject'])->name('reject');
+        });
 
-    // Admin Field Controls
-    Route::prefix('admin/field-controls')->name('admin.field-controls.')->group(function () {
-        Route::get('/', [App\Http\Controllers\AdminFieldControlController::class, 'index'])->name('index');
-        Route::get('/{control}', [App\Http\Controllers\AdminFieldControlController::class, 'show'])->name('show');
-        Route::post('/{control}/approve', [App\Http\Controllers\AdminFieldControlController::class, 'approve'])->name('approve');
-        Route::post('/{control}/reject', [App\Http\Controllers\AdminFieldControlController::class, 'reject'])->name('reject');
-    });
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Production
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('production')->name('production.')->group(function () {
+            Route::get('/', [ProductionController::class, 'index'])->name('index');
+            Route::get('/progress/{batchId}', [ProductionController::class, 'progress'])->name('progress');
+            Route::get('/{order}/preview', [ProductionController::class, 'preview'])->name('preview');
+            Route::get('/{order}/print', [ProductionController::class, 'printBatch'])->name('print');
+            Route::post('/{order}/generate', [ProductionController::class, 'generate'])->name('generate');
+            Route::post('/{order}/ready', [ProductionController::class, 'markReady'])->name('ready');
+            Route::post('/{order}/cancel', [ProductionController::class, 'cancel'])->name('cancel');
+            Route::get('/{order}/stamps', [ProductionController::class, 'stamps'])->name('stamps');
+            Route::get('/{order}', [ProductionController::class, 'show'])->name('show');
+        });
 
-    // Admin Product Requests
-    Route::prefix('admin/products/requests')->name('admin.products.requests.')->group(function () {
-        Route::get('/', [ProductRequestController::class, 'index'])->name('index');
-        Route::post('/{id}/approve', [ProductRequestController::class, 'approve'])->name('approve');
-        Route::patch('/{id}/reject', [ProductRequestController::class, 'reject'])->name('reject');
-    });
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Taxpayers
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('taxpayers')->name('taxpayers.')->group(function () {
+            Route::get('/', [TaxpayerController::class, 'index'])->name('index');
+            Route::post('/{taxpayer}/approve', [TaxpayerController::class, 'approve'])->name('approve');
+            Route::post('/{taxpayer}/reject', [TaxpayerController::class, 'reject'])->name('reject');
+        });
 
-    // Taxpayer Dashboard
-    Route::get('taxpayer/dashboard', function () {
-        return Inertia::render('taxpayer/dashboard');
-    })->name('taxpayer.dashboard');
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Field Controls
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('field-controls')->name('field-controls.')->group(function () {
+            Route::get('/', [FieldControlController::class, 'index'])->name('index');
+            Route::get('/{control}', [FieldControlController::class, 'show'])->name('show');
+            Route::post('/{control}/approve', [FieldControlController::class, 'approve'])->name('approve');
+            Route::post('/{control}/reject', [FieldControlController::class, 'reject'])->name('reject');
+        });
 
-    // Taxpayer Order Page
-    // Taxpayer Order Page
-    Route::get('taxpayer/order', [App\Http\Controllers\TaxpayerOrderController::class, 'index'])->name('taxpayer.order');
-
-    // Taxpayer Order API Routes
-    Route::prefix('taxpayer/orders')->name('taxpayer.orders.')->group(function () {
-        Route::get('/products', [App\Http\Controllers\TaxpayerOrderController::class, 'products'])->name('products');
-        Route::post('/', [App\Http\Controllers\TaxpayerOrderController::class, 'store'])->name('store');
-        Route::get('/history', [App\Http\Controllers\TaxpayerOrderController::class, 'history'])->name('history');
-    });
-
-    // Taxpayer Coming Soon Features
-    Route::get('taxpayer/inventory', function () {
-        return Inertia::render('taxpayer/coming-soon');
-    })->name('taxpayer.inventory');
-
-    Route::get('taxpayer/payments', function () {
-        return Inertia::render('taxpayer/coming-soon');
-    })->name('taxpayer.payments');
-
-    Route::get('taxpayer/compliance', function () {
-        return Inertia::render('taxpayer/coming-soon');
-    })->name('taxpayer.compliance');
-
-    // Taxpayer Product Catalogue (RESTful routes)
-    Route::prefix('taxpayer/products')->name('taxpayer.products.')->group(function () {
-        Route::get('/', [TaxpayerProductController::class, 'index'])->name('index');
-        Route::get('/create', [TaxpayerProductController::class, 'create'])->name('create');
-        Route::post('/', [TaxpayerProductController::class, 'store'])->name('store');
-        Route::patch('/{productId}', [TaxpayerProductController::class, 'update'])->name('update');
-        Route::delete('/{productId}', [TaxpayerProductController::class, 'destroy'])->name('destroy');
-    });
-
-    // Agent Routes
-    Route::prefix('agent')->name('agent.')->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\AgentFieldControlController::class, 'dashboard'])->name('dashboard');
-
-        // Agent Inspections
-        Route::prefix('inspections')->name('inspections.')->group(function () {
-            Route::get('/', [App\Http\Controllers\AgentFieldControlController::class, 'index'])->name('index');
-            Route::get('/create', [App\Http\Controllers\AgentFieldControlController::class, 'create'])->name('create');
-            Route::post('/', [App\Http\Controllers\AgentFieldControlController::class, 'store'])->name('store');
-            Route::get('/{control}', [App\Http\Controllers\AgentFieldControlController::class, 'show'])->name('show');
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Product Requests
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('products/requests')->name('products.requests.')->group(function () {
+            Route::get('/', [ProductRequestController::class, 'index'])->name('index');
+            Route::post('/{id}/approve', [ProductRequestController::class, 'approve'])->name('approve');
+            Route::patch('/{id}/reject', [ProductRequestController::class, 'reject'])->name('reject');
         });
     });
 
-    // Legacy redirect for old dashboard route
-    Route::get('dashboard', function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Taxpayer Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('taxpayer')->name('taxpayer.')->group(function () {
+
+        Route::get('/dashboard', function () {
+            return Inertia::render('taxpayer/dashboard');
+        })->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Orders
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [TaxpayerOrderController::class, 'index'])->name('index');
+            Route::get('/products', [TaxpayerOrderController::class, 'products'])->name('products');
+            Route::post('/', [TaxpayerOrderController::class, 'store'])->name('store');
+            Route::get('/history', [TaxpayerOrderController::class, 'history'])->name('history');
+            Route::get('/checkout/{orderId}', [TaxpayerOrderController::class, 'checkout'])->name('checkout');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Payments
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('payments')->name('payments.')->group(function () {
+            Route::get('/', [TaxpayerPaymentController::class, 'index'])->name('index');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Product Catalogue
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('products')->name('products.')->group(function () {
+            Route::get('/', [TaxpayerProductController::class, 'index'])->name('index');
+            Route::get('/create', [TaxpayerProductController::class, 'create'])->name('create');
+            Route::post('/', [TaxpayerProductController::class, 'store'])->name('store');
+            Route::patch('/{productId}', [TaxpayerProductController::class, 'update'])->name('update');
+            Route::delete('/{productId}', [TaxpayerProductController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Agent Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('agent')->name('agent.')->group(function () {
+
+        Route::get('/dashboard', [AgentFieldControlController::class, 'dashboard'])
+            ->name('dashboard');
+
+        Route::prefix('inspections')->name('inspections.')->group(function () {
+            Route::get('/', [AgentFieldControlController::class, 'index'])->name('index');
+            Route::get('/create', [AgentFieldControlController::class, 'create'])->name('create');
+            Route::post('/', [AgentFieldControlController::class, 'store'])->name('store');
+            Route::get('/{control}', [AgentFieldControlController::class, 'show'])->name('show');
+        });
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Legacy Redirect
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
     })->name('dashboard');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Settings
+|--------------------------------------------------------------------------
+*/
 require __DIR__ . '/settings.php';

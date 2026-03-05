@@ -50,8 +50,8 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order cannot be approved in current status.'], 422);
         }
 
-        $order->update([
-            'status' => 'approved',
+        $statusUpdate = $order->update([
+            'status' => 'payment_pending',
         ]);
 
         return response()->json(['message' => 'Order approved successfully.']);
