@@ -9,9 +9,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Eye, Download, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Eye, CreditCard } from 'lucide-react';
 import { useOrderStore } from '@/stores/useOrderStore';
-import { format } from 'date-fns';
 import {
     Dialog,
     DialogContent,
@@ -21,6 +20,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { router } from '@inertiajs/react';
 
 export function OrderHistory() {
     const {
@@ -53,6 +53,10 @@ export function OrderHistory() {
         setDetailsOpen(true);
     };
 
+    const handlePayNow = (orderId: string) => {
+        router.get(`/orders/checkout/${orderId}`);
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'delivered':
@@ -60,6 +64,7 @@ export function OrderHistory() {
             case 'processing':
                 return 'bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200';
             case 'pending':
+            case 'payment_pending':
             case 'submitted':
                 return 'bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200';
             case 'cancelled':
@@ -141,10 +146,23 @@ export function OrderHistory() {
                                                 size="icon"
                                                 className="h-8 w-8 text-slate-500 hover:text-[#003366]"
                                                 onClick={() => handleViewDetails(order)}
+                                                title="View Details"
                                             >
                                                 <Eye className="h-4 w-4" />
                                                 <span className="sr-only">View</span>
                                             </Button>
+
+                                            {order.status === 'payment_pending' && (
+                                                <Button
+                                                    variant="default"
+                                                    size="sm"
+                                                    className="bg-[#003366] hover:bg-[#004080] text-white"
+                                                    onClick={() => handlePayNow(order.id)}
+                                                >
+                                                    <CreditCard className="h-4 w-4 mr-1" />
+                                                    Pay Now
+                                                </Button>
+                                            )}
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -240,6 +258,22 @@ export function OrderHistory() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Pay Now button in dialog for pending_payment orders */}
+                            {selectedOrder.status === 'pending_payment' && (
+                                <div className="mt-4 pt-4 border-t border-slate-200">
+                                    <Button
+                                        className="w-full bg-[#003366] hover:bg-[#004080] text-white"
+                                        onClick={() => {
+                                            setDetailsOpen(false);
+                                            handlePayNow(selectedOrder.id);
+                                        }}
+                                    >
+                                        <CreditCard className="h-4 w-4 mr-2" />
+                                        Complete Payment Now
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
                     <DialogFooter>

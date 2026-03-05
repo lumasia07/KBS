@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\FieldControl;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Yajra\DataTables\Facades\DataTables;
 
-class AdminFieldControlController extends Controller
+class FieldControlController extends Controller
 {
     /**
      * Display a listing of field controls.
@@ -54,7 +55,7 @@ class AdminFieldControlController extends Controller
     public function show(FieldControl $control)
     {
         $control->load(['controlAgent', 'taxpayer', 'municipality', 'stampVerifications']);
-        
+
         return response()->json([
             'control' => $control,
             'agent' => $control->controlAgent,

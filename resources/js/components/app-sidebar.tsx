@@ -93,27 +93,27 @@ const taxpayerNavItems: NavItem[] = [
     },
     {
         title: 'My Orders',
-        href: '/taxpayer/order',
+        href: '/taxpayer/orders',
         icon: FileText,
     },
-    {
-        title: 'Stamp Inventory',
-        href: '/taxpayer/inventory',
-        icon: Stamp,
-    },
+    // {
+    //     title: 'Stamp Inventory',
+    //     href: '/taxpayer/inventory',
+    //     icon: Stamp,
+    // },
     {
         title: 'Payments',
         href: '/taxpayer/payments',
         icon: CreditCard,
     },
-    {
-        title: 'Compliance',
-        href: '/taxpayer/compliance',
-        icon: FileCheck,
-    },
+    // {
+    //     title: 'Compliance',
+    //     href: '/taxpayer/compliance',
+    //     icon: FileCheck,
+    // },
     {
         title: 'Order History',
-        href: '/taxpayer/order?view=history',
+        href: '/taxpayer/orders?view=history',
         icon: History,
     },
 ];

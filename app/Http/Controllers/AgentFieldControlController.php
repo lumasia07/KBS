@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FieldControl;
 use App\Models\Taxpayer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,7 +16,7 @@ class AgentFieldControlController extends Controller
      */
     public function dashboard()
     {
-        $agentId = auth()->id();
+        $agentId = Auth::id();
 
         $stats = [
             'today_inspections' => FieldControl::where('control_agent_id', $agentId)->today()->count(),
@@ -68,7 +69,7 @@ class AgentFieldControlController extends Controller
      */
     public function index(Request $request)
     {
-        $agentId = auth()->id();
+        $agentId = Auth::id();
 
         if ($request->wantsJson()) {
             $query = FieldControl::where('control_agent_id', $agentId)
@@ -140,7 +141,7 @@ class AgentFieldControlController extends Controller
 
         $control = FieldControl::create([
             'control_number' => $controlNumber,
-            'control_agent_id' => auth()->id(),
+            'control_agent_id' => Auth::id(),
             'taxpayer_id' => $validated['taxpayer_id'],
             'business_name' => $validated['business_name'],
             'location_address' => $validated['location_address'],
@@ -172,7 +173,7 @@ class AgentFieldControlController extends Controller
     public function show(FieldControl $control)
     {
         // Ensure agent can only view their own inspections
-        if ($control->control_agent_id !== auth()->id()) {
+        if ($control->control_agent_id !== Auth::id()) {
             abort(403);
         }
 

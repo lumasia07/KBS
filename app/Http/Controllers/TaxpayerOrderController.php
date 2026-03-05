@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\StampOrder;
+use App\Models\StampType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,6 @@ class TaxpayerOrderController extends Controller
                     'stamp_price_per_unit' => (float) $product->stamp_price_per_unit,
                     'requires_health_certificate' => (boolean) $product->requires_health_certificate,
                     'is_active' => (boolean) $product->is_active,
-                    // Pivot data if needed
                     'registration_date' => $product->pivot->registration_date,
                     'health_certificate_number' => $product->pivot->health_certificate_number,
                     'health_certificate_expiry' => $product->pivot->health_certificate_expiry,
@@ -85,13 +85,10 @@ class TaxpayerOrderController extends Controller
         try {
             $orders = [];
             $year = now()->year;
-            // Generate a shared reference for grouped orders if needed, 
-            // but schema implies one order = one product.
-            // We'll create separate orders for each item but maybe they share a payment ref?
 
             foreach ($request->items as $item) {
                 $product = Product::find($item['product_id']);
-                
+
                 // Calculate costs
                 $unitPrice = $product->stamp_price_per_unit;
                 $quantity = $item['quantity'];
@@ -103,20 +100,14 @@ class TaxpayerOrderController extends Controller
                 $randomStr = strtoupper(Str::random(5));
                 $orderNumber = "KBS-ORDER-{$year}-{$randomStr}";
 
-                $stampType = \App\Models\StampType::first();
+                $stampType = StampType::first();
                 $order = StampOrder::create([
                     'order_number' => $orderNumber,
                     'taxpayer_id' => $taxpayer->id,
                     'product_id' => $product->id,
-                    'stamp_type_id' => $stampType ? $stampType->id : 1, 
+                    'stamp_type_id' => $stampType ? $stampType->id : 1,
                     'quantity' => $quantity,
-                    // Check constraint failed: packaging_type. 
-                    // DB likely expects 'sheets' or specific case. Changing default to 'sheets' if 'roll' fails.
-                    // Or mapping frontend 'roll' to DB 'roll'. If DB is case sensitive or limited.
-                    // Allowed: 'unit', 'pack', 'carton', 'pallet'.
-                    // Mapping frontend 'roll'/'sheets' to 'pack' or 'unit'. 
-                    // Using 'pack' as it's closest to 'roll' of stamps.
-                    'packaging_type' => 'pack', 
+                    'packaging_type' => 'pack',
                     'unit_price' => $unitPrice,
                     'total_amount' => $totalAmount,
                     'tax_amount' => $taxAmount,
@@ -138,12 +129,7 @@ class TaxpayerOrderController extends Controller
 
             return response()->json([
                 'message' => 'Order submitted successfully',
-                // Return the first order reference or list?
-                // Frontend expects one order object? 
-                // Store.ts: return newOrder; (singular)
-                // If cart had multiple, this breaks the store logic.
-                // But we'll return the first one for now to satisfy the interface.
-                'order' => $orders[0] 
+                'order' => $orders[0]
             ], 201);
 
         } catch (\Exception $e) {
@@ -176,15 +162,18 @@ class TaxpayerOrderController extends Controller
                 return $order->created_at->format('Y-m-d H:i');
             })
             ->editColumn('grand_total', function ($order) {
-                return $order->grand_total; // Keep raw for sorting, format in frontend
+                return $order->grand_total;
             })
-            ->filterColumn('product_name', function($query, $keyword) {
-                $query->whereHas('product', function($q) use ($keyword) {
+            ->filterColumn('product_name', function ($query, $keyword) {
+                $query->whereHas('product', function ($q) use ($keyword) {
                     $q->where('name', 'like', "%{$keyword}%");
                 });
             })
             ->addColumn('product_name', function ($order) {
                 return $order->product ? $order->product->name : 'Unknown';
+            })
+            ->addColumn('actions', function ($order) {
+                // Placeholder, frontend handles UI
             })
             ->make(true);
     }
