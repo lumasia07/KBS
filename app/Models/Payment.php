@@ -19,13 +19,13 @@ class Payment extends Model
         'invoice_number',
         'order_id',
         'taxpayer_id',
+        'payment_method_id',
         'amount',
         'tax_amount',
         'penalty_amount',
         'total_amount',
-        'payment_method',
-        'transaction_id',
         'payment_provider',
+        'transaction_id',
         'payment_provider_response',
         'status',
         'payment_date',
@@ -66,5 +66,29 @@ class Payment extends Model
     public function confirmer()
     {
         return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    /**
+     * Get the payment method associated with this payment
+     */
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    /**
+     * Helper to get payment method code
+     */
+    public function getPaymentMethodCodeAttribute()
+    {
+        return $this->paymentMethod?->code;
+    }
+
+    /**
+     * Helper to get payment method name
+     */
+    public function getPaymentMethodNameAttribute()
+    {
+        return $this->paymentMethod?->name;
     }
 }
