@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PaymentMethod;
 use App\Models\StampOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Yajra\DataTables\DataTables;
 
@@ -37,7 +39,29 @@ class OrderController extends Controller
                 ->make(true);
         }
 
-        return Inertia::render('admin/orders/index');
+        return Inertia::render('admin/orders/index', [
+            'paymentMethods' => PaymentMethod::all()
+        ]);
+    }
+
+    public function status(Request $request, StampOrder $order)
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string',
+            ]);
+
+            $statusUpdate = $order->update([
+                'status' => $validated['status'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order status updated successfully.'
+            ]);
+        } catch (\Throwable $th) {
+
+        }
     }
 
     /**

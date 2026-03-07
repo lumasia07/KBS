@@ -59,7 +59,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Payments',
-        href: '#',
+        href: '/admin/payments',
         icon: CreditCard,
     },
     {
@@ -69,7 +69,7 @@ const adminNavItems: NavItem[] = [
     },
     {
         title: 'Reports',
-        href: '#',
+        href: '/admin/reports',
         icon: BarChart3,
     },
     {
@@ -96,21 +96,11 @@ const taxpayerNavItems: NavItem[] = [
         href: '/taxpayer/orders',
         icon: FileText,
     },
-    // {
-    //     title: 'Stamp Inventory',
-    //     href: '/taxpayer/inventory',
-    //     icon: Stamp,
-    // },
     {
         title: 'Payments',
         href: '/taxpayer/payments',
         icon: CreditCard,
     },
-    // {
-    //     title: 'Compliance',
-    //     href: '/taxpayer/compliance',
-    //     icon: FileCheck,
-    // },
     {
         title: 'Order History',
         href: '/taxpayer/orders?view=history',
@@ -134,16 +124,6 @@ const agentNavItems: NavItem[] = [
         title: 'New Inspection',
         href: '/agent/inspections/create',
         icon: MapPin,
-    },
-    {
-        title: 'Violations',
-        href: '#',
-        icon: AlertTriangle,
-    },
-    {
-        title: 'Performance',
-        href: '#',
-        icon: Target,
     },
 ];
 

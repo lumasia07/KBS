@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\ProductionController;
 use App\Http\Controllers\Admin\ProductRequestController;
 
 use App\Http\Controllers\Taxpayer\TaxpayerController;
+use App\Models\Report;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,8 +78,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         */
         Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::post('/{order}/status', [OrderController::class, 'status'])->name('status');
             Route::post('/{order}/approve', [OrderController::class, 'approve'])->name('approve');
             Route::post('/{order}/reject', [OrderController::class, 'reject'])->name('reject');
+        });
+
+        Route::prefix('payments')->name('payments.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Taxpayer\PaymentController::class, 'index'])->name('index');
         });
 
         /*
@@ -130,6 +137,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{id}/approve', [ProductRequestController::class, 'approve'])->name('approve');
             Route::patch('/{id}/reject', [ProductRequestController::class, 'reject'])->name('reject');
         });
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])->name('index');
+        });
     });
 
 
@@ -167,6 +178,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         */
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [App\Http\Controllers\Taxpayer\PaymentController::class, 'index'])->name('index');
+            Route::post('/store', [App\Http\Controllers\Taxpayer\PaymentController::class, 'store'])->name('store');
         });
 
         /*

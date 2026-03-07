@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             PermissionsSeeder::class,
             KinshasaLocationsSeeder::class,
             AdminUserSeeder::class,
+            PaymentMethodSeeder::class
         ]);
     }
 }

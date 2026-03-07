@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     CreditCard,
     Plus,
@@ -23,51 +23,109 @@ import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useSwal } from '@/Hooks/useSwal';
 
+// Types aligned with backend
+interface Order {
+    id: string;
+    order_number: string;
+    product?: {
+        name: string;
+    };
+    stamp_type?: {
+        name: string;
+    };
+    quantity?: number;
+}
+
+interface PaymentMethod {
+    id: string;
+    name: string;
+    code: string;
+    type: 'mobile_money' | 'card' | 'bank_transfer';
+    logo?: string;
+}
+
 interface Payment {
     id: string;
-    payment_reference: string;
-    order_number: string;
-    amount: number;
-    payment_method: 'mobile_money' | 'card' | 'bank_transfer';
-    payment_provider: string | null;
-    status: 'pending' | 'completed' | 'failed' | 'refunded';
+    invoice_number: string;  // Changed from payment_reference
     transaction_id: string | null;
-    phone_number: string | null;
-    bank_name: string | null;
-    bank_account_number: string | null;
+    amount: number;
+    tax_amount: number;
+    penalty_amount: number;
+    total_amount: number;
+    status: 'pending' | 'completed' | 'failed' | 'refunded';
     payment_date: string | null;
+    confirmation_date: string | null;
+    failure_reason: string | null;
     created_at: string;
     updated_at: string;
-    order?: {
-        id: string;
-        order_number: string;
-        product_name: string;
-        quantity: number;
-    };
+    
+    // Relationships
+    order?: Order;
+    paymentMethod?: PaymentMethod;
+    
+    // Payment provider response data (parsed from JSON)
+    payment_provider_response?: {
+        phone_number?: string;
+        bank_name?: string;
+        bank_account_number?: string;
+        card_provider?: string;
+        reference?: string;
+        ip_address?: string;
+        user_agent?: string;
+        submitted_at?: string;
+        payment_method?: string;
+    } | null;
+    
+    // For backward compatibility
+    payment_method?: string;
+    payment_provider?: string | null;
+}
+
+interface Filters {
+    search?: string;
+    status?: string;
+    payment_method_id?: string;
+    date_from?: string;
+    date_to?: string;
 }
 
 interface Props {
-    payments?: Payment[]; // Make it optional with ?
+    payments: {
+        data: Payment[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        links: any[];
+    };
+    paymentMethods: PaymentMethod[];
+    filters: Filters;
 }
 
-export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
+export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filters }: Props) {
     const swal = useSwal();
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-
-    // Ensure payments is always an array
-    const paymentsArray = Array.isArray(payments) ? payments : [];
-
-    const [filteredPayments, setFilteredPayments] = useState<Payment[]>(paymentsArray);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Filter states
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [methodFilter, setMethodFilter] = useState<string>('all');
-    const [dateFrom, setDateFrom] = useState('');
-    const [dateTo, setDateTo] = useState('');
+    // Local filter states
+    const [searchTerm, setSearchTerm] = useState(filters?.search || '');
+    const [statusFilter, setStatusFilter] = useState(filters?.status || 'all');
+    const [methodFilter, setMethodFilter] = useState(filters?.payment_method_id || 'all');
+    const [dateFrom, setDateFrom] = useState(filters?.date_from || '');
+    const [dateTo, setDateTo] = useState(filters?.date_to || '');
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchTerm !== filters?.search) {
+                applyFilters();
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const breadcrumbs = [
         {
@@ -80,46 +138,30 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
         },
     ];
 
-    // Apply filters
-    useEffect(() => {
-        let filtered = [...paymentsArray];
+    // Stats calculations
+    const stats = useMemo(() => {
+        const allPayments = payments?.data || [];
+        return {
+            total: allPayments.length,
+            completed: allPayments.filter(p => p.status === 'completed').length,
+            pending: allPayments.filter(p => p.status === 'pending').length,
+            totalAmount: allPayments.reduce((sum, p) => sum + (p.total_amount || p.amount), 0)
+        };
+    }, [payments]);
 
-        // Search filter
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(p =>
-                p.payment_reference.toLowerCase().includes(term) ||
-                p.order_number.toLowerCase().includes(term) ||
-                (p.transaction_id && p.transaction_id.toLowerCase().includes(term))
-            );
-        }
-
-        // Status filter
-        if (statusFilter !== 'all') {
-            filtered = filtered.filter(p => p.status === statusFilter);
-        }
-
-        // Method filter
-        if (methodFilter !== 'all') {
-            filtered = filtered.filter(p => p.payment_method === methodFilter);
-        }
-
-        // Date range filter
-        if (dateFrom) {
-            filtered = filtered.filter(p => {
-                const paymentDate = p.payment_date || p.created_at;
-                return paymentDate >= dateFrom;
-            });
-        }
-        if (dateTo) {
-            filtered = filtered.filter(p => {
-                const paymentDate = p.payment_date || p.created_at;
-                return paymentDate <= dateTo;
-            });
-        }
-
-        setFilteredPayments(filtered);
-    }, [searchTerm, statusFilter, methodFilter, dateFrom, dateTo, paymentsArray]);
+    const applyFilters = useCallback(() => {
+        router.get('/taxpayer/payments', {
+            search: searchTerm || undefined,
+            status: statusFilter !== 'all' ? statusFilter : undefined,
+            payment_method_id: methodFilter !== 'all' ? methodFilter : undefined,
+            date_from: dateFrom || undefined,
+            date_to: dateTo || undefined,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    }, [searchTerm, statusFilter, methodFilter, dateFrom, dateTo]);
 
     const refreshData = () => {
         setIsRefreshing(true);
@@ -142,7 +184,20 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
         setMethodFilter('all');
         setDateFrom('');
         setDateTo('');
-        toast.info('Filters cleared');
+        
+        router.get('/taxpayer/payments', {}, {
+            preserveState: true,
+            replace: true,
+            onSuccess: () => {
+                toast.info('Filters cleared');
+                setShowFilterModal(false);
+            }
+        });
+    };
+
+    const handleFilterApply = () => {
+        applyFilters();
+        setShowFilterModal(false);
     };
 
     const viewPaymentDetails = (payment: Payment) => {
@@ -156,23 +211,13 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
             return;
         }
 
-        toast.promise(
-            new Promise((resolve) => {
-                setTimeout(() => {
-                    window.open(`/taxpayer/payments/${payment.id}/receipt`, '_blank');
-                    resolve(true);
-                }, 1000);
-            }),
-            {
-                loading: 'Generating receipt...',
-                success: 'Receipt downloaded successfully',
-                error: 'Failed to download receipt',
-            }
-        );
+        window.open(`/taxpayer/payments/${payment.id}/receipt`, '_blank');
     };
 
-    const getPaymentMethodIcon = (method: string) => {
-        switch (method) {
+    const getPaymentMethodIcon = (method?: PaymentMethod | string) => {
+        const type = typeof method === 'object' ? method?.type : method;
+        
+        switch (type) {
             case 'mobile_money':
                 return <Smartphone className="w-4 h-4" />;
             case 'card':
@@ -184,7 +229,11 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
         }
     };
 
-    const getPaymentMethodLabel = (method: string) => {
+    const getPaymentMethodLabel = (method?: PaymentMethod | string) => {
+        if (typeof method === 'object' && method?.name) {
+            return method.name;
+        }
+        
         switch (method) {
             case 'mobile_money':
                 return 'Mobile Money';
@@ -193,8 +242,27 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
             case 'bank_transfer':
                 return 'Bank Transfer';
             default:
-                return method;
+                return method || 'Unknown';
         }
+    };
+
+    const getPaymentProviderDisplay = (payment: Payment): string | null => {
+        if (payment.payment_provider) {
+            return payment.payment_provider;
+        }
+        
+        const response = payment.payment_provider_response;
+        if (response?.phone_number) {
+            return response.phone_number;
+        }
+        if (response?.bank_name) {
+            return response.bank_name;
+        }
+        if (response?.card_provider) {
+            return response.card_provider;
+        }
+        
+        return null;
     };
 
     const getStatusColor = (status: string) => {
@@ -253,7 +321,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs text-white/70">Total Payments</p>
-                                <p className="text-2xl font-bold">{paymentsArray.length}</p>
+                                <p className="text-2xl font-bold">{stats.total}</p>
                             </div>
                             <CreditCard className="w-8 h-8 text-white/30" />
                         </div>
@@ -262,7 +330,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs text-white/70">Completed</p>
-                                <p className="text-2xl font-bold">{paymentsArray.filter(p => p.status === 'completed').length}</p>
+                                <p className="text-2xl font-bold">{stats.completed}</p>
                             </div>
                             <CheckCircle2 className="w-8 h-8 text-white/30" />
                         </div>
@@ -271,7 +339,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs text-white/70">Pending</p>
-                                <p className="text-2xl font-bold">{paymentsArray.filter(p => p.status === 'pending').length}</p>
+                                <p className="text-2xl font-bold">{stats.pending}</p>
                             </div>
                             <Clock className="w-8 h-8 text-white/30" />
                         </div>
@@ -280,7 +348,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs text-white/70">Total Amount</p>
-                                <p className="text-2xl font-bold">{formatCurrency(paymentsArray.reduce((sum, p) => sum + p.amount, 0))}</p>
+                                <p className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</p>
                             </div>
                             <FileText className="w-8 h-8 text-white/30" />
                         </div>
@@ -292,7 +360,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search by reference, order number, or transaction ID..."
+                        placeholder="Search by invoice, order number, or transaction ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-colors"
@@ -321,7 +389,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         )}
                         {methodFilter !== 'all' && (
                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded-full text-xs">
-                                Method: {methodFilter.replace('_', ' ')}
+                                Method: {paymentMethods.find(m => m.id === methodFilter)?.name || methodFilter}
                                 <button onClick={() => setMethodFilter('all')}>
                                     <X className="w-3 h-3" />
                                 </button>
@@ -350,7 +418,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <h2 className="text-lg font-semibold text-slate-900">Transaction History</h2>
                     </div>
 
-                    {filteredPayments.length === 0 ? (
+                    {!payments?.data?.length ? (
                         <div className="p-12 text-center">
                             <CreditCard className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                             <h3 className="text-lg font-medium text-slate-600 mb-2">No payments found</h3>
@@ -370,93 +438,130 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                             )}
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-slate-50">
-                                    <tr>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Reference</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Order</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Date</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Method</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Amount</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Status</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {filteredPayments.map((payment) => (
-                                        <tr key={payment.id} className="hover:bg-slate-50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-900">{payment.payment_reference}</p>
-                                                    {payment.transaction_id && (
-                                                        <p className="text-xs text-slate-500">TXN: {payment.transaction_id.substring(0, 8)}...</p>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <Link
-                                                    href={`/taxpayer/orders/${payment.order_number}`}
-                                                    className="text-sm text-[#003366] hover:underline"
-                                                >
-                                                    {payment.order_number}
-                                                </Link>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="w-4 h-4 text-slate-400" />
-                                                    <span className="text-sm text-slate-600">
-                                                        {payment.payment_date ? formatDate(payment.payment_date) : formatDate(payment.created_at)}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    {getPaymentMethodIcon(payment.payment_method)}
-                                                    <span className="text-sm text-slate-600">
-                                                        {getPaymentMethodLabel(payment.payment_method)}
-                                                    </span>
-                                                </div>
-                                                {payment.payment_provider && (
-                                                    <p className="text-xs text-slate-400 mt-1">{payment.payment_provider}</p>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm font-semibold text-slate-900">
-                                                    {formatCurrency(payment.amount)}
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                                                    {getStatusIcon(payment.status)}
-                                                    {payment.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => viewPaymentDetails(payment)}
-                                                        className="p-1.5 text-slate-400 hover:text-[#003366] hover:bg-[#003366]/10 rounded transition-colors"
-                                                        title="View Details"
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                    </button>
-                                                    {payment.status === 'completed' && (
-                                                        <button
-                                                            onClick={() => downloadReceipt(payment)}
-                                                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                                                            title="Download Receipt"
-                                                        >
-                                                            <Download className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
+                        <>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-slate-50">
+                                        <tr>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Invoice</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Order</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Date</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Method</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Amount</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Status</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {payments.data.map((payment) => (
+                                            <tr key={payment.id} className="hover:bg-slate-50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div>
+                                                        <p className="text-sm font-medium text-slate-900">{payment.invoice_number}</p>
+                                                        {payment.transaction_id && (
+                                                            <p className="text-xs text-slate-500">TXN: {payment.transaction_id.substring(0, 8)}...</p>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Link
+                                                        href={`/taxpayer/orders/${payment.order?.order_number}`}
+                                                        className="text-sm text-[#003366] hover:underline"
+                                                    >
+                                                        {payment.order?.order_number}
+                                                    </Link>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Calendar className="w-4 h-4 text-slate-400" />
+                                                        <span className="text-sm text-slate-600">
+                                                            {payment.payment_date ? formatDate(payment.payment_date) : formatDate(payment.created_at)}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        {getPaymentMethodIcon(payment.paymentMethod)}
+                                                        <span className="text-sm text-slate-600">
+                                                            {getPaymentMethodLabel(payment.paymentMethod)}
+                                                        </span>
+                                                    </div>
+                                                    {getPaymentProviderDisplay(payment) && (
+                                                        <p className="text-xs text-slate-400 mt-1">{getPaymentProviderDisplay(payment)}</p>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <p className="text-sm font-semibold text-slate-900">
+                                                        {formatCurrency(payment.total_amount || payment.amount)}
+                                                    </p>
+                                                    {(payment.tax_amount > 0 || payment.penalty_amount > 0) && (
+                                                        <p className="text-xs text-slate-400">
+                                                            Tax: {formatCurrency(payment.tax_amount)}
+                                                            {payment.penalty_amount > 0 && ` + Penalty: ${formatCurrency(payment.penalty_amount)}`}
+                                                        </p>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
+                                                        {getStatusIcon(payment.status)}
+                                                        {payment.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => viewPaymentDetails(payment)}
+                                                            className="p-1.5 text-slate-400 hover:text-[#003366] hover:bg-[#003366]/10 rounded transition-colors"
+                                                            title="View Details"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </button>
+                                                        {payment.status === 'completed' && (
+                                                            <button
+                                                                onClick={() => downloadReceipt(payment)}
+                                                                className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                                                                title="Download Receipt"
+                                                            >
+                                                                <Download className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Pagination */}
+                            {payments.last_page > 1 && (
+                                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
+                                    <p className="text-sm text-slate-500">
+                                        Showing {(payments.current_page - 1) * payments.per_page + 1} to{' '}
+                                        {Math.min(payments.current_page * payments.per_page, payments.total)} of{' '}
+                                        {payments.total} results
+                                    </p>
+                                    <div className="flex gap-2">
+                                        {payments.links?.map((link: any, index: number) => {
+                                            if (link.url === null) return null;
+                                            
+                                            return (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => router.get(link.url, {}, { preserveState: true })}
+                                                    className={`px-3 py-1 rounded text-sm ${
+                                                        link.active
+                                                            ? 'bg-[#003366] text-white'
+                                                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                                                    }`}
+                                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -504,9 +609,11 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                                     className="w-full px-4 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-colors"
                                 >
                                     <option value="all">All Methods</option>
-                                    <option value="mobile_money">Mobile Money</option>
-                                    <option value="card">Card Payment</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
+                                    {paymentMethods.map((method) => (
+                                        <option key={method.id} value={method.id}>
+                                            {method.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -536,16 +643,13 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <div className="flex gap-3 p-6 border-t border-slate-200">
                             <button
                                 type="button"
-                                onClick={() => {
-                                    resetFilters();
-                                    setShowFilterModal(false);
-                                }}
+                                onClick={resetFilters}
                                 className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                             >
                                 Reset
                             </button>
                             <button
-                                onClick={() => setShowFilterModal(false)}
+                                onClick={handleFilterApply}
                                 className="flex-1 px-4 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors"
                             >
                                 Apply Filters
@@ -562,7 +666,7 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                         <div className="flex items-center justify-between p-6 border-b border-slate-200">
                             <div>
                                 <h3 className="text-lg font-semibold text-slate-900">Payment Details</h3>
-                                <p className="text-sm text-slate-500">{selectedPayment.payment_reference}</p>
+                                <p className="text-sm text-slate-500">{selectedPayment.invoice_number}</p>
                             </div>
                             <button
                                 onClick={() => setShowDetailsModal(false)}
@@ -582,28 +686,46 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                                 </span>
                             </div>
 
-                            {/* Amount */}
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm text-slate-600">Amount</span>
-                                <span className="text-lg font-bold text-[#003366]">
-                                    {formatCurrency(selectedPayment.amount)}
-                                </span>
+                            {/* Amount Breakdown */}
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-slate-600">Subtotal</span>
+                                    <span className="text-sm">{formatCurrency(selectedPayment.amount)}</span>
+                                </div>
+                                {selectedPayment.tax_amount > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-slate-600">Tax</span>
+                                        <span className="text-sm">{formatCurrency(selectedPayment.tax_amount)}</span>
+                                    </div>
+                                )}
+                                {selectedPayment.penalty_amount > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-slate-600">Penalty</span>
+                                        <span className="text-sm text-amber-600">{formatCurrency(selectedPayment.penalty_amount)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                                    <span className="text-sm font-medium text-slate-700">Total</span>
+                                    <span className="text-lg font-bold text-[#003366]">
+                                        {formatCurrency(selectedPayment.total_amount || selectedPayment.amount)}
+                                    </span>
+                                </div>
                             </div>
 
-                            {/* Reference */}
+                            {/* Invoice */}
                             <div className="flex justify-between">
-                                <span className="text-sm text-slate-600">Reference</span>
-                                <span className="text-sm font-medium">{selectedPayment.payment_reference}</span>
+                                <span className="text-sm text-slate-600">Invoice</span>
+                                <span className="text-sm font-medium">{selectedPayment.invoice_number}</span>
                             </div>
 
                             {/* Order */}
                             <div className="flex justify-between">
                                 <span className="text-sm text-slate-600">Order Number</span>
                                 <Link
-                                    href={`/taxpayer/orders/${selectedPayment.order_number}`}
+                                    href={`/taxpayer/orders/${selectedPayment.order?.order_number}`}
                                     className="text-sm text-[#003366] hover:underline"
                                 >
-                                    {selectedPayment.order_number}
+                                    {selectedPayment.order?.order_number}
                                 </Link>
                             </div>
 
@@ -619,43 +741,52 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                             <div className="flex justify-between">
                                 <span className="text-sm text-slate-600">Payment Method</span>
                                 <div className="flex items-center gap-2">
-                                    {getPaymentMethodIcon(selectedPayment.payment_method)}
-                                    <span className="text-sm">{getPaymentMethodLabel(selectedPayment.payment_method)}</span>
+                                    {getPaymentMethodIcon(selectedPayment.paymentMethod)}
+                                    <span className="text-sm">{getPaymentMethodLabel(selectedPayment.paymentMethod)}</span>
                                 </div>
                             </div>
 
-                            {/* Provider */}
-                            {selectedPayment.payment_provider && (
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-slate-600">Provider</span>
-                                    <span className="text-sm">{selectedPayment.payment_provider}</span>
-                                </div>
-                            )}
-
-                            {/* Phone (for mobile money) */}
-                            {selectedPayment.phone_number && (
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-slate-600">Phone Number</span>
-                                    <span className="text-sm">{selectedPayment.phone_number}</span>
-                                </div>
-                            )}
-
-                            {/* Bank Details */}
-                            {selectedPayment.bank_name && (
-                                <div className="border-t border-slate-100 pt-4 mt-2">
-                                    <p className="text-sm font-medium text-slate-700 mb-2">Bank Details</p>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-slate-600">Bank:</span>
-                                            <span>{selectedPayment.bank_name}</span>
+                            {/* Provider Details from Response */}
+                            {selectedPayment.payment_provider_response && (
+                                <>
+                                    {selectedPayment.payment_provider_response.phone_number && (
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-slate-600">Phone Number</span>
+                                            <span className="text-sm">{selectedPayment.payment_provider_response.phone_number}</span>
                                         </div>
-                                        {selectedPayment.bank_account_number && (
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-600">Account:</span>
-                                                <span>{selectedPayment.bank_account_number}</span>
+                                    )}
+                                    
+                                    {selectedPayment.payment_provider_response.bank_name && (
+                                        <div className="border-t border-slate-100 pt-4 mt-2">
+                                            <p className="text-sm font-medium text-slate-700 mb-2">Bank Details</p>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-slate-600">Bank:</span>
+                                                    <span>{selectedPayment.payment_provider_response.bank_name}</span>
+                                                </div>
+                                                {selectedPayment.payment_provider_response.bank_account_number && (
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-slate-600">Account:</span>
+                                                        <span>{selectedPayment.payment_provider_response.bank_account_number}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
+
+                                    {selectedPayment.payment_provider_response.card_provider && (
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-slate-600">Card Provider</span>
+                                            <span className="text-sm">{selectedPayment.payment_provider_response.card_provider}</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {/* Failure Reason */}
+                            {selectedPayment.failure_reason && (
+                                <div className="bg-red-50 p-3 rounded-lg">
+                                    <p className="text-xs text-red-700">{selectedPayment.failure_reason}</p>
                                 </div>
                             )}
 
@@ -665,6 +796,12 @@ export default function TaxpayerPaymentsIndex({ payments = [] }: Props) {
                                     <span className="text-slate-600">Payment Date</span>
                                     <span>{selectedPayment.payment_date ? formatDate(selectedPayment.payment_date) : 'N/A'}</span>
                                 </div>
+                                {selectedPayment.confirmation_date && (
+                                    <div className="flex justify-between text-sm mt-2">
+                                        <span className="text-slate-600">Confirmed</span>
+                                        <span>{formatDate(selectedPayment.confirmation_date)}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-sm mt-2">
                                     <span className="text-slate-600">Created</span>
                                     <span>{formatDate(selectedPayment.created_at)}</span>
