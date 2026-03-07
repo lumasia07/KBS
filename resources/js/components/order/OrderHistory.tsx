@@ -54,7 +54,7 @@ export function OrderHistory() {
     };
 
     const handlePayNow = (orderId: string) => {
-        router.get(`/orders/checkout/${orderId}`);
+        router.get(`/taxpayer/orders/${orderId}/checkout`);
     };
 
     const getStatusColor = (status: string) => {

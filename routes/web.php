@@ -9,13 +9,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductionController;
 use App\Http\Controllers\Admin\ProductRequestController;
 
-use App\Http\Controllers\TaxpayerController;
-use App\Http\Controllers\TaxpayerProductController;
-use App\Http\Controllers\TaxpayerOrderController;
-use App\Http\Controllers\TaxpayerPaymentController;
-
-use App\Http\Controllers\AgentFieldControlController;
-
+use App\Http\Controllers\Taxpayer\TaxpayerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -145,10 +139,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('taxpayer')->name('taxpayer.')->group(function () {
-
-        Route::get('/dashboard', function () {
-            return Inertia::render('taxpayer/dashboard');
-        })->name('dashboard');
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/dashboard', [App\Http\Controllers\Taxpayer\DashboardController::class, 'index'])
+            ->name('dashboard');
 
         /*
         |--------------------------------------------------------------------------
@@ -156,11 +153,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('orders')->name('orders.')->group(function () {
-            Route::get('/', [TaxpayerOrderController::class, 'index'])->name('index');
-            Route::get('/products', [TaxpayerOrderController::class, 'products'])->name('products');
-            Route::post('/', [TaxpayerOrderController::class, 'store'])->name('store');
-            Route::get('/history', [TaxpayerOrderController::class, 'history'])->name('history');
-            Route::get('/checkout/{orderId}', [TaxpayerOrderController::class, 'checkout'])->name('checkout');
+            Route::get('/', [App\Http\Controllers\Taxpayer\OrderController::class, 'index'])->name('index');
+            Route::get('/products', [App\Http\Controllers\Taxpayer\OrderController::class, 'products'])->name('products');
+            Route::get('/history', [App\Http\Controllers\Taxpayer\OrderController::class, 'history'])->name('history');
+            Route::get('/{order}/checkout', [App\Http\Controllers\Taxpayer\OrderController::class, 'checkout'])->name('checkout');
+            Route::post('/store', [App\Http\Controllers\Taxpayer\OrderController::class, 'store'])->name('store');
         });
 
         /*
@@ -169,7 +166,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('payments')->name('payments.')->group(function () {
-            Route::get('/', [TaxpayerPaymentController::class, 'index'])->name('index');
+            Route::get('/', [App\Http\Controllers\Taxpayer\PaymentController::class, 'index'])->name('index');
         });
 
         /*
@@ -178,11 +175,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('products')->name('products.')->group(function () {
-            Route::get('/', [TaxpayerProductController::class, 'index'])->name('index');
-            Route::get('/create', [TaxpayerProductController::class, 'create'])->name('create');
-            Route::post('/', [TaxpayerProductController::class, 'store'])->name('store');
-            Route::patch('/{productId}', [TaxpayerProductController::class, 'update'])->name('update');
-            Route::delete('/{productId}', [TaxpayerProductController::class, 'destroy'])->name('destroy');
+            Route::get('/', [App\Http\Controllers\Taxpayer\ProductController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Taxpayer\ProductController::class, 'create'])->name('create');
+            Route::post('/store', [App\Http\Controllers\Taxpayer\ProductController::class, 'store'])->name('store');
+            Route::patch('/{productId}', [App\Http\Controllers\Taxpayer\ProductController::class, 'update'])->name('update');
+            Route::delete('/{productId}', [App\Http\Controllers\Taxpayer\ProductController::class, 'destroy'])->name('destroy');
         });
     });
 
@@ -193,15 +190,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('agent')->name('agent.')->group(function () {
-
-        Route::get('/dashboard', [AgentFieldControlController::class, 'dashboard'])
+        Route::get('/dashboard', [App\Http\Controllers\Agent\FieldControlController::class, 'dashboard'])
             ->name('dashboard');
 
         Route::prefix('inspections')->name('inspections.')->group(function () {
-            Route::get('/', [AgentFieldControlController::class, 'index'])->name('index');
-            Route::get('/create', [AgentFieldControlController::class, 'create'])->name('create');
-            Route::post('/', [AgentFieldControlController::class, 'store'])->name('store');
-            Route::get('/{control}', [AgentFieldControlController::class, 'show'])->name('show');
+            Route::get('/', [App\Http\Controllers\Agent\FieldControlController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\Agent\FieldControlController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Agent\FieldControlController::class, 'store'])->name('store');
+            Route::get('/{control}', [App\Http\Controllers\Agent\FieldControlController::class, 'show'])->name('show');
         });
     });
 
