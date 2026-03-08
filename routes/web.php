@@ -140,6 +140,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [ReportController::class, 'index'])->name('index');
+            Route::post('/generate', [ReportController::class, 'generate'])->name('generate');
+            Route::get('/download', [ReportController::class, 'download'])->name('download');
         });
     });
 
