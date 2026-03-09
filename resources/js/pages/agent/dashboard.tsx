@@ -18,10 +18,11 @@ import {
 
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Agent Portal',
+        title: useI18nStore.getState().t('agent.dashboard.breadcrumb'),
         href: '/agent/dashboard',
     },
 ];
@@ -59,10 +60,10 @@ interface Props {
 
 // Quick actions for agent - bank app style
 const quickActions = [
-    { label: 'Inspect', icon: ClipboardCheck, href: '/agent/inspections/create', color: 'bg-blue-500' },
-    { label: 'History', icon: Target, href: '/agent/inspections', color: 'bg-emerald-500' },
-    { label: 'Report', icon: AlertTriangle, href: '#', color: 'bg-red-500' },
-    { label: 'Route', icon: Navigation, href: '#', color: 'bg-purple-500' },
+    { label: useI18nStore.getState().t('agent.dashboard.inspect'), icon: ClipboardCheck, href: '/agent/inspections/create', color: 'bg-blue-500' },
+    { label: useI18nStore.getState().t('agent.dashboard.history'), icon: Target, href: '/agent/inspections', color: 'bg-emerald-500' },
+    { label: useI18nStore.getState().t('agent.dashboard.report'), icon: AlertTriangle, href: '#', color: 'bg-red-500' },
+    { label: useI18nStore.getState().t('agent.dashboard.route'), icon: Navigation, href: '#', color: 'bg-purple-500' },
 ];
 
 export default function AgentDashboard({
@@ -70,31 +71,32 @@ export default function AgentDashboard({
     todaySchedule = [],
     recentInspections = []
 }: Props) {
+    const { t } = useI18nStore();
 
     const statCards = [
         {
-            title: "Today's Inspections",
+            title: t('agent.dashboard.todayInspections'),
             value: stats.today_inspections.toString(),
             change: '',
             trend: 'up',
             icon: ClipboardCheck,
         },
         {
-            title: 'Completed',
+            title: t('agent.dashboard.completed'),
             value: stats.completed.toString(),
             change: '',
             trend: 'up',
             icon: CheckCircle,
         },
         {
-            title: 'Violations Found',
+            title: t('agent.dashboard.violationsFound'),
             value: stats.violations.toString(),
             change: '',
             trend: 'down',
             icon: AlertTriangle,
         },
         {
-            title: 'Items Verified',
+            title: t('agent.dashboard.itemsVerified'),
             value: stats.stamps_verified.toString(),
             change: '',
             trend: 'up',
@@ -104,14 +106,14 @@ export default function AgentDashboard({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Agent Dashboard" />
+            <Head title={t('agent.dashboard.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 {/* Header with Welcome and Quick Actions */}
                 <div className="flex items-start justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Field Operations</h1>
-                        <p className="text-sm text-slate-500">Your daily inspection schedule and field activities.</p>
+                        <h1 className="text-2xl font-bold text-slate-900">{t('agent.dashboard.title')}</h1>
+                        <p className="text-sm text-slate-500">{t('agent.dashboard.subtitle')}</p>
                     </div>
 
                     {/* Quick Actions - Bank App Style */}
@@ -158,11 +160,11 @@ export default function AgentDashboard({
                 <div className="rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <div className="p-6 border-b border-slate-200">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-slate-900">Today's Schedule</h2>
+                            <h2 className="text-lg font-semibold text-slate-900">{t('agent.dashboard.todaySchedule')}</h2>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-slate-500">{todaySchedule.length} inspections</span>
+                                <span className="text-sm text-slate-500">{todaySchedule.length} {t('agent.dashboard.inspectionsCount')}</span>
                                 <Link href="/agent/inspections/create" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
-                                    <Plus className="w-4 h-4" /> New
+                                    <Plus className="w-4 h-4" /> {t('agent.dashboard.new')}
                                 </Link>
                             </div>
                         </div>
@@ -171,9 +173,9 @@ export default function AgentDashboard({
                         {todaySchedule.length === 0 ? (
                             <div className="p-8 text-center text-slate-500">
                                 <ClipboardCheck className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-                                <p>No inspections scheduled for today.</p>
+                                <p>{t('agent.dashboard.noScheduled')}</p>
                                 <Link href="/agent/inspections/create" className="text-blue-600 hover:underline mt-2 inline-block">
-                                    Start a new inspection
+                                    {t('agent.dashboard.startNew')}
                                 </Link>
                             </div>
                         ) : (
@@ -215,9 +217,9 @@ export default function AgentDashboard({
                 <div className="rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <div className="p-6 border-b border-slate-200">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-slate-900">Recent Inspections</h2>
+                            <h2 className="text-lg font-semibold text-slate-900">{t('agent.dashboard.recentInspections')}</h2>
                             <Link href="/agent/inspections" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                                View all <ArrowUpRight className="w-4 h-4" />
+                                {t('agent.dashboard.viewAll')} <ArrowUpRight className="w-4 h-4" />
                             </Link>
                         </div>
                     </div>
@@ -225,7 +227,7 @@ export default function AgentDashboard({
                         {recentInspections.length === 0 ? (
                             <div className="p-8 text-center text-slate-500">
                                 <CheckSquare className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-                                <p>No completed inspections yet.</p>
+                                <p>{t('agent.dashboard.noCompleted')}</p>
                             </div>
                         ) : (
                             recentInspections.map((inspection, index) => (
@@ -243,7 +245,7 @@ export default function AgentDashboard({
                                             <div>
                                                 <p className="font-medium text-slate-900">{inspection.company}</p>
                                                 <p className="text-sm text-slate-500">
-                                                    {inspection.stampsVerified} items • {inspection.violations} violations
+                                                    {inspection.stampsVerified} {t('agent.dashboard.items')} • {inspection.violations} {t('agent.dashboard.violations')}
                                                 </p>
                                             </div>
                                         </div>

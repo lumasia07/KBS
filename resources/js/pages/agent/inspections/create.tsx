@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Loader2, ClipboardCheck, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface Taxpayer {
     id: string;
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function CreateInspection({ taxpayers = [] }: Props) {
+    const { t } = useI18nStore();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         taxpayer_id: '',
@@ -63,21 +65,21 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
 
         // Validation
         if (!formData.business_name || !formData.location_address) {
-            toast.error('Please fill in business name and location');
+            toast.error(t('agent.create.errorBusinessRequired'));
             return;
         }
         if (formData.total_items_checked < 1) {
-            toast.error('Please check at least one item');
+            toast.error(t('agent.create.errorMinItem'));
             return;
         }
 
         setLoading(true);
         try {
             await axios.post('/agent/inspections', formData);
-            toast.success('Inspection recorded successfully!');
+            toast.success(t('agent.create.success'));
             router.visit('/agent/inspections');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to save inspection');
+            toast.error(error.response?.data?.message || t('agent.create.errorSave'));
         } finally {
             setLoading(false);
         }
@@ -89,10 +91,10 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
 
     return (
         <AppLayout breadcrumbs={[
-            { title: 'Inspections', href: '/agent/inspections' },
-            { title: 'New Inspection', href: '/agent/inspections/create' }
+            { title: t('agent.inspections.breadcrumb'), href: '/agent/inspections' },
+            { title: t('agent.create.breadcrumb'), href: '/agent/inspections/create' }
         ]}>
-            <Head title="New Inspection" />
+            <Head title={t('agent.create.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 <div className="flex items-center gap-4">
@@ -102,8 +104,8 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">New Inspection</h1>
-                        <p className="text-slate-500 text-sm">Record a new field inspection.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('agent.create.title')}</h1>
+                        <p className="text-slate-500 text-sm">{t('agent.create.subtitle')}</p>
                     </div>
                 </div>
 
@@ -114,14 +116,14 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                             <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                                 <ClipboardCheck className="h-5 w-5 text-blue-600" />
-                                Business Information
+                                {t('agent.create.businessInfo')}
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="md:col-span-2">
-                                    <Label>Select Registered Taxpayer (Optional)</Label>
+                                    <Label>{t('agent.create.selectTaxpayer')}</Label>
                                     <Select onValueChange={handleTaxpayerSelect}>
                                         <SelectTrigger className="mt-1">
-                                            <SelectValue placeholder="Search or select a taxpayer..." />
+                                            <SelectValue placeholder={t('agent.create.searchTaxpayer')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {taxpayers.map((tp) => (
@@ -133,36 +135,36 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label>Business Name *</Label>
+                                    <Label>{t('agent.create.businessName')}</Label>
                                     <Input
                                         className="mt-1"
                                         value={formData.business_name}
                                         onChange={(e) => setFormData(prev => ({ ...prev, business_name: e.target.value }))}
-                                        placeholder="Enter business name"
+                                        placeholder={t('agent.create.enterBusinessName')}
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <Label>Location/Address *</Label>
+                                    <Label>{t('agent.create.locationAddress')}</Label>
                                     <Input
                                         className="mt-1"
                                         value={formData.location_address}
                                         onChange={(e) => setFormData(prev => ({ ...prev, location_address: e.target.value }))}
-                                        placeholder="Enter location"
+                                        placeholder={t('agent.create.enterLocation')}
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <Label>Inspection Type</Label>
+                                    <Label>{t('agent.create.inspectionType')}</Label>
                                     <Select value={formData.control_type} onValueChange={(v) => setFormData(prev => ({ ...prev, control_type: v }))}>
                                         <SelectTrigger className="mt-1">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="routine">Routine Inspection</SelectItem>
-                                            <SelectItem value="random">Random Check</SelectItem>
-                                            <SelectItem value="follow_up">Follow-up</SelectItem>
-                                            <SelectItem value="complaint">Complaint-based</SelectItem>
+                                            <SelectItem value="routine">{t('agent.create.routine')}</SelectItem>
+                                            <SelectItem value="random">{t('agent.create.random')}</SelectItem>
+                                            <SelectItem value="follow_up">{t('agent.create.followUp')}</SelectItem>
+                                            <SelectItem value="complaint">{t('agent.create.complaint')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -171,10 +173,10 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
 
                         {/* Compliance Data */}
                         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Compliance Data</h2>
+                            <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('agent.create.complianceData')}</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
-                                    <Label>Total Items Checked *</Label>
+                                    <Label>{t('agent.create.totalItemsChecked')}</Label>
                                     <Input
                                         type="number"
                                         min="0"
@@ -184,7 +186,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Compliant Items</Label>
+                                    <Label>{t('agent.create.compliantItems')}</Label>
                                     <Input
                                         type="number"
                                         min="0"
@@ -194,7 +196,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Non-Compliant Items</Label>
+                                    <Label>{t('agent.create.nonCompliantItems')}</Label>
                                     <Input
                                         type="number"
                                         min="0"
@@ -204,7 +206,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <Label>Counterfeit Items</Label>
+                                    <Label>{t('agent.create.counterfeitItems')}</Label>
                                     <Input
                                         type="number"
                                         min="0"
@@ -215,19 +217,19 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                 </div>
                             </div>
                             <div className="mt-4">
-                                <Label>Observations</Label>
+                                <Label>{t('agent.create.observationsLabel')}</Label>
                                 <Textarea
                                     className="mt-1"
-                                    placeholder="Enter your observations..."
+                                    placeholder={t('agent.create.observationsPlaceholder')}
                                     value={formData.observations}
                                     onChange={(e) => setFormData(prev => ({ ...prev, observations: e.target.value }))}
                                 />
                             </div>
                             <div className="mt-4">
-                                <Label>Recommendations</Label>
+                                <Label>{t('agent.create.recommendationsLabel')}</Label>
                                 <Textarea
                                     className="mt-1"
-                                    placeholder="Enter recommendations..."
+                                    placeholder={t('agent.create.recommendationsPlaceholder')}
                                     value={formData.recommendations}
                                     onChange={(e) => setFormData(prev => ({ ...prev, recommendations: e.target.value }))}
                                 />
@@ -244,22 +246,22 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                 />
                                 <Label htmlFor="offence" className="text-lg font-semibold text-red-700 flex items-center gap-2">
                                     <AlertTriangle className="h-5 w-5" />
-                                    Declare Offence
+                                    {t('agent.create.declareOffence')}
                                 </Label>
                             </div>
                             {formData.offence_declared && (
                                 <div className="space-y-4 border-t pt-4">
                                     <div>
-                                        <Label>Offence Description *</Label>
+                                        <Label>{t('agent.create.offenceDescription')}</Label>
                                         <Textarea
                                             className="mt-1"
-                                            placeholder="Describe the offence..."
+                                            placeholder={t('agent.create.offencePlaceholder')}
                                             value={formData.offence_description}
                                             onChange={(e) => setFormData(prev => ({ ...prev, offence_description: e.target.value }))}
                                         />
                                     </div>
                                     <div className="w-1/2">
-                                        <Label>Proposed Fine (CDF)</Label>
+                                        <Label>{t('agent.create.proposedFine')}</Label>
                                         <Input
                                             type="number"
                                             min="0"
@@ -276,10 +278,10 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                     {/* Sidebar - Summary */}
                     <div className="space-y-6">
                         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sticky top-6">
-                            <h2 className="text-lg font-semibold text-slate-900 mb-4">Summary</h2>
+                            <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('agent.create.summary')}</h2>
                             <div className="space-y-4">
                                 <div className="text-center p-4 bg-slate-50 rounded-lg">
-                                    <p className="text-sm text-slate-500">Compliance Rate</p>
+                                    <p className="text-sm text-slate-500">{t('agent.create.complianceRate')}</p>
                                     <p className={`text-4xl font-bold ${parseFloat(complianceRate) >= 80 ? 'text-emerald-600' :
                                             parseFloat(complianceRate) >= 50 ? 'text-amber-600' : 'text-red-600'
                                         }`}>
@@ -289,26 +291,26 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     <div className="bg-emerald-50 p-2 rounded text-center">
                                         <p className="text-emerald-600 font-bold">{formData.compliant_items}</p>
-                                        <p className="text-xs text-emerald-700">Compliant</p>
+                                        <p className="text-xs text-emerald-700">{t('agent.create.compliant')}</p>
                                     </div>
                                     <div className="bg-red-50 p-2 rounded text-center">
                                         <p className="text-red-600 font-bold">{formData.non_compliant_items}</p>
-                                        <p className="text-xs text-red-700">Non-Compliant</p>
+                                        <p className="text-xs text-red-700">{t('agent.create.nonCompliant')}</p>
                                     </div>
                                 </div>
                                 {formData.counterfeit_items > 0 && (
                                     <div className="bg-red-100 border border-red-200 p-3 rounded-lg text-center">
-                                        <p className="text-red-800 font-bold">{formData.counterfeit_items} Counterfeit Items</p>
+                                        <p className="text-red-800 font-bold">{formData.counterfeit_items} {t('agent.create.counterfeitItems')}</p>
                                     </div>
                                 )}
                                 {formData.offence_declared && (
                                     <div className="bg-red-100 border border-red-200 p-3 rounded-lg">
                                         <p className="text-red-800 font-bold flex items-center gap-2">
-                                            <AlertTriangle className="h-4 w-4" /> Offence Declared
+                                            <AlertTriangle className="h-4 w-4" /> {t('agent.create.offenceDeclared')}
                                         </p>
                                         {formData.proposed_fine > 0 && (
                                             <p className="text-sm text-red-700 mt-1">
-                                                Fine: {formData.proposed_fine.toLocaleString()} CDF
+                                                {t('agent.create.fine')} {formData.proposed_fine.toLocaleString()} CDF
                                             </p>
                                         )}
                                     </div>
@@ -316,7 +318,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                             </div>
                             <Button type="submit" className="w-full mt-6 bg-blue-600 hover:bg-blue-700" disabled={loading}>
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                                Save Inspection
+                                {t('agent.create.saveInspection')}
                             </Button>
                         </div>
                     </div>

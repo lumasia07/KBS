@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface Inspection {
     id: string;
@@ -63,6 +64,7 @@ interface Props {
 }
 
 export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, completed: 0, pending: 0 } }: Props) {
+    const { t } = useI18nStore();
     const [inspections, setInspections] = useState<Inspection[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -87,7 +89,7 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
             setTotalRecords(response.data.recordsTotal);
         } catch (error) {
             console.error('Failed to fetch inspections', error);
-            toast.error('Failed to load inspections');
+            toast.error(t('agent.inspections.failedLoad'));
         } finally {
             setLoading(false);
         }
@@ -116,25 +118,25 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
     const totalPages = Math.ceil(totalRecords / 10);
 
     const statCards = [
-        { label: 'Total Inspections', value: stats.total, icon: ClipboardCheck, bgColor: '#1e40af' },
-        { label: "Today's", value: stats.today, icon: Calendar, bgColor: '#059669' },
-        { label: 'Completed', value: stats.completed, icon: CheckCircle, bgColor: '#7c3aed' },
-        { label: 'In Progress', value: stats.pending, icon: Clock, bgColor: '#d97706' },
+        { label: t('agent.inspections.totalInspections'), value: stats.total, icon: ClipboardCheck, bgColor: '#1e40af' },
+        { label: t('agent.inspections.todays'), value: stats.today, icon: Calendar, bgColor: '#059669' },
+        { label: t('agent.inspections.completed'), value: stats.completed, icon: CheckCircle, bgColor: '#7c3aed' },
+        { label: t('agent.inspections.inProgress'), value: stats.pending, icon: Clock, bgColor: '#d97706' },
     ];
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Inspections', href: '/agent/inspections' }]}>
-            <Head title="My Inspections" />
+        <AppLayout breadcrumbs={[{ title: t('agent.inspections.breadcrumb'), href: '/agent/inspections' }]}>
+            <Head title={t('agent.inspections.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Inspections</h1>
-                        <p className="text-slate-500 text-sm mt-1">View and manage your field inspections.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('agent.inspections.title')}</h1>
+                        <p className="text-slate-500 text-sm mt-1">{t('agent.inspections.subtitle')}</p>
                     </div>
                     <Link href="/agent/inspections/create">
                         <Button className="bg-blue-600 hover:bg-blue-700">
-                            <Plus className="h-4 w-4 mr-2" /> New Inspection
+                            <Plus className="h-4 w-4 mr-2" /> {t('agent.inspections.newInspection')}
                         </Button>
                     </Link>
                 </div>
@@ -156,11 +158,11 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
 
                 {/* Search Bar */}
                 <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <div className="font-medium text-slate-900">Inspection History</div>
+                    <div className="font-medium text-slate-900">{t('agent.inspections.inspectionHistory')}</div>
                     <div className="relative w-72">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                         <Input
-                            placeholder="Search inspections..."
+                            placeholder={t('agent.inspections.searchPlaceholder')}
                             className="pl-9 bg-slate-50"
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -173,13 +175,13 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
                     <Table>
                         <TableHeader className="bg-slate-50">
                             <TableRow>
-                                <TableHead className="font-semibold text-slate-600">Control #</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Business</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Date</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Type</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Compliance</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                                <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('agent.inspections.thControl')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('agent.inspections.thBusiness')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('agent.inspections.thDate')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('agent.inspections.thType')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('agent.inspections.thCompliance')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('agent.inspections.thStatus')}</TableHead>
+                                <TableHead className="text-right font-semibold text-slate-600">{t('agent.inspections.thActions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -192,7 +194,7 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
                             ) : inspections.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="h-24 text-center text-slate-500">
-                                        No inspections found. Start a new inspection!
+                                        {t('agent.inspections.noInspections')}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -233,7 +235,7 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
                     {totalRecords > 0 && (
                         <div className="flex items-center justify-between p-4 border-t border-slate-100">
                             <div className="text-sm text-slate-500">
-                                Showing {Math.min((page - 1) * 10 + 1, totalRecords)} to {Math.min(page * 10, totalRecords)} of {totalRecords}
+                                {t('agent.inspections.showing')} {Math.min((page - 1) * 10 + 1, totalRecords)} {t('agent.inspections.to')} {Math.min(page * 10, totalRecords)} {t('agent.inspections.of')} {totalRecords}
                             </div>
                             <div className="flex gap-2">
                                 <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 1}>
@@ -251,38 +253,38 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
                 <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
                     <DialogContent className="sm:max-w-2xl bg-white">
                         <DialogHeader>
-                            <DialogTitle>Inspection #{selectedInspection?.control_number}</DialogTitle>
-                            <DialogDescription>Inspection details and compliance report</DialogDescription>
+                            <DialogTitle>{t('agent.inspections.inspectionTitle')} #{selectedInspection?.control_number}</DialogTitle>
+                            <DialogDescription>{t('agent.inspections.inspectionDesc')}</DialogDescription>
                         </DialogHeader>
                         {selectedInspection && (
                             <div className="grid grid-cols-2 gap-4 py-4">
                                 <div>
-                                    <span className="text-slate-500 text-xs">Business</span>
+                                    <span className="text-slate-500 text-xs">{t('agent.inspections.business')}</span>
                                     <p className="font-medium">{selectedInspection.business || selectedInspection.business_name}</p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-500 text-xs">Location</span>
+                                    <span className="text-slate-500 text-xs">{t('agent.inspections.location')}</span>
                                     <p className="font-medium">{selectedInspection.location_address}</p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-500 text-xs">Items Checked</span>
+                                    <span className="text-slate-500 text-xs">{t('agent.inspections.itemsChecked')}</span>
                                     <p className="font-medium">{selectedInspection.total_items_checked}</p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-500 text-xs">Compliant</span>
+                                    <span className="text-slate-500 text-xs">{t('agent.inspections.compliant')}</span>
                                     <p className="font-medium text-emerald-600">{selectedInspection.compliant_items}</p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-500 text-xs">Non-Compliant</span>
+                                    <span className="text-slate-500 text-xs">{t('agent.inspections.nonCompliant')}</span>
                                     <p className="font-medium text-red-600">{selectedInspection.non_compliant_items}</p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-500 text-xs">Compliance Rate</span>
+                                    <span className="text-slate-500 text-xs">{t('agent.inspections.complianceRate')}</span>
                                     <p className="font-bold text-lg">{selectedInspection.compliance_rate}</p>
                                 </div>
                                 {selectedInspection.observations && (
                                     <div className="col-span-2">
-                                        <span className="text-slate-500 text-xs">Observations</span>
+                                        <span className="text-slate-500 text-xs">{t('agent.inspections.observations')}</span>
                                         <p className="text-sm">{selectedInspection.observations}</p>
                                     </div>
                                 )}

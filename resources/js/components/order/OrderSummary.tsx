@@ -1,8 +1,10 @@
 import { useOrderStore } from '@/stores/useOrderStore';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 export function OrderSummary() {
     const { cartItems, getCartTotal, getCartTax, getCartGrandTotal, requiresHealthCertificate } =
         useOrderStore();
+    const { t } = useI18nStore();
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-CD', {
@@ -19,7 +21,7 @@ export function OrderSummary() {
         <div className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-[#003366] to-[#0052A3] p-4">
-                <h3 className="text-lg font-bold text-white">Order Summary</h3>
+                <h3 className="text-lg font-bold text-white">{t('taxpayer.orders.summary.title')}</h3>
             </div>
 
             {/* Items List */}
@@ -47,19 +49,19 @@ export function OrderSummary() {
             {/* Totals */}
             <div className="p-4 bg-slate-50 space-y-2">
                 <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Subtotal</span>
+                    <span className="text-slate-500">{t('taxpayer.orders.summary.subtotal')}</span>
                     <span className="font-medium text-slate-900">
                         {formatPrice(getCartTotal())} CDF
                     </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Tax (16% VAT)</span>
+                    <span className="text-slate-500">{t('taxpayer.orders.summary.tax')}</span>
                     <span className="font-medium text-slate-900">
                         {formatPrice(getCartTax())} CDF
                     </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-3 border-t border-slate-200">
-                    <span className="text-slate-900">Grand Total</span>
+                    <span className="text-slate-900">{t('taxpayer.orders.summary.grandTotal')}</span>
                     <span className="text-[#003366]">{formatPrice(getCartGrandTotal())} CDF</span>
                 </div>
             </div>
@@ -68,8 +70,7 @@ export function OrderSummary() {
             {requiresHealthCertificate() && (
                 <div className="p-4 bg-amber-50 border-t border-amber-100">
                     <p className="text-sm text-amber-800">
-                        <span className="font-semibold">Note:</span> One or more products in your
-                        order require a valid health certificate.
+                        {t('taxpayer.orders.summary.healthCertNote')}
                     </p>
                 </div>
             )}

@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface ProductRequest {
     id: number;
@@ -59,6 +60,7 @@ interface Props {
 
 export default function AdminProductRequests({ requests = [] }: Props) {
     console.log('AdminProductRequests requests:', requests);
+    const { t } = useI18nStore();
     const [selectedRequest, setSelectedRequest] = useState<ProductRequest | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [rejectOpen, setRejectOpen] = useState(false);
@@ -80,12 +82,12 @@ export default function AdminProductRequests({ requests = [] }: Props) {
             stamp_price: stampPrice
         }, {
             onSuccess: () => {
-                toast.success('Product approved successfully');
+                toast.success(t('admin.products.approvedSuccess'));
                 setDetailsOpen(false);
                 setProcessingId(null);
             },
             onError: () => {
-                toast.error('Failed to approve product');
+                toast.error(t('admin.products.failedApprove'));
                 setProcessingId(null);
             }
         });
@@ -97,28 +99,28 @@ export default function AdminProductRequests({ requests = [] }: Props) {
 
         router.patch(`/admin/products/requests/${selectedRequest.id}/reject`, { rejection_reason: rejectionReason }, {
             onSuccess: () => {
-                toast.success('Product rejected');
+                toast.success(t('admin.products.rejectedSuccess'));
                 setRejectOpen(false);
                 setDetailsOpen(false);
                 setRejectionReason('');
                 setProcessingId(null);
             },
             onError: () => {
-                toast.error('Failed to reject product');
+                toast.error(t('admin.products.failedReject'));
                 setProcessingId(null);
             }
         });
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Product Requests', href: '/admin/products/requests' }]}>
-            <Head title="Product Requests" />
+        <AppLayout breadcrumbs={[{ title: t('admin.products.breadcrumb'), href: '/admin/products/requests' }]}>
+            <Head title={t('admin.products.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Product Requests</h1>
-                        <p className="text-slate-500 text-sm mt-1">Review and approve new product registrations from taxpayers.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('admin.products.title')}</h1>
+                        <p className="text-slate-500 text-sm mt-1">{t('admin.products.subtitle')}</p>
                     </div>
                 </div>
 
@@ -126,20 +128,20 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                     <Table>
                         <TableHeader className="bg-slate-50">
                             <TableRow>
-                                <TableHead className="font-semibold text-slate-600">Taxpayer</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Product</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Category</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Price</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Date</TableHead>
-                                <TableHead className="font-semibold text-slate-600">Certificate</TableHead>
-                                <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('admin.products.thTaxpayer')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('admin.products.thProduct')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('admin.products.thCategory')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('admin.products.thPrice')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('admin.products.thDate')}</TableHead>
+                                <TableHead className="font-semibold text-slate-600">{t('admin.products.thCertificate')}</TableHead>
+                                <TableHead className="text-right font-semibold text-slate-600">{t('admin.products.thActions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {requests.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="h-24 text-center text-slate-500">
-                                        No pending product requests.
+                                        {t('admin.products.noPending')}
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -162,7 +164,7 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                             <div className="text-sm font-medium text-slate-700">
                                                 {Number(req.product.stamp_price).toLocaleString()} CDF
                                             </div>
-                                            <div className="text-xs text-slate-500 capitalize">Per {req.product.unit_type}</div>
+                                            <div className="text-xs text-slate-500 capitalize">{t('admin.products.perUnit')} {req.product.unit_type}</div>
                                         </TableCell>
                                         <TableCell className="text-slate-600 text-sm">
                                             {req.date}
@@ -176,11 +178,11 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                                     className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    <FileCheck className="w-4 h-4" /> View
+                                                    <FileCheck className="w-4 h-4" /> {t('admin.products.viewCert')}
                                                 </a>
                                             ) : (
                                                 <span className="text-slate-400 text-xs flex items-center gap-1">
-                                                    <AlertCircle className="w-3 h-3" /> Missing
+                                                    <AlertCircle className="w-3 h-3" /> {t('admin.products.missingCert')}
                                                 </span>
                                             )}
                                         </TableCell>
@@ -191,7 +193,7 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                                 onClick={() => handleView(req)}
                                                 className="gap-2"
                                             >
-                                                Review
+                                                {t('admin.products.review')}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -207,35 +209,35 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold flex items-center gap-2">
                                 <Package className="h-6 w-6 text-blue-600" />
-                                Product Approval Request
+                                {t('admin.products.approvalRequest')}
                             </DialogTitle>
                             <DialogDescription className="text-slate-500">
-                                Review product details and certificate before approving.
+                                {t('admin.products.approvalDesc')}
                             </DialogDescription>
                         </DialogHeader>
 
                         {selectedRequest && (
                             <div className="grid grid-cols-2 gap-6 py-4">
                                 <div className="space-y-4 col-span-2 md:col-span-1">
-                                    <h3 className="font-semibold text-slate-900 border-b pb-2">Taxpayer Information</h3>
+                                    <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.products.taxpayerInfo')}</h3>
                                     <div className="space-y-1">
-                                        <p className="text-sm text-slate-500">Company Name</p>
+                                        <p className="text-sm text-slate-500">{t('admin.products.companyName')}</p>
                                         <p className="font-medium text-slate-900">{selectedRequest.taxpayer.company_name}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-sm text-slate-500">Tax ID (TIN)</p>
+                                        <p className="text-sm text-slate-500">{t('admin.products.taxId')}</p>
                                         <p className="font-mono text-slate-700">{selectedRequest.taxpayer.tin}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4 col-span-2 md:col-span-1">
-                                    <h3 className="font-semibold text-slate-900 border-b pb-2">Product Details</h3>
+                                    <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.products.productDetails')}</h3>
                                     <div className="space-y-1">
-                                        <p className="text-sm text-slate-500">Product Name</p>
+                                        <p className="text-sm text-slate-500">{t('admin.products.productName')}</p>
                                         <p className="font-medium text-slate-900">{selectedRequest.product.name}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-sm text-slate-500">Category</p>
+                                        <p className="text-sm text-slate-500">{t('admin.products.category')}</p>
                                         <p className="font-medium text-slate-700 capitalize">
                                             {selectedRequest.product.category && typeof selectedRequest.product.category === 'object'
                                                 ? String((selectedRequest.product.category as any).name || 'Uncategorized')
@@ -244,13 +246,13 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="space-y-1">
-                                            <p className="text-sm text-slate-500">Unit Type</p>
+                                            <p className="text-sm text-slate-500">{t('admin.products.unitType')}</p>
                                             <p className="font-medium text-slate-700 capitalize">{selectedRequest.product.unit_type}</p>
                                         </div>
                                     </div>
 
                                     <div className="space-y-1 pt-2">
-                                        <label className="text-sm text-slate-500 block mb-1">Set Stamp Price <span className='text-red-500'>*</span></label>
+                                        <label className="text-sm text-slate-500 block mb-1">{t('admin.products.setStampPrice')} <span className='text-red-500'>*</span></label>
                                         <div className="relative">
                                             <Input
                                                 type="number"
@@ -262,15 +264,15 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                             />
                                             <span className="absolute right-3 top-2.5 text-sm text-slate-500">CDF</span>
                                         </div>
-                                        <p className="text-xs text-slate-500">Price per {selectedRequest.product.unit_type} unit.</p>
+                                        <p className="text-xs text-slate-500">{t('admin.products.pricePerUnit')} {selectedRequest.product.unit_type} {t('admin.products.unitSuffix')}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4 col-span-2 border-t pt-4">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <h3 className="font-semibold text-slate-900">Certificate Document</h3>
-                                            <p className="text-sm text-slate-500">Uploaded proof of authorization.</p>
+                                            <h3 className="font-semibold text-slate-900">{t('admin.products.certificateDocument')}</h3>
+                                            <p className="text-sm text-slate-500">{t('admin.products.certificateDesc')}</p>
                                         </div>
                                         {selectedRequest.certificate_path ? (
                                             <a
@@ -280,11 +282,11 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                                 className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium text-sm"
                                             >
                                                 <FileCheck className="w-4 h-4" />
-                                                View Document
+                                                {t('admin.products.viewDocument')}
                                             </a>
                                         ) : (
                                             <Badge variant="destructive" className="flex items-center gap-1">
-                                                <AlertCircle className="w-3 h-3" /> Not Uploaded
+                                                <AlertCircle className="w-3 h-3" /> {t('admin.products.notUploaded')}
                                             </Badge>
                                         )}
                                     </div>
@@ -293,9 +295,9 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                         )}
 
                         <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
-                            <Button variant="outline" onClick={() => setDetailsOpen(false)}>Cancel</Button>
+                            <Button variant="outline" onClick={() => setDetailsOpen(false)}>{t('admin.products.cancel')}</Button>
                             <Button variant="destructive" onClick={() => setRejectOpen(true)}>
-                                <XCircle className="mr-2 h-4 w-4" /> Reject
+                                <XCircle className="mr-2 h-4 w-4" /> {t('admin.products.rejectBtn')}
                             </Button>
                             <Button
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -303,7 +305,7 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                 disabled={!!processingId || !stampPrice}
                             >
                                 {processingId === selectedRequest?.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                Approve Product
+                                {t('admin.products.approveProduct')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -313,16 +315,16 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                 <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
                     <DialogContent className="sm:max-w-md bg-white text-slate-900">
                         <DialogHeader>
-                            <DialogTitle>Reject Product Request</DialogTitle>
+                            <DialogTitle>{t('admin.products.rejectTitle')}</DialogTitle>
                             <DialogDescription>
-                                Please provide a reason for rejection. This will be visible to the taxpayer.
+                                {t('admin.products.rejectDesc')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label>Rejection Reason</Label>
+                                <Label>{t('admin.products.rejectionReason')}</Label>
                                 <Textarea
-                                    placeholder="e.g. Invalid certificate, Incorrect pricing..."
+                                    placeholder={t('admin.products.rejectionPlaceholder')}
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                     rows={3}
@@ -330,10 +332,10 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setRejectOpen(false)}>Cancel</Button>
+                            <Button variant="ghost" onClick={() => setRejectOpen(false)}>{t('admin.products.cancel')}</Button>
                             <Button variant="destructive" onClick={confirmReject} disabled={!rejectionReason || !!processingId}>
                                 {processingId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                Confirm Rejection
+                                {t('admin.products.confirmRejection')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

@@ -1,6 +1,7 @@
 import { X, Plus, Minus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOrderStore } from '@/stores/useOrderStore';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 export function OrderCart() {
     const {
@@ -15,6 +16,7 @@ export function OrderCart() {
         getCartGrandTotal,
         setStep,
     } = useOrderStore();
+    const { t } = useI18nStore();
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('fr-CD', {
@@ -45,7 +47,7 @@ export function OrderCart() {
                     <div className="flex items-center gap-3">
                         <ShoppingCart className="w-6 h-6 text-white" />
                         <div>
-                            <h2 className="text-lg font-bold text-white">Your Cart</h2>
+                            <h2 className="text-lg font-bold text-white">{t('taxpayer.orders.cart.title')}</h2>
                             <p className="text-sm text-white/70">
                                 {cartItems.length} item{cartItems.length !== 1 ? 's' : ''}
                             </p>
@@ -65,17 +67,17 @@ export function OrderCart() {
                         <div className="flex flex-col items-center justify-center h-full text-center py-12">
                             <ShoppingCart className="w-16 h-16 text-slate-300 mb-4" />
                             <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                                Your cart is empty
+                                {t('taxpayer.orders.cart.empty')}
                             </h3>
                             <p className="text-sm text-slate-500 mb-4">
-                                Add some products to get started
+                                {t('taxpayer.orders.cart.emptyMessage')}
                             </p>
                             <Button
                                 variant="outline"
                                 onClick={() => setCartOpen(false)}
                                 className="border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white"
                             >
-                                Browse Products
+                                {t('taxpayer.orders.cart.browseProducts')}
                             </Button>
                         </div>
                     ) : (
@@ -149,19 +151,19 @@ export function OrderCart() {
                         {/* Totals */}
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Subtotal</span>
+                                <span className="text-slate-500">{t('taxpayer.orders.cart.subtotal')}</span>
                                 <span className="font-medium text-slate-900">
                                     {formatPrice(getCartTotal())} CDF
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Tax (16% VAT)</span>
+                                <span className="text-slate-500">{t('taxpayer.orders.cart.tax')}</span>
                                 <span className="font-medium text-slate-900">
                                     {formatPrice(getCartTax())} CDF
                                 </span>
                             </div>
                             <div className="flex justify-between text-lg font-bold pt-2 border-t border-slate-200">
-                                <span className="text-slate-900">Grand Total</span>
+                                <span className="text-slate-900">{t('taxpayer.orders.cart.grandTotal')}</span>
                                 <span className="text-[#003366]">
                                     {formatPrice(getCartGrandTotal())} CDF
                                 </span>
@@ -174,14 +176,14 @@ export function OrderCart() {
                                 onClick={handleProceedToCheckout}
                                 className="w-full bg-gradient-to-r from-[#003366] to-[#0052A3] hover:from-[#002244] hover:to-[#003366] text-white py-3 rounded-xl font-medium"
                             >
-                                Proceed to Checkout
+                                {t('taxpayer.orders.cart.proceedToCheckout')}
                                 <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                             <button
                                 onClick={clearCart}
                                 className="w-full py-2 text-sm text-slate-500 hover:text-red-500 transition-colors"
                             >
-                                Clear Cart
+                                {t('taxpayer.orders.cart.clearCart')}
                             </button>
                         </div>
                     </div>

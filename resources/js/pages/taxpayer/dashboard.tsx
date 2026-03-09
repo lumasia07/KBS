@@ -17,6 +17,7 @@ import {
 import { useState, useMemo } from 'react';
 
 import AppLayout from '@/layouts/app-layout';
+import { useI18nStore } from '@/stores/useI18nStore';
 import { type BreadcrumbItem } from '@/types';
 
 // Define interfaces with optional fields for safety
@@ -73,12 +74,7 @@ interface TaxpayerDashboardProps {
     yearlyComparison?: YearlyComparison;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Taxpayer Portal',
-        href: '/taxpayer/dashboard',
-    },
-];
+// Breadcrumbs are built inside the component to access translations
 
 // Helper function to format currency
 const formatCurrency = (amount: number = 0): string => {
@@ -122,13 +118,16 @@ const formatDate = (dateString: string): string => {
     }
 };
 
-// Status badge component
+// Status badge component with i18n
 const StatusBadge = ({ status }: { status: string }) => {
+    const { t } = useI18nStore();
     const statusConfig = {
-        delivered: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', icon: CheckCircle },
-        processing: { color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: Clock },
-        pending: { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: Clock },
-        rejected: { color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', icon: AlertTriangle },
+        delivered: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', icon: CheckCircle, label: t('statuses.delivered') },
+        processing: { color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: Clock, label: t('statuses.processing') },
+        pending: { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: Clock, label: t('statuses.pending') },
+        rejected: { color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', icon: AlertTriangle, label: t('statuses.rejected') },
+        ready_for_delivery: { color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', icon: CheckCircle, label: t('statuses.readyForDelivery') },
+        pending_payment: { color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: Clock, label: t('statuses.pendingPayment') },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -137,7 +136,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     return (
         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${config.color}`}>
             <Icon className="w-3 h-3" />
-            {status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown'}
+            {config.label}
         </span>
     );
 };
@@ -152,6 +151,8 @@ const StatsSkeleton = () => (
 );
 
 export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
+    const { t, language } = useI18nStore();
+
     // Provide default values to prevent undefined errors
     const {
         taxpayer = {},
@@ -160,6 +161,10 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
         quickActions = {},
         yearlyComparison = {}
     } = props;
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: t('taxpayer.portalName'), href: '/taxpayer/dashboard' },
+    ];
 
     // Safe destructuring with defaults
     const {
@@ -183,81 +188,81 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
     // Calculate stats with trends
     const statsData = useMemo(() => [
         {
-            title: 'My Orders',
+            title: t('taxpayer.dashboard.stats.myOrders'),
             value: formatNumber(totalOrders),
             change: calculateChange(totalOrders, yearlyOrders).value,
             trend: calculateChange(totalOrders, yearlyOrders).trend,
             icon: Package,
-            description: 'Total stamp orders',
+            description: t('taxpayer.dashboard.stats.myOrdersDesc'),
         },
         {
-            title: 'Pending Approvals',
+            title: t('taxpayer.dashboard.stats.pendingApprovals'),
             value: formatNumber(pendingOrders),
             change: calculateChange(pendingOrders, pendingOrders * 1.1).value,
             trend: calculateChange(pendingOrders, pendingOrders * 1.1).trend,
             icon: Clock,
-            description: 'Awaiting processing',
+            description: t('taxpayer.dashboard.stats.pendingApprovalsDesc'),
         },
         {
-            title: 'Total Spent (CDF)',
+            title: t('taxpayer.dashboard.stats.totalSpent'),
             value: formatCurrency(totalSpent.current),
             change: calculateChange(totalSpent.current, totalSpent.previous).value,
             trend: calculateChange(totalSpent.current, totalSpent.previous).trend,
             icon: CreditCard,
-            description: 'This year',
+            description: t('taxpayer.dashboard.stats.totalSpentDesc'),
         },
         {
-            title: 'Active Stamps',
+            title: t('taxpayer.dashboard.stats.activeStamps'),
             value: formatNumber(activeStamps.current),
             change: calculateChange(activeStamps.current, activeStamps.previous).value,
             trend: calculateChange(activeStamps.current, activeStamps.previous).trend,
             icon: Stamp,
-            description: 'In my inventory',
+            description: t('taxpayer.dashboard.stats.activeStampsDesc'),
         },
-    ], [totalOrders, pendingOrders, totalSpent, activeStamps, yearlyOrders]);
+    ], [totalOrders, pendingOrders, totalSpent, activeStamps, yearlyOrders, language]);
 
     // Quick actions configuration based on real data
     const quickActionsConfig = useMemo(() => [
         {
-            label: 'New Order',
+            label: t('taxpayer.dashboard.quickActions.newOrder'),
             icon: Package,
             href: '/taxpayer/orders/create',
             color: 'bg-emerald-500 hover:bg-emerald-600',
             disabled: !canPlaceOrder,
-            tooltip: !canPlaceOrder ? 'You cannot place a new order at this time' : 'Create a new stamp order'
+            tooltip: t('taxpayer.dashboard.quickActions.newOrderTooltip')
         },
         {
-            label: 'Pay',
+            label: t('taxpayer.dashboard.quickActions.pay'),
             icon: CreditCard,
             href: hasPendingPayments ? '/taxpayer/payments' : '#',
             color: 'bg-blue-500 hover:bg-blue-600',
             badge: hasPendingPayments ? '!' : null,
             disabled: !hasPendingPayments,
-            tooltip: !hasPendingPayments ? 'No pending payments' : 'View pending payments'
+            tooltip: t('taxpayer.dashboard.quickActions.payTooltip')
         },
         {
-            label: 'Certificates',
+            label: t('taxpayer.dashboard.quickActions.certificates'),
             icon: FileCheck,
             href: certificatesAvailable ? '/taxpayer/certificates' : '#',
             color: 'bg-purple-500 hover:bg-purple-600',
             disabled: !certificatesAvailable,
-            tooltip: !certificatesAvailable ? 'No certificates available' : 'View your certificates'
+            tooltip: t('taxpayer.dashboard.quickActions.certificatesTooltip')
         },
         {
-            label: 'History',
+            label: t('taxpayer.dashboard.quickActions.history'),
             icon: History,
             href: '/taxpayer/orders?view=history',
             color: 'bg-orange-500 hover:bg-orange-600',
-            tooltip: 'View order history'
+            tooltip: t('taxpayer.dashboard.quickActions.historyTooltip')
         },
         {
-            label: 'Support',
+            label: t('taxpayer.dashboard.quickActions.support'),
             icon: AlertTriangle,
             href: '/help',
             color: 'bg-red-500 hover:bg-red-600',
-            tooltip: 'Get help and support'
+            tooltip: t('taxpayer.dashboard.quickActions.supportTooltip')
         },
-    ], [canPlaceOrder, hasPendingPayments, certificatesAvailable]);
+    ], [canPlaceOrder, hasPendingPayments, certificatesAvailable, language]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -268,11 +273,11 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
-                            Welcome Back, {taxpayer.company_name || taxpayer.name || 'Taxpayer'}!
+                            {t('taxpayer.dashboard.welcome').replace('{name}', taxpayer.company_name || taxpayer.name || 'Taxpayer')}
                         </h1>
                         {taxpayer.tax_identification_number && (
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Tax Identification Number: {taxpayer.tax_identification_number}
+                                {t('taxpayer.dashboard.taxIdLabel').replace('{tin}', taxpayer.tax_identification_number)}
                             </p>
                         )}
                     </div>
@@ -349,9 +354,9 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                 <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
                     <div className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-base md:text-lg font-semibold text-slate-900 dark:text-white">Recent Orders</h2>
+                            <h2 className="text-base md:text-lg font-semibold text-slate-900 dark:text-white">{t('taxpayer.dashboard.recentOrders.title')}</h2>
                             <a href="/taxpayer/orders?view=history" className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                                View all <ArrowUpRight className="w-4 h-4" />
+                                {t('taxpayer.dashboard.recentOrders.viewAll')} <ArrowUpRight className="w-4 h-4" />
                             </a>
                         </div>
                     </div>
@@ -361,13 +366,13 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                         <table className="w-full">
                             <thead className="bg-slate-50 dark:bg-slate-700/50">
                                 <tr>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Order #</th>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Type</th>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Quantity</th>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Amount</th>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Status</th>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Date</th>
-                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">Actions</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.orderNumber')}</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.type')}</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.quantity')}</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.amount')}</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.status')}</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.date')}</th>
+                                    <th className="text-left text-xs font-medium text-slate-500 dark:text-slate-300 px-6 py-3">{t('taxpayer.dashboard.table.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -415,7 +420,7 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                                 ) : (
                                     <tr>
                                         <td colSpan={7} className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
-                                            No orders found. Place your first order to get started!
+                                            {t('taxpayer.dashboard.recentOrders.emptyState')}
                                         </td>
                                     </tr>
                                 )}
@@ -436,19 +441,19 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">Type</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('taxpayer.dashboard.table.type')}</p>
                                             <p className="text-slate-900 dark:text-white">{order.type}</p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">Quantity</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('taxpayer.dashboard.table.quantity')}</p>
                                             <p className="text-slate-900 dark:text-white">{formatNumber(order.quantity)}</p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">Amount</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('taxpayer.dashboard.table.amount')}</p>
                                             <p className="font-medium text-slate-900 dark:text-white">{formatCurrency(order.amount)} CDF</p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">Date</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{t('taxpayer.dashboard.table.date')}</p>
                                             <p className="text-slate-900 dark:text-white">{formatDate(order.created_at)}</p>
                                         </div>
                                     </div>
@@ -474,7 +479,7 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                             ))
                         ) : (
                             <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                                No orders found. Place your first order to get started!
+                                {t('taxpayer.dashboard.recentOrders.emptyState')}
                             </div>
                         )}
                     </div>

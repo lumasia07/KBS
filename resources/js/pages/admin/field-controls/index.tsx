@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface FieldControl {
     id: string;
@@ -83,6 +84,7 @@ interface TableParams {
 }
 
 export default function AdminFieldControlsIndex({ stats = { total: 0, completed: 0, in_progress: 0, requires_followup: 0, today: 0, this_month: 0 } }: Props) {
+    const { t } = useI18nStore();
     const [controls, setControls] = useState<FieldControl[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -118,7 +120,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
             setTotalRecords(response.data.recordsTotal);
         } catch (error) {
             console.error('Failed to fetch controls', error);
-            toast.error('Failed to load field controls');
+            toast.error(t('admin.fieldControls.failedLoad'));
         } finally {
             setLoading(false);
         }
@@ -141,11 +143,11 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
         setProcessingId(selectedControl.id);
         try {
             await axios.post(`/admin/field-controls/${selectedControl.id}/approve`);
-            toast.success('Field control approved successfully');
+            toast.success(t('admin.fieldControls.approvedSuccess'));
             fetchControls();
             setDetailsOpen(false);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to approve');
+            toast.error(error.response?.data?.message || t('admin.fieldControls.failedApprove'));
         } finally {
             setProcessingId(null);
         }
@@ -156,13 +158,13 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
         setProcessingId(selectedControl.id);
         try {
             await axios.post(`/admin/field-controls/${selectedControl.id}/reject`, { reason: rejectionReason });
-            toast.success('Field control flagged successfully');
+            toast.success(t('admin.fieldControls.flaggedSuccess'));
             fetchControls();
             setRejectOpen(false);
             setDetailsOpen(false);
             setRejectionReason('');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to flag');
+            toast.error(error.response?.data?.message || t('admin.fieldControls.failedFlag'));
         } finally {
             setProcessingId(null);
         }
@@ -190,21 +192,21 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
     const totalPages = Math.ceil(totalRecords / params.pageSize);
 
     const statCards = [
-        { label: 'Total Controls', value: stats.total, icon: ClipboardCheck, bgColor: '#1e40af' },
-        { label: 'Completed', value: stats.completed, icon: CheckCircle, bgColor: '#059669' },
-        { label: 'In Progress', value: stats.in_progress, icon: Loader2, bgColor: '#d97706' },
-        { label: 'Requires Follow-up', value: stats.requires_followup, icon: AlertTriangle, bgColor: '#dc2626' },
+        { label: t('admin.fieldControls.totalControls'), value: stats.total, icon: ClipboardCheck, bgColor: '#1e40af' },
+        { label: t('admin.fieldControls.completed'), value: stats.completed, icon: CheckCircle, bgColor: '#059669' },
+        { label: t('admin.fieldControls.inProgress'), value: stats.in_progress, icon: Loader2, bgColor: '#d97706' },
+        { label: t('admin.fieldControls.requiresFollowup'), value: stats.requires_followup, icon: AlertTriangle, bgColor: '#dc2626' },
     ];
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Field Control', href: '/admin/field-controls' }]}>
-            <Head title="Field Control Management" />
+        <AppLayout breadcrumbs={[{ title: t('admin.fieldControls.breadcrumb'), href: '/admin/field-controls' }]}>
+            <Head title={t('admin.fieldControls.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Field Control</h1>
-                        <p className="text-slate-500 text-sm mt-1">Monitor and manage agent inspections.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('admin.fieldControls.title')}</h1>
+                        <p className="text-slate-500 text-sm mt-1">{t('admin.fieldControls.subtitle')}</p>
                     </div>
                 </div>
 
@@ -226,11 +228,11 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                 <div className="space-y-4">
                     {/* Controls */}
                     <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <div className="font-medium text-slate-900">All Inspections</div>
+                        <div className="font-medium text-slate-900">{t('admin.fieldControls.allInspections')}</div>
                         <div className="relative w-72">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                             <Input
-                                placeholder="Search Control #, Agent..."
+                                placeholder={t('admin.fieldControls.searchPlaceholder')}
                                 className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500"
                                 value={params.search}
                                 onChange={(e) => setParams(p => ({ ...p, search: e.target.value, page: 1 }))}
@@ -243,13 +245,13 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                         <Table>
                             <TableHeader className="bg-slate-50">
                                 <TableRow>
-                                    <TableHead className="font-semibold text-slate-600">Control #</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Agent</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Business</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Date</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Compliance</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                                    <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.fieldControls.thControl')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.fieldControls.thAgent')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.fieldControls.thBusiness')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.fieldControls.thDate')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.fieldControls.thCompliance')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.fieldControls.thStatus')}</TableHead>
+                                    <TableHead className="text-right font-semibold text-slate-600">{t('admin.fieldControls.thActions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -262,7 +264,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                 ) : controls.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={7} className="h-24 text-center text-slate-500">
-                                            No field controls found.
+                                            {t('admin.fieldControls.noControls')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -318,7 +320,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                         {totalRecords > 0 && (
                             <div className="flex items-center justify-between p-4 border-t border-slate-100">
                                 <div className="text-sm text-slate-500">
-                                    Showing {Math.min(((params.page - 1) * params.pageSize) + 1, totalRecords)} to {Math.min(params.page * params.pageSize, totalRecords)} of {totalRecords} entries
+                                    {t('admin.fieldControls.showing')} {Math.min(((params.page - 1) * params.pageSize) + 1, totalRecords)} {t('admin.fieldControls.to')} {Math.min(params.page * params.pageSize, totalRecords)} {t('admin.fieldControls.of')} {totalRecords} {t('admin.fieldControls.entries')}
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="outline" size="sm" onClick={() => setParams(p => ({ ...p, page: p.page - 1 }))} disabled={params.page === 1 || loading}>
@@ -342,60 +344,60 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                 Control #{selectedControl?.control_number}
                             </DialogTitle>
                             <DialogDescription className="text-slate-500">
-                                Field Inspection Details & Compliance Report
+                                {t('admin.fieldControls.inspectionDetails')}
                             </DialogDescription>
                         </DialogHeader>
 
                         {selectedControl && (
                             <div className="grid grid-cols-2 gap-6 py-4">
                                 <div className="space-y-4">
-                                    <h3 className="font-semibold text-slate-900 border-b pb-2">Inspection Info</h3>
+                                    <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.inspectionInfo')}</h3>
                                     <div className="grid grid-cols-1 gap-2 text-sm">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Agent</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.fieldControls.agent')}</span>
                                             <span className="font-medium">{selectedControl.agent_name}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Business</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.fieldControls.business')}</span>
                                             <span className="font-medium">{selectedControl.taxpayer_name || selectedControl.business_name}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Location</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.fieldControls.location')}</span>
                                             <span className="font-medium">{selectedControl.location || selectedControl.location_address}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Date</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.fieldControls.date')}</span>
                                             <span className="font-medium">{formatDate(selectedControl.control_date)}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Type</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.fieldControls.type')}</span>
                                             <span className="font-medium">{selectedControl.control_type}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h3 className="font-semibold text-slate-900 border-b pb-2">Compliance Stats</h3>
+                                    <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.complianceStats')}</h3>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div className="bg-slate-50 p-3 rounded-lg">
-                                            <span className="text-slate-500 text-xs">Total Checked</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.fieldControls.totalChecked')}</span>
                                             <p className="font-bold text-lg">{selectedControl.total_items_checked}</p>
                                         </div>
                                         <div className="bg-emerald-50 p-3 rounded-lg">
-                                            <span className="text-emerald-600 text-xs">Compliant</span>
+                                            <span className="text-emerald-600 text-xs">{t('admin.fieldControls.compliant')}</span>
                                             <p className="font-bold text-lg text-emerald-700">{selectedControl.compliant_items}</p>
                                         </div>
                                         <div className="bg-amber-50 p-3 rounded-lg">
-                                            <span className="text-amber-600 text-xs">Non-Compliant</span>
+                                            <span className="text-amber-600 text-xs">{t('admin.fieldControls.nonCompliant')}</span>
                                             <p className="font-bold text-lg text-amber-700">{selectedControl.non_compliant_items}</p>
                                         </div>
                                         <div className="bg-red-50 p-3 rounded-lg">
-                                            <span className="text-red-600 text-xs">Counterfeit</span>
+                                            <span className="text-red-600 text-xs">{t('admin.fieldControls.counterfeit')}</span>
                                             <p className="font-bold text-lg text-red-700">{selectedControl.counterfeit_items}</p>
                                         </div>
                                     </div>
                                     <div className="mt-2">
-                                        <span className="text-slate-500 text-xs">Compliance Rate</span>
+                                        <span className="text-slate-500 text-xs">{t('admin.fieldControls.complianceRate')}</span>
                                         <div className={`text-2xl font-bold ${parseFloat(selectedControl.compliance_rate) >= 80 ? 'text-emerald-600' :
                                             parseFloat(selectedControl.compliance_rate) >= 50 ? 'text-amber-600' :
                                                 'text-red-600'
@@ -407,7 +409,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
 
                                 {selectedControl.observations && (
                                     <div className="col-span-2 space-y-2">
-                                        <h3 className="font-semibold text-slate-900 border-b pb-2">Observations</h3>
+                                        <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.observations')}</h3>
                                         <p className="text-sm text-slate-600">{selectedControl.observations}</p>
                                     </div>
                                 )}
@@ -415,12 +417,12 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                 {selectedControl.offence_declared && (
                                     <div className="col-span-2 bg-red-50 border border-red-200 rounded-lg p-4">
                                         <h3 className="font-semibold text-red-800 flex items-center gap-2">
-                                            <AlertTriangle className="h-4 w-4" /> Offence Declared
+                                            <AlertTriangle className="h-4 w-4" /> {t('admin.fieldControls.offenceDeclared')}
                                         </h3>
                                         <p className="text-sm text-red-700 mt-1">{selectedControl.offence_description}</p>
                                         {selectedControl.proposed_fine > 0 && (
                                             <p className="text-sm font-medium text-red-800 mt-2">
-                                                Proposed Fine: ${selectedControl.proposed_fine.toLocaleString()}
+                                                {t('admin.fieldControls.proposedFine')} ${selectedControl.proposed_fine.toLocaleString()}
                                             </p>
                                         )}
                                     </div>
@@ -429,12 +431,12 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                         )}
 
                         <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
-                            <Button variant="outline" onClick={() => setDetailsOpen(false)}>Close</Button>
+                            <Button variant="outline" onClick={() => setDetailsOpen(false)}>{t('admin.fieldControls.close')}</Button>
 
                             {selectedControl?.status === 'completed' && (
                                 <>
                                     <Button variant="destructive" onClick={() => setRejectOpen(true)}>
-                                        <XCircle className="mr-2 h-4 w-4" /> Flag Issue
+                                        <XCircle className="mr-2 h-4 w-4" /> {t('admin.fieldControls.flagIssue')}
                                     </Button>
                                     <Button
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -442,7 +444,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                         disabled={!!processingId}
                                     >
                                         {processingId === selectedControl?.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                        Approve
+                                        {t('admin.fieldControls.approve')}
                                     </Button>
                                 </>
                             )}
@@ -454,26 +456,26 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                 <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
                     <DialogContent className="sm:max-w-md bg-white text-slate-900">
                         <DialogHeader>
-                            <DialogTitle>Flag Inspection Issue</DialogTitle>
+                            <DialogTitle>{t('admin.fieldControls.flagTitle')}</DialogTitle>
                             <DialogDescription>
-                                Please provide details about the issue with this field control report.
+                                {t('admin.fieldControls.flagDesc')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label>Issue Description</Label>
+                                <Label>{t('admin.fieldControls.issueDescription')}</Label>
                                 <Textarea
-                                    placeholder="e.g. Incomplete documentation, missing photos..."
+                                    placeholder={t('admin.fieldControls.issuePlaceholder')}
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                 />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setRejectOpen(false)}>Cancel</Button>
+                            <Button variant="ghost" onClick={() => setRejectOpen(false)}>{t('admin.fieldControls.cancel')}</Button>
                             <Button variant="destructive" onClick={confirmReject} disabled={!rejectionReason || !!processingId}>
                                 {processingId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                Confirm Flag
+                                {t('admin.fieldControls.confirmFlag')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

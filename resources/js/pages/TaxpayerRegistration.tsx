@@ -11,10 +11,11 @@ import LegalRepresentativeStep from '@/components/registration/LegalRepresentati
 import ReviewSubmitStep from '@/components/registration/ReviewSubmitStep';
 import StepIndicator from '@/components/registration/StepIndicator';
 import NavigationButtons from '@/components/registration/NavigationButtons';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface LegalForm { id: number; name: string; code?: string; }
 interface Sector { id: number; name: string; }
-interface CompanySize { id: number; name: string; }
+interface CompanySize { id: number; category: string; }
 interface District { id: number; name: string; }
 interface Commune { id: number; name: string; district_id: number; }
 interface Quartier { id: number; name: string; commune_id: number; }
@@ -49,25 +50,26 @@ const fieldToStepMap: Record<string, number> = {
     legal_representative_id_number: 3,
 };
 
-// Map field keys to user-friendly labels
+// Map field keys to translation keys used under registration.fields.*
 const fieldLabels: Record<string, string> = {
-    tax_identification_number: 'Tax Identification Number',
-    rccm_number: 'RCCM Number',
-    company_name: 'Company Name',
-    legal_form_id: 'Legal Form',
-    sector_id: 'Business Sector',
-    email: 'Company Email',
-    phone_number: 'Company Phone',
-    company_size_id: 'Company Size',
-    district_id: 'District',
-    commune_id: 'Commune',
-    quartier_id: 'Quartier',
-    avenue: 'Avenue/Street',
-    physical_address: 'Physical Address',
-    legal_representative_name: 'Legal Representative Name',
-    legal_representative_email: 'Legal Representative Email',
-    legal_representative_phone: 'Legal Representative Phone',
-    legal_representative_id_number: 'Legal Representative ID',
+
+    tax_identification_number: 'tin',
+    rccm_number: 'rccm',
+    company_name: 'companyName',
+    legal_form_id: 'legalForm',
+    sector_id: 'sector',
+    email: 'companyEmail',
+    phone_number: 'companyPhone',
+    company_size_id: 'size',
+    district_id: 'district',
+    commune_id: 'commune',
+    quartier_id: 'quartier',
+    avenue: 'avenue',
+    physical_address: 'address',
+    legal_representative_name: 'repName',
+    legal_representative_email: 'repEmail',
+    legal_representative_phone: 'repPhone',
+    legal_representative_id_number: 'repId',
 };
 
 export default function TaxpayerRegistration({
@@ -78,6 +80,7 @@ export default function TaxpayerRegistration({
     communes,
     quartiers
 }: Props) {
+    const { t } = useI18nStore();
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 4;
 
@@ -118,7 +121,8 @@ export default function TaxpayerRegistration({
                 if (!errorsByStep[step]) {
                     errorsByStep[step] = [];
                 }
-                errorsByStep[step].push(fieldLabels[field] || field);
+                const translationKey = fieldLabels[field] || field;
+                errorsByStep[step].push(t(`registration.fields.${translationKey}`) as string || field);
             });
 
             // Find the first step with errors
@@ -134,11 +138,11 @@ export default function TaxpayerRegistration({
                 <div className="space-y-2">
                     <div className="font-semibold flex items-center gap-2">
                         <AlertCircle className="h-4 w-4" />
-                        {errorCount} validation error{errorCount > 1 ? 's' : ''} found
+                        {t('registration.validationErrors').toString().replace('{count}', errorCount.toString())}
                     </div>
                     {Object.entries(errorsByStep).map(([step, fields]) => (
                         <div key={step} className="text-sm">
-                            <span className="font-medium">Step {step}:</span> {fields.join(', ')}
+                            <span className="font-medium">{t('registration.errorStep').toString().replace('{step}', step)}:</span> {fields.join(', ')}
                         </div>
                     ))}
                 </div>,
@@ -155,7 +159,7 @@ export default function TaxpayerRegistration({
                 toast.success(
                     <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4" />
-                        Registration submitted successfully! Check your email for credentials.
+                        {t('registration.success')}
                     </div>
                 );
             },
@@ -198,7 +202,8 @@ export default function TaxpayerRegistration({
         const fields = stepFields[step] || [];
         fields.forEach((field) => {
             if (!data[field as keyof typeof data]) {
-                missing.push(fieldLabels[field] || field);
+                const translationKey = fieldLabels[field] || field;
+                missing.push(t(`registration.fields.${translationKey}`) as string || field);
             }
         });
 
@@ -213,7 +218,7 @@ export default function TaxpayerRegistration({
                 const missingFields = getMissingFieldsForStep(currentStep);
                 toast.error(
                     <div className="space-y-1">
-                        <div className="font-semibold">Please fill in required fields:</div>
+                        <div className="font-semibold">{t('registration.fillOptions')}</div>
                         <ul className="list-disc list-inside text-sm">
                             {missingFields.map((field) => (
                                 <li key={field}>{field}</li>
@@ -233,10 +238,10 @@ export default function TaxpayerRegistration({
     };
 
     const steps = [
-        { id: 1, title: 'Company Details', description: 'Business information' },
-        { id: 2, title: 'Location', description: 'Business location' },
-        { id: 3, title: 'Legal Representative', description: 'Contact details' },
-        { id: 4, title: 'Review & Submit', description: 'Confirm registration' },
+        { id: 1, title: t('registration.steps.company.title'), description: t('registration.steps.company.description') },
+        { id: 2, title: t('registration.steps.location.title'), description: t('registration.steps.location.description') },
+        { id: 3, title: t('registration.steps.legalRoot.title'), description: t('registration.steps.legalRoot.description') },
+        { id: 4, title: t('registration.steps.review.title'), description: t('registration.steps.review.description') },
     ];
 
     const renderCurrentStep = () => {
@@ -330,7 +335,7 @@ export default function TaxpayerRegistration({
 
     return (
         <div className="min-h-dvh bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex flex-col">
-            <Head title="Taxpayer Registration" />
+            <Head title={t('registration.title') as string} />
             <Toaster richColors position="top-right" />
 
             {/* Homepage Header */}
@@ -341,8 +346,8 @@ export default function TaxpayerRegistration({
                 <div className="max-w-4xl mx-auto px-6 py-8">
                     {/* Main Title */}
                     <div className="my-8 text-center">
-                        <h1 className="text-3xl md:text-4xl font-bold text-[#003366] mb-3">Taxpayer Registration</h1>
-                        <p className="text-base md:text-lg text-slate-600">Register your business with the Kinshasa Bureau of Standards</p>
+                        <h1 className="text-3xl md:text-4xl font-bold text-[#003366] mb-3">{t('registration.title')}</h1>
+                        <p className="text-base md:text-lg text-slate-600">{t('registration.subtitle')}</p>
                     </div>
 
                     {/* Step Indicator */}
@@ -354,14 +359,17 @@ export default function TaxpayerRegistration({
                             <div className="flex items-start gap-3">
                                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <h3 className="font-semibold text-red-800">Please correct the following errors:</h3>
+                                    <h3 className="font-semibold text-red-800">{t('registration.fillOptions')}</h3>
                                     <ul className="mt-2 space-y-1 text-sm text-red-700">
-                                        {Object.entries(errors).map(([field, message]) => (
-                                            <li key={field} className="flex items-start gap-2">
-                                                <span className="font-medium">{fieldLabels[field] || field}:</span>
-                                                <span>{message}</span>
-                                            </li>
-                                        ))}
+                                        {Object.entries(errors).map(([field, message]) => {
+                                            const translationKey = fieldLabels[field] || field;
+                                            return (
+                                                <li key={field} className="flex items-start gap-2">
+                                                    <span className="font-medium">{t(`registration.fields.${translationKey}`) as string || field}:</span>
+                                                    <span>{message}</span>
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
                                 </div>
                             </div>
@@ -377,19 +385,19 @@ export default function TaxpayerRegistration({
                             totalSteps={totalSteps}
                             onPrevStep={prevStep}
                             onNextStep={nextStep}
-                            onSubmit={handleSubmit}
+                            onSubmit={() => handleSubmit(new Event('submit') as any)}
                             processing={processing}
                         />
                     </form>
 
                     {/* Login link */}
                     <div className="text-center text-sm text-slate-600 mt-8 mb-12">
-                        Already have an account?{' '}
+                        {t('registration.alreadyAccount')}{' '}
                         <Link
                             href="/login"
                             className="text-[#003366] font-semibold hover:text-[#002244] hover:underline transition-colors"
                         >
-                            Log in
+                            {t('registration.login')}
                         </Link>
                     </div>
                 </div>

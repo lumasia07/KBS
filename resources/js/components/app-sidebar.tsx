@@ -31,127 +31,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useI18nStore } from '@/stores/useI18nStore';
 import { type NavItem, type SharedData } from '@/types';
 
 import AppLogo from './app-logo';
-
-// Admin navigation items
-const adminNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/admin/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Taxpayers',
-        href: '/admin/taxpayers',
-        icon: Users,
-    },
-    {
-        title: 'Stamp Orders',
-        href: '/admin/orders',
-        icon: FileText,
-    },
-    {
-        title: 'Product Requests',
-        href: '/admin/products/requests',
-        icon: Package,
-    },
-    {
-        title: 'Payments',
-        href: '/admin/payments',
-        icon: CreditCard,
-    },
-    {
-        title: 'Field Control',
-        href: '/admin/field-controls',
-        icon: ShieldCheck,
-    },
-    {
-        title: 'Reports',
-        href: '/admin/reports',
-        icon: BarChart3,
-    },
-    {
-        title: 'Production',
-        href: '/admin/production',
-        icon: Printer,
-    },
-];
-
-// Taxpayer navigation items
-const taxpayerNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/taxpayer/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'My Products',
-        href: '/taxpayer/products',
-        icon: Package,
-    },
-    {
-        title: 'My Orders',
-        href: '/taxpayer/orders',
-        icon: FileText,
-    },
-    {
-        title: 'Payments',
-        href: '/taxpayer/payments',
-        icon: CreditCard,
-    },
-    {
-        title: 'Order History',
-        href: '/taxpayer/orders?view=history',
-        icon: History,
-    },
-];
-
-// Agent navigation items
-const agentNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/agent/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'My Inspections',
-        href: '/agent/inspections',
-        icon: ClipboardCheck,
-    },
-    {
-        title: 'New Inspection',
-        href: '/agent/inspections/create',
-        icon: MapPin,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Settings',
-        href: '/settings/profile',
-        icon: Settings,
-    },
-    {
-        title: 'Help & Support',
-        href: '/help',
-        icon: HelpCircle,
-    },
-];
-
-function getNavItemsForUserType(userType: string | undefined): NavItem[] {
-    switch (userType) {
-        case 'taxpayer':
-            return taxpayerNavItems;
-        case 'control_agent':
-            return agentNavItems;
-        case 'admin':
-        case 'finance':
-        default:
-            return adminNavItems;
-    }
-}
 
 function getDashboardUrlForUserType(userType: string | undefined): string {
     switch (userType) {
@@ -168,9 +51,45 @@ function getDashboardUrlForUserType(userType: string | undefined): string {
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
+    const { t, language } = useI18nStore();
     const userType = auth?.user?.user_type as string | undefined;
-    const navItems = getNavItemsForUserType(userType);
     const dashboardUrl = getDashboardUrlForUserType(userType);
+
+    // Build translated nav items based on user type
+    const navItems: NavItem[] = (() => {
+        switch (userType) {
+            case 'taxpayer':
+                return [
+                    { title: t('taxpayer.sidebar.dashboard'), href: '/taxpayer/dashboard', icon: LayoutGrid },
+                    { title: t('taxpayer.sidebar.myProducts'), href: '/taxpayer/products', icon: Package },
+                    { title: t('taxpayer.sidebar.myOrders'), href: '/taxpayer/orders', icon: FileText },
+                    { title: t('taxpayer.sidebar.payments'), href: '/taxpayer/payments', icon: CreditCard },
+                    { title: t('taxpayer.sidebar.orderHistory'), href: '/taxpayer/orders?view=history', icon: History },
+                ];
+            case 'control_agent':
+                return [
+                    { title: t('admin.sidebar.dashboard'), href: '/agent/dashboard', icon: LayoutGrid },
+                    { title: t('admin.sidebar.myInspections'), href: '/agent/inspections', icon: ClipboardCheck },
+                    { title: t('admin.sidebar.newInspection'), href: '/agent/inspections/create', icon: MapPin },
+                ];
+            default:
+                return [
+                    { title: t('admin.sidebar.dashboard'), href: '/admin/dashboard', icon: LayoutGrid },
+                    { title: t('admin.sidebar.taxpayers'), href: '/admin/taxpayers', icon: Users },
+                    { title: t('admin.sidebar.stampOrders'), href: '/admin/orders', icon: FileText },
+                    { title: t('admin.sidebar.productRequests'), href: '/admin/products/requests', icon: Package },
+                    { title: t('admin.sidebar.payments'), href: '/admin/payments', icon: CreditCard },
+                    { title: t('admin.sidebar.fieldControl'), href: '/admin/field-controls', icon: ShieldCheck },
+                    { title: t('admin.sidebar.reports'), href: '/admin/reports', icon: BarChart3 },
+                    { title: t('admin.sidebar.production'), href: '/admin/production', icon: Printer },
+                ];
+        }
+    })();
+
+    const footerNavItems: NavItem[] = [
+        { title: t('common.settings'), href: '/settings/profile', icon: Settings },
+        { title: t('common.helpSupport'), href: '/help', icon: HelpCircle },
+    ];
 
     return (
         <Sidebar collapsible="icon" variant="inset">

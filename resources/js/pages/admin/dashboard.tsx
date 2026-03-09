@@ -18,10 +18,7 @@ import {
 
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Admin Portal', href: '/admin/dashboard' },
-];
+import { useI18nStore } from '@/stores/useI18nStore';
 
 const iconMap: Record<string, any> = { Users, FileText, CreditCard, Stamp };
 
@@ -59,7 +56,6 @@ function DonutChart({ data, size = 130 }: { data: OrderStatusItem[]; size?: numb
                 <div className="rounded-full border-8 border-slate-100" style={{ width: size, height: size }} />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-lg font-bold text-slate-400">N/A</span>
-                    <span className="text-[10px] text-slate-400">No data</span>
                 </div>
             </div>
         );
@@ -82,7 +78,6 @@ function DonutChart({ data, size = 130 }: { data: OrderStatusItem[]; size?: numb
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-xl font-bold text-slate-900">{totalCount}</span>
-                <span className="text-[10px] text-slate-500">Total Orders</span>
             </div>
         </div>
     );
@@ -111,11 +106,11 @@ function BarChart({ data }: { data: MonthlyRevenueItem[] }) {
 // ── Quick Actions Config ──
 
 const quickActionConfig = [
-    { key: 'pendingOrders' as const, label: 'Approve Orders', icon: CheckCircle, href: '/admin/orders' },
-    { key: 'pendingVerifications' as const, label: 'Production Queue', icon: Clock, href: '/admin/production' },
-    { key: 'pendingProducts' as const, label: 'Product Requests', icon: Package, href: '/admin/products/requests' },
-    { key: 'newRegistrations' as const, label: 'New Registrations', icon: Building2, href: '/admin/taxpayers' },
-    { key: 'activeComplaints' as const, label: 'Active Complaints', icon: AlertCircle, href: '#' },
+    { key: 'pendingOrders' as const, labelKey: 'admin.dashboard.approveOrders', icon: CheckCircle, href: '/admin/orders' },
+    { key: 'pendingVerifications' as const, labelKey: 'admin.dashboard.productionQueue', icon: Clock, href: '/admin/production' },
+    { key: 'pendingProducts' as const, labelKey: 'admin.dashboard.productRequests', icon: Package, href: '/admin/products/requests' },
+    { key: 'newRegistrations' as const, labelKey: 'admin.dashboard.newRegistrations', icon: Building2, href: '/admin/taxpayers' },
+    { key: 'activeComplaints' as const, labelKey: 'admin.dashboard.activeComplaints', icon: AlertCircle, href: '#' },
 ];
 
 // ── Main Component ──
@@ -129,20 +124,24 @@ export default function Dashboard({
     stampDistribution = [],
     recentTransactions = [],
 }: DashboardProps) {
+    const { t } = useI18nStore();
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: t('admin.dashboard.breadcrumb'), href: '/admin/dashboard' },
+    ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Admin Dashboard" />
+            <Head title={t('admin.dashboard.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
-                        <p className="text-sm text-slate-500 mt-0.5">Welcome back! Here's what's happening with KBS today.</p>
+                        <h1 className="text-2xl font-bold text-slate-900">{t('admin.dashboard.title')}</h1>
+                        <p className="text-sm text-slate-500 mt-0.5">{t('admin.dashboard.welcome')}</p>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200">
                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                        <span>System Status: <span className="text-emerald-600 font-semibold">Operational</span></span>
+                        <span>{t('admin.dashboard.systemStatus')} <span className="text-emerald-600 font-semibold">{t('admin.dashboard.operational')}</span></span>
                     </div>
                 </div>
 
@@ -161,7 +160,7 @@ export default function Dashboard({
                                         <div className="flex items-center gap-1 mt-2">
                                             {stat.trend === 'up' ? <TrendingUp className="w-4 h-4 text-emerald-400" /> : <TrendingDown className="w-4 h-4 text-red-400" />}
                                             <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>{stat.change}</span>
-                                            <span className="text-xs text-white/50">vs last month</span>
+                                            <span className="text-xs text-white/50">{t('admin.dashboard.vsLastMonth')}</span>
                                         </div>
                                     </div>
                                     <div className="bg-white/10 p-3 rounded-xl group-hover:bg-white/20 transition-colors">
@@ -178,9 +177,9 @@ export default function Dashboard({
                 <div className="grid gap-6 lg:grid-cols-3">
                     {/* Order Status Donut */}
                     <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-6">
-                        <h2 className="text-lg font-semibold text-slate-900 mb-6">Order Status</h2>
+                        <h2 className="text-lg font-semibold text-slate-900 mb-6">{t('admin.dashboard.orderStatus')}</h2>
                         {orderStatusData.length === 0 ? (
-                            <p className="text-sm text-slate-400 text-center py-10">No orders yet.</p>
+                            <p className="text-sm text-slate-400 text-center py-10">{t('admin.dashboard.noOrdersYet')}</p>
                         ) : (
                             <div className="flex flex-col items-center">
                                 <DonutChart data={orderStatusData} />
@@ -200,18 +199,18 @@ export default function Dashboard({
                     {/* Monthly Revenue */}
                     <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-semibold text-slate-900">Monthly Revenue</h2>
+                            <h2 className="text-lg font-semibold text-slate-900">{t('admin.dashboard.monthlyRevenue')}</h2>
                             <span className={`text-sm font-medium flex items-center gap-1 ${revenueTrend.startsWith('-') ? 'text-red-500' : 'text-emerald-600'}`}>
                                 {revenueTrend.startsWith('-') ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
                                 {revenueTrend}
                             </span>
                         </div>
                         {monthlyRevenue.length === 0 ? (
-                            <p className="text-sm text-slate-400 text-center py-10">No revenue data.</p>
+                            <p className="text-sm text-slate-400 text-center py-10">{t('admin.dashboard.noRevenueData')}</p>
                         ) : (
                             <>
                                 <BarChart data={monthlyRevenue} />
-                                <p className="text-xs text-slate-400 mt-4 text-center">Revenue in millions (CDF)</p>
+                                <p className="text-xs text-slate-400 mt-4 text-center">{t('admin.dashboard.revenueCDF')}</p>
                             </>
                         )}
                     </div>
@@ -219,7 +218,7 @@ export default function Dashboard({
                     {/* Quick Actions */}
                     <div className="rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col">
                         <div className="p-6 border-b border-slate-200">
-                            <h2 className="text-lg font-semibold text-slate-900">Quick Actions</h2>
+                            <h2 className="text-lg font-semibold text-slate-900">{t('admin.dashboard.quickActions')}</h2>
                         </div>
                         <div className="p-4 space-y-2 flex-1">
                             {quickActionConfig.map((action, i) => {
@@ -230,7 +229,7 @@ export default function Dashboard({
                                             <div className="w-9 h-9 rounded-lg bg-[#003366]/10 flex items-center justify-center">
                                                 <action.icon className="w-4.5 h-4.5 text-[#003366]" />
                                             </div>
-                                            <span className="font-medium text-sm text-slate-900">{action.label}</span>
+                                            <span className="font-medium text-sm text-slate-900">{t(action.labelKey)}</span>
                                         </div>
                                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${count > 0 ? 'bg-[#003366] text-white' : 'bg-slate-200 text-slate-500'}`}>
                                             {count}
@@ -246,9 +245,9 @@ export default function Dashboard({
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Stamp Distribution */}
                     <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-6">
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Stamp Distribution by Type</h2>
+                        <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('admin.dashboard.stampDistribution')}</h2>
                         {stampDistribution.length === 0 ? (
-                            <p className="text-sm text-slate-400 text-center py-8">No stamp type data available.</p>
+                            <p className="text-sm text-slate-400 text-center py-8">{t('admin.dashboard.noStampData')}</p>
                         ) : (
                             <div className="space-y-4">
                                 {stampDistribution.map((item, i) => (
@@ -270,15 +269,15 @@ export default function Dashboard({
                     <div className="rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col">
                         <div className="p-6 border-b border-slate-200">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
+                                <h2 className="text-lg font-semibold text-slate-900">{t('admin.dashboard.recentActivity')}</h2>
                                 <Link href="/admin/orders" className="text-sm text-[#003366] hover:underline flex items-center gap-1">
-                                    View all <ArrowUpRight className="w-3.5 h-3.5" />
+                                    {t('admin.dashboard.viewAll')} <ArrowUpRight className="w-3.5 h-3.5" />
                                 </Link>
                             </div>
                         </div>
                         {recentTransactions.length === 0 ? (
                             <div className="flex-1 flex items-center justify-center p-8">
-                                <p className="text-sm text-slate-400">No recent activity.</p>
+                                <p className="text-sm text-slate-400">{t('admin.dashboard.noRecentActivity')}</p>
                             </div>
                         ) : (
                             <div className="divide-y divide-slate-100">

@@ -12,8 +12,9 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { AlertCircle, CheckCircle, Clock, FileText, Truck, Download, Printer, Landmark } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from 'sonner';
-import { useSwal } from '@/Hooks/useSwal';
-import { useFlashMessages } from '@/Hooks/useFlashMessages';
+import { useSwal } from '@/hooks/useSwal';
+import { useFlashMessages } from '@/hooks/useFlashMessages';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface TaxpayerInfo {
     id: string;
@@ -80,10 +81,10 @@ interface Props {
     taxpayerInfo: TaxpayerInfo;
 }
 
-const paymentMethods = [
-    { id: "mobile_money", name: "Mobile Money", providers: ["M-PESA", "Airtel Money", "Orange Money"] },
-    { id: "card", name: "Bank Card", providers: ["Visa", "Mastercard"] },
-    { id: "bank_transfer", name: "Bank Transfer", providers: ["All Banks"] },
+const paymentMethodDefs = [
+    { id: "mobile_money", nameKey: "taxpayer.checkout.methods.mobileMoney", providers: ["M-PESA", "Airtel Money", "Orange Money"] },
+    { id: "card", nameKey: "taxpayer.checkout.methods.bankCard", providers: ["Visa", "Mastercard"] },
+    { id: "bank_transfer", nameKey: "taxpayer.checkout.methods.bankTransfer", providers: ["All Banks"] },
 ];
 
 const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
@@ -95,6 +96,7 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
 
     const swal = useSwal();
     useFlashMessages(); // Initialize flash message listener
+    const { t, language } = useI18nStore();
 
     const { data, setData, post, processing, errors } = useForm({
         payment_method: selectedMethod,
@@ -662,11 +664,11 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
 
     const getStatusBadge = (status: string) => {
         const statusMap: Record<string, { color: string; icon: any; label: string }> = {
-            payment_pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: "Payment Pending" },
-            paid: { color: "bg-green-100 text-green-800", icon: CheckCircle, label: "Paid" },
-            processing: { color: "bg-blue-100 text-blue-800", icon: Clock, label: "Processing" },
-            completed: { color: "bg-green-100 text-green-800", icon: CheckCircle, label: "Completed" },
-            cancelled: { color: "bg-red-100 text-red-800", icon: AlertCircle, label: "Cancelled" },
+            payment_pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock, label: t('taxpayer.checkout.statuses.paymentPending') },
+            paid: { color: "bg-green-100 text-green-800", icon: CheckCircle, label: t('taxpayer.checkout.statuses.paid') },
+            processing: { color: "bg-blue-100 text-blue-800", icon: Clock, label: t('taxpayer.checkout.statuses.processing') },
+            completed: { color: "bg-green-100 text-green-800", icon: CheckCircle, label: t('taxpayer.checkout.statuses.completed') },
+            cancelled: { color: "bg-red-100 text-red-800", icon: AlertCircle, label: t('taxpayer.checkout.statuses.cancelled') },
         };
 
         const statusInfo = statusMap[status] || statusMap.payment_pending;
@@ -682,12 +684,12 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
 
     return (
         <AppLayout>
-            <Head title="Checkout - Stamp Order" />
+            <Head title={t('taxpayer.checkout.completePayment')} />
 
             <div className="container mx-auto py-8 px-4 max-w-6xl">
                 <div className="mb-6 flex justify-between items-center">
                     <Link href={`taxpayer/orders?view=history`} className="text-sm text-muted-foreground hover:text-primary">
-                        ← Back to Orders
+                        ← {t('taxpayer.checkout.backToOrders')}
                     </Link>
 
                     {order.status === 'payment_pending' && (
@@ -696,7 +698,7 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                             size="sm"
                             onClick={handleCancelOrder}
                         >
-                            Cancel Order
+                            {t('taxpayer.checkout.cancelOrder')}
                         </Button>
                     )}
                 </div>
@@ -707,9 +709,9 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <CardTitle className="text-2xl">Complete Payment</CardTitle>
+                                        <CardTitle className="text-2xl">{t('taxpayer.checkout.completePayment')}</CardTitle>
                                         <CardDescription>
-                                            Order #{order.order_number}
+                                            {t('taxpayer.checkout.orderNumber')} #{order.order_number}
                                         </CardDescription>
                                     </div>
                                     {getStatusBadge(order.status)}
@@ -718,22 +720,22 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                             <CardContent>
                                 <div className="space-y-6">
                                     <div className="bg-muted/50 p-4 rounded-lg">
-                                        <h3 className="font-semibold mb-3">Order Details</h3>
+                                        <h3 className="font-semibold mb-3">{t('taxpayer.checkout.orderDetails')}</h3>
                                         <div className="grid grid-cols-2 gap-4 text-sm">
                                             <div>
-                                                <p className="text-muted-foreground">Quantity</p>
-                                                <p className="font-medium">{order.quantity.toLocaleString()} stamps</p>
+                                                <p className="text-muted-foreground">{t('taxpayer.checkout.quantity')}</p>
+                                                <p className="font-medium">{order.quantity.toLocaleString()} {t('taxpayer.checkout.stamps')}</p>
                                             </div>
                                             <div>
-                                                <p className="text-muted-foreground">Packaging</p>
+                                                <p className="text-muted-foreground">{t('taxpayer.checkout.packaging')}</p>
                                                 <p className="font-medium capitalize">{order.packaging_type}</p>
                                             </div>
                                             <div>
-                                                <p className="text-muted-foreground">Delivery Method</p>
+                                                <p className="text-muted-foreground">{t('taxpayer.checkout.deliveryMethod')}</p>
                                                 <p className="font-medium capitalize">{order.delivery_method}</p>
                                             </div>
                                             <div>
-                                                <p className="text-muted-foreground">Order Date</p>
+                                                <p className="text-muted-foreground">{t('taxpayer.checkout.orderDate')}</p>
                                                 <p className="font-medium">{formatDate(order.created_at)}</p>
                                             </div>
                                         </div>
@@ -741,14 +743,14 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
 
                                     <form onSubmit={handleSubmit}>
                                         <div className="space-y-4">
-                                            <h3 className="font-semibold">Select Payment Method</h3>
+                                            <h3 className="font-semibold">{t('taxpayer.checkout.selectPaymentMethod')}</h3>
 
                                             <RadioGroup value={selectedMethod} onValueChange={handlePaymentMethodChange}>
-                                                {paymentMethods.map((method) => (
+                                                {paymentMethodDefs.map((method) => (
                                                     <div key={method.id} className="flex items-start space-x-3 space-y-0">
                                                         <RadioGroupItem value={method.id} id={method.id} />
                                                         <Label htmlFor={method.id} className="font-medium cursor-pointer">
-                                                            {method.name}
+                                                            {t(method.nameKey)}
                                                         </Label>
                                                     </div>
                                                 ))}
@@ -757,13 +759,13 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                             {selectedMethod === "mobile_money" && (
                                                 <div className="mt-4 space-y-4">
                                                     <div>
-                                                        <Label htmlFor="provider">Select Provider</Label>
+                                                        <Label htmlFor="provider">{t('taxpayer.checkout.selectProvider')}</Label>
                                                         <RadioGroup
                                                             value={selectedProvider}
                                                             onValueChange={handleProviderChange}
                                                             className="flex flex-wrap gap-4 mt-2"
                                                         >
-                                                            {paymentMethods.find(m => m.id === "mobile_money")?.providers.map((provider) => (
+                                                            {paymentMethodDefs.find(m => m.id === "mobile_money")?.providers.map((provider) => (
                                                                 <div key={provider} className="flex items-center space-x-2">
                                                                     <RadioGroupItem value={provider} id={provider} />
                                                                     <Label htmlFor={provider}>{provider}</Label>
@@ -773,11 +775,11 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                                     </div>
 
                                                     <div>
-                                                        <Label htmlFor="phone">Phone Number</Label>
+                                                        <Label htmlFor="phone">{t('taxpayer.checkout.phoneNumber')}</Label>
                                                         <Input
                                                             id="phone"
                                                             type="tel"
-                                                            placeholder="Enter your phone number"
+                                                            placeholder={t('taxpayer.checkout.phoneNumberPlaceholder')}
                                                             value={phoneNumber}
                                                             onChange={handlePhoneChange}
                                                             required={selectedMethod === "mobile_money"}
@@ -792,9 +794,9 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                             {selectedMethod === "card" && (
                                                 <Alert className="mt-4">
                                                     <AlertCircle className="h-4 w-4" />
-                                                    <AlertTitle>Card Payment</AlertTitle>
+                                                    <AlertTitle>{t('taxpayer.checkout.methods.bankCard')}</AlertTitle>
                                                     <AlertDescription>
-                                                        You will be redirected to a secure payment page to enter your card details.
+                                                        {t('taxpayer.checkout.cardPaymentAlert')}
                                                     </AlertDescription>
                                                 </Alert>
                                             )}
@@ -802,10 +804,9 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                             {selectedMethod === "bank_transfer" && (
                                                 <Alert className="mt-4">
                                                     <Landmark className="h-4 w-4" />
-                                                    <AlertTitle>Bank Transfer</AlertTitle>
+                                                    <AlertTitle>{t('taxpayer.checkout.methods.bankTransfer')}</AlertTitle>
                                                     <AlertDescription>
-                                                        Download the invoice and present it at any authorized bank to make payment.
-                                                        After payment, present the bank-stamped invoice at our offices for validation.
+                                                        {t('taxpayer.checkout.bankTransferAlert')}
                                                     </AlertDescription>
                                                 </Alert>
                                             )}
@@ -815,22 +816,22 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
 
                                         <div className="space-y-2">
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Subtotal</span>
+                                                <span className="text-muted-foreground">{t('taxpayer.checkout.subtotal')}</span>
                                                 <span>{formatCurrency(parseFloat(order.total_amount))}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">VAT (16%)</span>
+                                                <span className="text-muted-foreground">{t('taxpayer.checkout.vat')}</span>
                                                 <span>{formatCurrency(parseFloat(order.tax_amount))}</span>
                                             </div>
                                             {parseFloat(order.penalty_amount) > 0 && (
                                                 <div className="flex justify-between text-sm">
-                                                    <span className="text-muted-foreground">Penalties</span>
+                                                    <span className="text-muted-foreground">{t('taxpayer.checkout.penalties')}</span>
                                                     <span className="text-red-600">{formatCurrency(parseFloat(order.penalty_amount))}</span>
                                                 </div>
                                             )}
                                             <Separator className="my-2" />
                                             <div className="flex justify-between font-semibold text-lg">
-                                                <span>Total</span>
+                                                <span>{t('taxpayer.checkout.total')}</span>
                                                 <span>{formatCurrency(parseFloat(order.grand_total))}</span>
                                             </div>
                                         </div>
@@ -844,7 +845,7 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                                 disabled={isDownloading}
                                             >
                                                 <Download className="h-4 w-4" />
-                                                {isDownloading ? "Generating..." : "Download Invoice for Bank Payment"}
+                                                {isDownloading ? t('taxpayer.checkout.generating') : t('taxpayer.checkout.downloadInvoiceBank')}
                                             </Button>
 
                                             <Button
@@ -852,7 +853,7 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                                 className="w-full"
                                                 disabled={processing || isProcessing || (selectedMethod === "mobile_money" && (!selectedProvider || !phoneNumber))}
                                             >
-                                                {isProcessing ? "Processing..." : `Pay Online ${formatCurrency(parseFloat(order.grand_total))}`}
+                                                {isProcessing ? t('taxpayer.checkout.processingPayment') : `${t('taxpayer.checkout.payOnline')} ${formatCurrency(parseFloat(order.grand_total))}`}
                                             </Button>
                                         </div>
                                     </form>
@@ -867,12 +868,12 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                 <CardHeader className="pb-2">
                                     <CardTitle className="text-lg flex items-center gap-2 text-blue-700">
                                         <Printer className="h-5 w-5" />
-                                        Bank Payment Option
+                                        {t('taxpayer.checkout.bankPaymentOption')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-blue-800 mb-3">
-                                        Prefer to pay at the bank? Download the invoice and present it at any authorized bank branch.
+                                        {t('taxpayer.checkout.bankPaymentDesc')}
                                     </p>
                                     <Button
                                         variant="default"
@@ -881,10 +882,10 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                         disabled={isDownloading}
                                     >
                                         <Download className="h-4 w-4" />
-                                        {isDownloading ? "Generating..." : "Download Invoice"}
+                                        {isDownloading ? t('taxpayer.checkout.generating') : t('taxpayer.checkout.downloadInvoice')}
                                     </Button>
                                     <div className="mt-3 text-xs text-blue-600">
-                                        <p>After bank payment, present the stamped invoice at the authority with required documents for approval.</p>
+                                        <p>{t('taxpayer.checkout.afterBankPayment')}</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -893,24 +894,24 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                 <CardHeader>
                                     <CardTitle className="text-lg flex items-center gap-2">
                                         <Truck className="h-5 w-5" />
-                                        Delivery Information
+                                        {t('taxpayer.checkout.deliveryInfo')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-2 text-sm">
                                         <p>
-                                            <span className="text-muted-foreground">Method:</span>{' '}
+                                            <span className="text-muted-foreground">{t('taxpayer.checkout.method')}:</span>{' '}
                                             <span className="font-medium capitalize">{order.delivery_method}</span>
                                         </p>
                                         {order.delivery_address && (
                                             <p>
-                                                <span className="text-muted-foreground">Address:</span>{' '}
+                                                <span className="text-muted-foreground">{t('taxpayer.checkout.address')}:</span>{' '}
                                                 <span className="font-medium">{order.delivery_address}</span>
                                             </p>
                                         )}
                                         {order.estimated_delivery_date && (
                                             <p>
-                                                <span className="text-muted-foreground">Estimated Delivery:</span>{' '}
+                                                <span className="text-muted-foreground">{t('taxpayer.checkout.estimatedDelivery')}:</span>{' '}
                                                 <span className="font-medium">{formatDate(order.estimated_delivery_date)}</span>
                                             </p>
                                         )}
@@ -922,22 +923,22 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                                 <CardHeader>
                                     <CardTitle className="text-lg flex items-center gap-2">
                                         <FileText className="h-5 w-5" />
-                                        Required Documents
+                                        {t('taxpayer.checkout.requiredDocuments')}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <ul className="space-y-2 text-sm">
                                         <li className="flex items-center gap-2">
                                             <CheckCircle className="h-4 w-4 text-green-500" />
-                                            Import Declaration (if applicable)
+                                            {t('taxpayer.checkout.importDeclaration')}
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <CheckCircle className="h-4 w-4 text-green-500" />
-                                            Marketing Authorization (if applicable)
+                                            {t('taxpayer.checkout.marketingAuth')}
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <CheckCircle className="h-4 w-4 text-green-500" />
-                                            Certificate of Conformity (if applicable)
+                                            {t('taxpayer.checkout.certOfConformity')}
                                         </li>
                                     </ul>
                                 </CardContent>
@@ -945,14 +946,14 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="text-lg">Need Help?</CardTitle>
+                                    <CardTitle className="text-lg">{t('taxpayer.checkout.needHelp')}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-muted-foreground mb-3">
-                                        If you encounter any payment issues or need assistance, please contact our support.
+                                        {t('taxpayer.checkout.needHelpDesc')}
                                     </p>
                                     <Button variant="outline" className="w-full" asChild>
-                                        <Link href={"/help"}>Contact Support</Link>
+                                        <Link href={"/help"}>{t('taxpayer.checkout.contactSupport')}</Link>
                                     </Button>
                                 </CardContent>
                             </Card>
