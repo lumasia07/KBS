@@ -1,6 +1,7 @@
 import AppLayout from "@/layouts/app-layout";
 import { Head, useForm } from "@inertiajs/react";
 import { useState } from "react";
+import { useI18nStore } from '@/stores/useI18nStore';
 import {
     FileText,
     Download,
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
+    const { t } = useI18nStore();
     const [selectedReport, setSelectedReport] = useState('payments');
     const [showFilters, setShowFilters] = useState(false);
     const [previewData, setPreviewData] = useState<any>(null);
@@ -54,45 +56,45 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
     const reportTypes = [
         {
             id: 'payments',
-            name: 'Payments Report',
+            name: t('admin.reports.paymentsReport'),
             icon: CreditCard,
-            description: 'Payment transactions with filters'
+            description: t('admin.reports.paymentsDesc')
         },
         {
             id: 'orders',
-            name: 'Orders Report',
+            name: t('admin.reports.ordersReport'),
             icon: ShoppingCart,
-            description: 'Stamp orders history'
+            description: t('admin.reports.ordersDesc')
         },
         {
             id: 'taxpayers',
-            name: 'Taxpayers Report',
+            name: t('admin.reports.taxpayersReport'),
             icon: Users,
-            description: 'Taxpayer registration data'
+            description: t('admin.reports.taxpayersDesc')
         },
     ];
 
     const statusOptions = {
         payments: [
-            { value: '', label: 'All Status' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'completed', label: 'Completed' },
-            { value: 'failed', label: 'Failed' },
-            { value: 'refunded', label: 'Refunded' },
+            { value: '', label: t('admin.reports.allStatus') },
+            { value: 'pending', label: t('admin.reports.pending') },
+            { value: 'completed', label: t('admin.reports.completedStatus') },
+            { value: 'failed', label: t('admin.reports.failed') },
+            { value: 'refunded', label: t('admin.reports.refunded') },
         ],
         orders: [
-            { value: '', label: 'All Status' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'paid', label: 'Paid' },
-            { value: 'processing', label: 'Processing' },
-            { value: 'completed', label: 'Completed' },
-            { value: 'cancelled', label: 'Cancelled' },
+            { value: '', label: t('admin.reports.allStatus') },
+            { value: 'pending', label: t('admin.reports.pending') },
+            { value: 'paid', label: t('admin.reports.paidStatus') },
+            { value: 'processing', label: t('admin.reports.processing') },
+            { value: 'completed', label: t('admin.reports.completedStatus') },
+            { value: 'cancelled', label: t('admin.reports.cancelledStatus') },
         ],
         taxpayers: [
-            { value: '', label: 'All Status' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'approved', label: 'Approved' },
-            { value: 'rejected', label: 'Rejected' },
+            { value: '', label: t('admin.reports.allStatus') },
+            { value: 'pending', label: t('admin.reports.pending') },
+            { value: 'approved', label: t('admin.reports.approved') },
+            { value: 'rejected', label: t('admin.reports.rejectedStatus') },
         ]
     };
 
@@ -134,22 +136,22 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Reports', href: '/admin/reports' }]}>
-            <Head title="Reports" />
+        <AppLayout breadcrumbs={[{ title: t('admin.reports.breadcrumb'), href: '/admin/reports' }]}>
+            <Head title={t('admin.reports.headTitle')} />
 
             <div className="p-6">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-                        <p className="text-sm text-gray-500">Generate and download system reports</p>
+                        <h1 className="text-2xl font-bold text-gray-900">{t('admin.reports.title')}</h1>
+                        <p className="text-sm text-gray-500">{t('admin.reports.subtitle')}</p>
                     </div>
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
                         <Filter className="h-4 w-4" />
-                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                        {showFilters ? t('admin.reports.hideFilters') : t('admin.reports.showFilters')}
                     </button>
                 </div>
 
@@ -192,7 +194,7 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700">
-                                    Date From
+                                    {t('admin.reports.dateFrom')}
                                 </label>
                                 <input
                                     type="date"
@@ -203,7 +205,7 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                             </div>
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700">
-                                    Date To
+                                    {t('admin.reports.dateTo')}
                                 </label>
                                 <input
                                     type="date"
@@ -214,7 +216,7 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                             </div>
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700">
-                                    Status
+                                    {t('admin.reports.status')}
                                 </label>
                                 <select
                                     value={data.status}
@@ -231,14 +233,14 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                             {selectedReport === 'payments' && (
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700">
-                                        Payment Method
+                                        {t('admin.reports.paymentMethod')}
                                     </label>
                                     <select
                                         value={data.payment_method_id}
                                         onChange={e => setData('payment_method_id', e.target.value)}
                                         className="w-full rounded-lg border-gray-300 text-sm"
                                     >
-                                        <option value="">All Methods</option>
+                                        <option value="">{t('admin.reports.allMethods')}</option>
                                         {paymentMethods.map(method => (
                                             <option key={method.id} value={method.id}>
                                                 {method.name}
@@ -250,14 +252,14 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                             {(selectedReport === 'payments' || selectedReport === 'orders') && (
                                 <div className="md:col-span-4">
                                     <label className="mb-1 block text-sm font-medium text-gray-700">
-                                        Taxpayer
+                                        {t('admin.reports.taxpayer')}
                                     </label>
                                     <select
                                         value={data.taxpayer_id}
                                         onChange={e => setData('taxpayer_id', e.target.value)}
                                         className="w-full rounded-lg border-gray-300 text-sm"
                                     >
-                                        <option value="">All Taxpayers</option>
+                                        <option value="">{t('admin.reports.allTaxpayers')}</option>
                                         {taxpayers.map(taxpayer => (
                                             <option key={taxpayer.id} value={taxpayer.id}>
                                                 {taxpayer.company_name} - {taxpayer.tax_identification_number}
@@ -278,21 +280,21 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                             <FileText className="h-4 w-4" />
-                            PDF
+                            {t('admin.reports.pdf')}
                         </button>
                         <button
                             onClick={() => downloadReport('excel')}
                             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                             <FileSpreadsheet className="h-4 w-4" />
-                            Excel
+                            {t('admin.reports.excel')}
                         </button>
                         <button
                             onClick={() => downloadReport('csv')}
                             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                             <FileBarChart className="h-4 w-4" />
-                            CSV
+                            {t('admin.reports.csv')}
                         </button>
                     </div>
                     <button
@@ -303,12 +305,12 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                         {loading ? (
                             <>
                                 <Loader2 className="h-4 w-4 animate-spin" />
-                                Generating...
+                                {t('admin.reports.generating')}
                             </>
                         ) : (
                             <>
                                 <Eye className="h-4 w-4" />
-                                Preview
+                                {t('admin.reports.preview')}
                             </>
                         )}
                     </button>
@@ -320,7 +322,7 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                         <div className="max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-lg bg-white">
                             <div className="flex items-center justify-between border-b border-gray-200 p-4">
                                 <h3 className="text-lg font-semibold text-gray-900">
-                                    {selectedReport.charAt(0).toUpperCase() + selectedReport.slice(1)} Report Preview
+                                    {selectedReport.charAt(0).toUpperCase() + selectedReport.slice(1)} {t('admin.reports.reportPreview')}
                                 </h3>
                                 <button
                                     onClick={() => setShowPreview(false)}
@@ -337,13 +339,13 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                                         {selectedReport === 'payments' && (
                                             <>
                                                 <div className="rounded-lg bg-blue-50 p-4">
-                                                    <p className="text-sm text-blue-600">Total Payments</p>
+                                                    <p className="text-sm text-blue-600">{t('admin.reports.totalPayments')}</p>
                                                     <p className="text-xl font-bold text-blue-700">
                                                         {previewData.summary.total_payments}
                                                     </p>
                                                 </div>
                                                 <div className="rounded-lg bg-green-50 p-4">
-                                                    <p className="text-sm text-green-600">Grand Total</p>
+                                                    <p className="text-sm text-green-600">{t('admin.reports.grandTotal')}</p>
                                                     <p className="text-xl font-bold text-green-700">
                                                         {formatCurrency(previewData.summary.grand_total)}
                                                     </p>
@@ -353,19 +355,19 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                                         {selectedReport === 'orders' && (
                                             <>
                                                 <div className="rounded-lg bg-blue-50 p-4">
-                                                    <p className="text-sm text-blue-600">Total Orders</p>
+                                                    <p className="text-sm text-blue-600">{t('admin.reports.totalOrdersSummary')}</p>
                                                     <p className="text-xl font-bold text-blue-700">
                                                         {previewData.summary.total_orders}
                                                     </p>
                                                 </div>
                                                 <div className="rounded-lg bg-green-50 p-4">
-                                                    <p className="text-sm text-green-600">Total Quantity</p>
+                                                    <p className="text-sm text-green-600">{t('admin.reports.totalQuantity')}</p>
                                                     <p className="text-xl font-bold text-green-700">
                                                         {previewData.summary.total_quantity}
                                                     </p>
                                                 </div>
                                                 <div className="rounded-lg bg-purple-50 p-4">
-                                                    <p className="text-sm text-purple-600">Grand Total</p>
+                                                    <p className="text-sm text-purple-600">{t('admin.reports.grandTotal')}</p>
                                                     <p className="text-xl font-bold text-purple-700">
                                                         {formatCurrency(previewData.summary.grand_total)}
                                                     </p>
@@ -374,7 +376,7 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                                         )}
                                         {selectedReport === 'taxpayers' && (
                                             <div className="rounded-lg bg-blue-50 p-4">
-                                                <p className="text-sm text-blue-600">Total Taxpayers</p>
+                                                <p className="text-sm text-blue-600">{t('admin.reports.totalTaxpayers')}</p>
                                                 <p className="text-xl font-bold text-blue-700">
                                                     {previewData.summary.total_taxpayers}
                                                 </p>
@@ -389,33 +391,33 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                                         <thead className="bg-gray-50">
                                             {selectedReport === 'payments' && (
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Date</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Invoice</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Taxpayer</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Method</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Amount</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Total</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Status</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thDate')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thInvoice')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thTaxpayer')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thMethod')}</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">{t('admin.reports.thAmount')}</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">{t('admin.reports.thTotal')}</th>
+                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">{t('admin.reports.thStatus')}</th>
                                                 </tr>
                                             )}
                                             {selectedReport === 'orders' && (
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Order #</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Date</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Taxpayer</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Qty</th>
-                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">Total</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Status</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thOrderNum')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thDate')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thTaxpayer')}</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">{t('admin.reports.thQty')}</th>
+                                                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">{t('admin.reports.thTotal')}</th>
+                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">{t('admin.reports.thStatus')}</th>
                                                 </tr>
                                             )}
                                             {selectedReport === 'taxpayers' && (
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">TIN</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Company</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Legal Form</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Sector</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">Status</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Reg Date</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thTIN')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thCompany')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thLegalForm')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thSector')}</th>
+                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500">{t('admin.reports.thStatus')}</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('admin.reports.thRegDate')}</th>
                                                 </tr>
                                             )}
                                         </thead>
@@ -520,13 +522,13 @@ export default function ReportIndex({ taxpayers, paymentMethods }: Props) {
                                         onClick={() => setShowPreview(false)}
                                         className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                                     >
-                                        Close
+                                        {t('admin.reports.close')}
                                     </button>
                                     <button
                                         onClick={() => downloadReport('pdf')}
                                         className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                                     >
-                                        Download PDF
+                                        {t('admin.reports.downloadPDF')}
                                     </button>
                                 </div>
                             </div>

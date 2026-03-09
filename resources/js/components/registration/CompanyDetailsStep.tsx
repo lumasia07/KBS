@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputError from '@/components/input-error';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface LegalForm { id: number; name: string; code?: string; }
 interface Sector { id: number; name: string; }
@@ -28,12 +29,15 @@ interface CompanyDetailsStepProps {
 }
 
 export default function CompanyDetailsStep({ data, setData, errors, legalForms, sectors, companySizes }: CompanyDetailsStepProps) {
+    const { t } = useI18nStore();
     return (
         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-            <h2 className="text-2xl font-semibold text-black mb-4">Company Details</h2>
+            <h2 className="text-2xl font-semibold text-black mb-4">{t('registration.steps.company.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <Label htmlFor="tax_identification_number" className="text-sm font-medium text-slate-600">Tax Identification Number</Label>
+                    <Label htmlFor="tax_identification_number" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.tin')}
+                    </Label>
                     <Input
                         id="tax_identification_number"
                         type="text"
@@ -41,12 +45,14 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         onChange={(e) => setData('tax_identification_number', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter TIN"
+                        placeholder={t('registration.fields.tinPlaceholder') as string}
                     />
                     <InputError message={errors.tax_identification_number} />
                 </div>
                 <div>
-                    <Label htmlFor="rccm_number" className="text-sm font-medium text-slate-600">RCCM Number</Label>
+                    <Label htmlFor="rccm_number" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.rccm')}
+                    </Label>
                     <Input
                         id="rccm_number"
                         type="text"
@@ -54,12 +60,14 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         onChange={(e) => setData('rccm_number', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter RCCM number"
+                        placeholder={t('registration.fields.rccmPlaceholder') as string}
                     />
                     <InputError message={errors.rccm_number} />
                 </div>
                 <div>
-                    <Label htmlFor="company_name" className="text-sm font-medium text-slate-600">Company Name</Label>
+                    <Label htmlFor="company_name" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.companyName')}
+                    </Label>
                     <Input
                         id="company_name"
                         type="text"
@@ -67,12 +75,14 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         onChange={(e) => setData('company_name', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter full company name"
+                        placeholder={t('registration.fields.companyNamePlaceholder') as string}
                     />
                     <InputError message={errors.company_name} />
                 </div>
                 <div>
-                    <Label htmlFor="email" className="text-sm font-medium text-slate-600">Company Email</Label>
+                    <Label htmlFor="email" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.companyEmail')}
+                    </Label>
                     <Input
                         id="email"
                         type="email"
@@ -80,12 +90,14 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         onChange={(e) => setData('email', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter company email"
+                        placeholder={t('registration.fields.companyEmailPlaceholder') as string}
                     />
                     <InputError message={errors.email} />
                 </div>
                 <div>
-                    <Label htmlFor="phone_number" className="text-sm font-medium text-slate-600">Company Phone</Label>
+                    <Label htmlFor="phone_number" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.companyPhone')}
+                    </Label>
                     <Input
                         id="phone_number"
                         type="tel"
@@ -93,15 +105,17 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                         onChange={(e) => setData('phone_number', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter company phone"
+                        placeholder={t('registration.fields.companyPhonePlaceholder') as string}
                     />
                     <InputError message={errors.phone_number} />
                 </div>
                 <div>
-                    <Label htmlFor="legal_form_id" className="text-sm font-medium text-slate-600">Legal Form</Label>
+                    <Label htmlFor="legal_form_id" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.legalForm')}
+                    </Label>
                     <Select value={data.legal_form_id?.toString()} onValueChange={(value) => setData('legal_form_id', value)}>
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
-                            <SelectValue placeholder="Select legal form" />
+                            <SelectValue placeholder={t('registration.fields.legalFormPlaceholder') as string} />
                         </SelectTrigger>
                         <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {legalForms.map((form) => (
@@ -114,10 +128,12 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                     <InputError message={errors.legal_form_id} />
                 </div>
                 <div>
-                    <Label htmlFor="sector_id" className="text-sm font-medium text-slate-600">Business Sector</Label>
+                    <Label htmlFor="sector_id" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.sector')}
+                    </Label>
                     <Select value={data.sector_id?.toString()} onValueChange={(value) => setData('sector_id', value)}>
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
-                            <SelectValue placeholder="Select business sector" />
+                            <SelectValue placeholder={t('registration.fields.sectorPlaceholder') as string} />
                         </SelectTrigger>
                         <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {sectors.map((sector) => (
@@ -130,10 +146,12 @@ export default function CompanyDetailsStep({ data, setData, errors, legalForms, 
                     <InputError message={errors.sector_id} />
                 </div>
                 <div>
-                    <Label htmlFor="company_size_id" className="text-sm font-medium text-slate-600">Company Size</Label>
+                    <Label htmlFor="company_size_id" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.size')}
+                    </Label>
                     <Select value={data.company_size_id?.toString()} onValueChange={(value) => setData('company_size_id', value)}>
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
-                            <SelectValue placeholder="Select company size" />
+                            <SelectValue placeholder={t('registration.fields.sizePlaceholder') as string} />
                         </SelectTrigger>
                         <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {companySizes.map((size) => (

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { router } from '@inertiajs/react';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 export function OrderHistory() {
     const {
@@ -35,6 +36,7 @@ export function OrderHistory() {
     // Modal State
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const { t } = useI18nStore();
 
     useEffect(() => {
         fetchOrderHistory();
@@ -91,7 +93,7 @@ export function OrderHistory() {
                     {!ordersLoading && <div className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500">🔍</div>}
                     <input
                         type="text"
-                        placeholder="Search by order number or product..."
+                        placeholder={t('taxpayer.orders.history.searchPlaceholder')}
                         className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-4 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]"
                         value={tableParams.search}
                         onChange={handleSearch}
@@ -104,20 +106,20 @@ export function OrderHistory() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Order Number</TableHead>
-                            <TableHead>Product</TableHead>
-                            <TableHead>Quantity</TableHead>
-                            <TableHead>Total</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>{t('taxpayer.orders.history.columns.orderNumber')}</TableHead>
+                            <TableHead>{t('taxpayer.orders.history.columns.product')}</TableHead>
+                            <TableHead>{t('taxpayer.orders.history.columns.quantity')}</TableHead>
+                            <TableHead>{t('taxpayer.orders.history.columns.total')}</TableHead>
+                            <TableHead>{t('taxpayer.orders.history.columns.status')}</TableHead>
+                            <TableHead>{t('taxpayer.orders.history.columns.date')}</TableHead>
+                            <TableHead className="text-right">{t('taxpayer.orders.history.columns.actions')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {orderHistory.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={7} className="h-24 text-center text-slate-500">
-                                    {ordersLoading ? 'Loading...' : 'No orders found.'}
+                                    {ordersLoading ? t('taxpayer.orders.history.loading') : t('taxpayer.orders.history.noOrders')}
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -160,7 +162,7 @@ export function OrderHistory() {
                                                     onClick={() => handlePayNow(order.id)}
                                                 >
                                                     <CreditCard className="h-4 w-4 mr-1" />
-                                                    Pay Now
+                                                    {t('taxpayer.payments.payNow')}
                                                 </Button>
                                             )}
                                         </div>
@@ -176,7 +178,10 @@ export function OrderHistory() {
             {totalRecords > 0 && (
                 <div className="flex items-center justify-between">
                     <div className="text-sm text-slate-500">
-                        Showing {Math.min(((tableParams.page - 1) * tableParams.pageSize) + 1, totalRecords)} to {Math.min(tableParams.page * tableParams.pageSize, totalRecords)} of {totalRecords} entries
+                        {t('taxpayer.payments.showing')
+                            .replace('{from}', String(Math.min(((tableParams.page - 1) * tableParams.pageSize) + 1, totalRecords)))
+                            .replace('{to}', String(Math.min(tableParams.page * tableParams.pageSize, totalRecords)))
+                            .replace('{total}', String(totalRecords))}
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -208,7 +213,7 @@ export function OrderHistory() {
             <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
                 <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
-                        <DialogTitle>Order Details</DialogTitle>
+                        <DialogTitle>{t('taxpayer.orders.history.dialog.title')}</DialogTitle>
                         <DialogDescription>
                             Review complete information for Order #{selectedOrder?.order_number}
                         </DialogDescription>
@@ -217,7 +222,7 @@ export function OrderHistory() {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label className="text-slate-500">Product</Label>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.product')}</Label>
                                     <div className="font-medium">{selectedOrder.product?.name || selectedOrder.product_name}</div>
                                 </div>
                                 <div className="text-right">
@@ -226,34 +231,34 @@ export function OrderHistory() {
                                     </Badge>
                                 </div>
                                 <div>
-                                    <Label className="text-slate-500">Packaging</Label>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.packaging')}</Label>
                                     <div className="capitalize">{selectedOrder.packaging_type}</div>
                                 </div>
                                 <div>
-                                    <Label className="text-slate-500">Quantity</Label>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.quantity')}</Label>
                                     <div>{selectedOrder.quantity.toLocaleString()}</div>
                                 </div>
                                 <div>
-                                    <Label className="text-slate-500">Grand Total</Label>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.total')}</Label>
                                     <div className="font-bold text-lg">
                                         {formatCurrency(selectedOrder.grand_total)}
                                     </div>
                                 </div>
                                 <div className="col-span-2">
-                                    <Label className="text-slate-500">Delivery Address</Label>
-                                    <div>{selectedOrder.delivery_method === 'pickup' ? 'Store Pickup' : selectedOrder.delivery_address}</div>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.deliveryAddress')}</Label>
+                                    <div>{selectedOrder.delivery_method === 'pickup' ? t('taxpayer.orders.history.dialog.storePickup') : selectedOrder.delivery_address}</div>
                                 </div>
                                 <div>
-                                    <Label className="text-slate-500">Payment Method</Label>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.paymentMethod')}</Label>
                                     <div className="capitalize">{selectedOrder.payment_method?.replace('_', ' ')}</div>
                                 </div>
                                 <div>
-                                    <Label className="text-slate-500">Date Placed</Label>
+                                    <Label className="text-slate-500">{t('taxpayer.orders.history.dialog.datePlaced')}</Label>
                                     <div>{selectedOrder.created_at}</div>
                                 </div>
                                 {selectedOrder.rejection_reason && (
                                     <div className="col-span-2 bg-red-50 p-3 rounded-md border border-red-100">
-                                        <Label className="text-red-600 font-semibold mb-1 block">Rejection Reason</Label>
+                                        <Label className="text-red-600 font-semibold mb-1 block">{t('taxpayer.orders.history.dialog.rejectionReason')}</Label>
                                         <div className="text-red-700 text-sm">{selectedOrder.rejection_reason}</div>
                                     </div>
                                 )}
@@ -270,14 +275,14 @@ export function OrderHistory() {
                                         }}
                                     >
                                         <CreditCard className="h-4 w-4 mr-2" />
-                                        Complete Payment Now
+                                        {t('taxpayer.orders.history.dialog.completePayment')}
                                     </Button>
                                 </div>
                             )}
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setDetailsOpen(false)}>Close</Button>
+                        <Button variant="outline" onClick={() => setDetailsOpen(false)}>{t('taxpayer.orders.history.dialog.close')}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

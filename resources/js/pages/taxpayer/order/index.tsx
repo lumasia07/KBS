@@ -7,20 +7,23 @@ import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { ProductGrid, OrderCart, OrderForm, OrderHistory } from '@/components/order';
 import { useOrderStore } from '@/stores/useOrderStore';
+import { useI18nStore } from '@/stores/useI18nStore';
 import type { BreadcrumbItem } from '@/types';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Taxpayer Portal',
-        href: '/taxpayer/dashboard',
-    },
-    {
-        title: 'Place Order',
-        href: '/taxpayer/order',
-    },
-];
-
 export default function TaxpayerOrder() {
+    const { t, language } = useI18nStore();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('taxpayer.portalName'),
+            href: '/taxpayer/dashboard',
+        },
+        {
+            title: t('taxpayer.sidebar.myOrders'),
+            href: '/taxpayer/order',
+        },
+    ];
+
     const {
         currentStep,
         cartItems,
@@ -56,7 +59,7 @@ export default function TaxpayerOrder() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Place Order - Taxpayer Portal" />
+            <Head title={t('taxpayer.orders.title')} />
             <Toaster richColors position="top-right" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
@@ -70,23 +73,23 @@ export default function TaxpayerOrder() {
                                 className="text-slate-500 hover:text-slate-900"
                             >
                                 <ArrowLeft className="w-4 h-4 mr-2" />
-                                Back to Products
+                                {t('taxpayer.orders.orderForm.back')}
                             </Button>
                         )}
                         <div>
                             <h1 className="text-2xl font-bold text-slate-900">
                                 {currentStep === 'products'
-                                    ? 'Order Stamps'
+                                    ? t('taxpayer.orders.title')
                                     : currentStep === 'confirmation'
-                                        ? 'Order Complete'
-                                        : 'Checkout'}
+                                        ? t('taxpayer.orders.confirmationTitle')
+                                        : t('taxpayer.orders.checkoutTitle')}
                             </h1>
                             <p className="text-sm text-slate-500">
                                 {currentStep === 'products'
-                                    ? 'Browse and add products to your cart'
+                                    ? t('taxpayer.orders.subtitle')
                                     : currentStep === 'confirmation'
-                                        ? 'Your order has been submitted'
-                                        : 'Complete your order details'}
+                                        ? t('taxpayer.orders.confirmationSubtitle')
+                                        : t('taxpayer.orders.checkoutSubtitle')}
                             </p>
                         </div>
                     </div>
@@ -100,22 +103,22 @@ export default function TaxpayerOrder() {
                                 onClick={() => setView('history')}
                             >
                                 <History className="w-4 h-4 mr-2" />
-                                Order History
+                                {t('taxpayer.orders.orderHistory')}
                             </Button>
                             <Button
-                                variant={view === 'create' ? 'default' : 'outline'} // Highlight if active (or use tabs style)
+                                variant={view === 'create' ? 'default' : 'outline'}
                                 className={view === 'create' ? "bg-[#003366] text-white hover:bg-[#002244]" : "border-slate-200 text-slate-600 hover:border-[#003366] hover:text-[#003366]"}
                                 onClick={() => setView('create')}
                             >
                                 <FileText className="w-4 h-4 mr-2" />
-                                New Order
+                                {t('taxpayer.orders.newOrder')}
                             </Button>
                             <Button
                                 onClick={() => setCartOpen(true)}
                                 className="bg-gradient-to-r from-[#003366] to-[#0052A3] hover:from-[#002244] hover:to-[#003366] text-white relative"
                             >
                                 <ShoppingCart className="w-4 h-4 mr-2" />
-                                Cart
+                                {t('taxpayer.orders.cart.button')}
                                 {cartItems.length > 0 && (
                                     <>
                                         <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs">

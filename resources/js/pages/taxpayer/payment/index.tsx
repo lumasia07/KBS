@@ -21,7 +21,8 @@ import {
 import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { useSwal } from '@/Hooks/useSwal';
+import { useSwal } from '@/hooks/useSwal';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 // Types aligned with backend
 interface Order {
@@ -104,6 +105,7 @@ interface Props {
 
 export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filters }: Props) {
     const swal = useSwal();
+    const { t, language } = useI18nStore();
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
@@ -129,11 +131,11 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
 
     const breadcrumbs = [
         {
-            title: 'Dashboard',
+            title: t('taxpayer.sidebar.dashboard'),
             href: '/taxpayer/dashboard',
         },
         {
-            title: 'Payments',
+            title: t('taxpayer.sidebar.payments'),
             href: '/taxpayer/payments',
         },
     ];
@@ -236,11 +238,11 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
         
         switch (method) {
             case 'mobile_money':
-                return 'Mobile Money';
+                return t('taxpayer.payments.methods.mobileMoney');
             case 'card':
-                return 'Card Payment';
+                return t('taxpayer.payments.methods.cardPayment');
             case 'bank_transfer':
-                return 'Bank Transfer';
+                return t('taxpayer.payments.methods.bankTransfer');
             default:
                 return method || 'Unknown';
         }
@@ -287,14 +289,14 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Payments" />
+            <Head title={t('taxpayer.payments.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Payment History</h1>
-                        <p className="text-sm text-slate-500">View and manage all your payment transactions</p>
+                        <h1 className="text-2xl font-bold text-slate-900">{t('taxpayer.payments.title')}</h1>
+                        <p className="text-sm text-slate-500">{t('taxpayer.payments.subtitle')}</p>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -303,14 +305,14 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
                         >
                             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            {t('taxpayer.payments.refresh')}
                         </button>
                         <button
                             onClick={() => setShowFilterModal(true)}
                             className="flex items-center gap-2 px-4 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors shadow-md"
                         >
                             <Filter className="w-4 h-4" />
-                            Filter
+                            {t('taxpayer.payments.filter')}
                         </button>
                     </div>
                 </div>
@@ -320,7 +322,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <div className="bg-gradient-to-br from-[#003366] to-[#002244] rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Total Payments</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.payments.stats.totalPayments')}</p>
                                 <p className="text-2xl font-bold">{stats.total}</p>
                             </div>
                             <CreditCard className="w-8 h-8 text-white/30" />
@@ -329,7 +331,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Completed</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.payments.stats.completed')}</p>
                                 <p className="text-2xl font-bold">{stats.completed}</p>
                             </div>
                             <CheckCircle2 className="w-8 h-8 text-white/30" />
@@ -338,7 +340,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Pending</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.payments.stats.pending')}</p>
                                 <p className="text-2xl font-bold">{stats.pending}</p>
                             </div>
                             <Clock className="w-8 h-8 text-white/30" />
@@ -347,7 +349,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Total Amount</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.payments.stats.totalAmount')}</p>
                                 <p className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</p>
                             </div>
                             <FileText className="w-8 h-8 text-white/30" />
@@ -360,7 +362,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search by invoice, order number, or transaction ID..."
+                        placeholder={t('taxpayer.payments.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-colors"
@@ -378,7 +380,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                 {/* Active Filters */}
                 {(statusFilter !== 'all' || methodFilter !== 'all' || dateFrom || dateTo) && (
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-slate-500">Active filters:</span>
+                        <span className="text-xs text-slate-500">{t('taxpayer.payments.activeFilters')}</span>
                         {statusFilter !== 'all' && (
                             <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs">
                                 Status: {statusFilter}
@@ -407,7 +409,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             onClick={resetFilters}
                             className="text-xs text-[#003366] hover:underline"
                         >
-                            Clear all
+                            {t('taxpayer.payments.clearAll')}
                         </button>
                     </div>
                 )}
@@ -415,25 +417,24 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                 {/* Payments Table */}
                 <div className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-slate-200">
-                        <h2 className="text-lg font-semibold text-slate-900">Transaction History</h2>
+                        <h2 className="text-lg font-semibold text-slate-900">{t('taxpayer.payments.tableTitle')}</h2>
                     </div>
 
                     {!payments?.data?.length ? (
                         <div className="p-12 text-center">
                             <CreditCard className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-slate-600 mb-2">No payments found</h3>
+                            <h3 className="text-lg font-medium text-slate-600 mb-2">{t('taxpayer.payments.noPayments')}</h3>
                             <p className="text-sm text-slate-400 mb-4">
                                 {searchTerm || statusFilter !== 'all' || methodFilter !== 'all' || dateFrom || dateTo
-                                    ? 'No payments match your filters. Try adjusting your search criteria.'
-                                    : "You haven't made any payments yet."}
-                            </p>
+                                    ? t('taxpayer.payments.noPaymentsFiltered')
+                                    : t('taxpayer.payments.noPaymentsDefault')}</p>
                             {!searchTerm && statusFilter === 'all' && methodFilter === 'all' && !dateFrom && !dateTo && (
                                 <Link
                                     href="/taxpayer/orders"
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors"
                                 >
                                     <Plus className="w-4 h-4" />
-                                    View Orders
+                                    {t('taxpayer.payments.viewOrders')}
                                 </Link>
                             )}
                         </div>
@@ -443,13 +444,13 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                 <table className="w-full">
                                     <thead className="bg-slate-50">
                                         <tr>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Invoice</th>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Order</th>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Date</th>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Method</th>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Amount</th>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Status</th>
-                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Actions</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.invoice')}</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.order')}</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.date')}</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.method')}</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.amount')}</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.status')}</th>
+                                            <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.payments.table.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -459,7 +460,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                                     <div>
                                                         <p className="text-sm font-medium text-slate-900">{payment.invoice_number}</p>
                                                         {payment.transaction_id && (
-                                                            <p className="text-xs text-slate-500">TXN: {payment.transaction_id.substring(0, 8)}...</p>
+                                                        <p className="text-xs text-slate-500">TXN: {payment.transaction_id.substring(0, 8)}...</p>
                                                         )}
                                                     </div>
                                                 </td>
@@ -496,8 +497,8 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                                     </p>
                                                     {(payment.tax_amount > 0 || payment.penalty_amount > 0) && (
                                                         <p className="text-xs text-slate-400">
-                                                            Tax: {formatCurrency(payment.tax_amount)}
-                                                            {payment.penalty_amount > 0 && ` + Penalty: ${formatCurrency(payment.penalty_amount)}`}
+                                                            {t('taxpayer.payments.detailsModal.tax')}: {formatCurrency(payment.tax_amount)}
+                                                            {payment.penalty_amount > 0 && ` + ${t('taxpayer.payments.detailsModal.penalty')}: ${formatCurrency(payment.penalty_amount)}`}
                                                         </p>
                                                     )}
                                                 </td>
@@ -537,9 +538,10 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             {payments.last_page > 1 && (
                                 <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200">
                                     <p className="text-sm text-slate-500">
-                                        Showing {(payments.current_page - 1) * payments.per_page + 1} to{' '}
-                                        {Math.min(payments.current_page * payments.per_page, payments.total)} of{' '}
-                                        {payments.total} results
+                                        {t('taxpayer.payments.showing')
+                                            .replace('{from}', String((payments.current_page - 1) * payments.per_page + 1))
+                                            .replace('{to}', String(Math.min(payments.current_page * payments.per_page, payments.total)))
+                                            .replace('{total}', String(payments.total))}
                                     </p>
                                     <div className="flex gap-2">
                                         {payments.links?.map((link: any, index: number) => {
@@ -572,8 +574,8 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
                         <div className="flex items-center justify-between p-6 border-b border-slate-200">
                             <div>
-                                <h3 className="text-lg font-semibold text-slate-900">Filter Payments</h3>
-                                <p className="text-sm text-slate-500">Narrow down your payment history</p>
+                                <h3 className="text-lg font-semibold text-slate-900">{t('taxpayer.payments.filterModal.title')}</h3>
+                                <p className="text-sm text-slate-500">{t('taxpayer.payments.filterModal.subtitle')}</p>
                             </div>
                             <button
                                 onClick={() => setShowFilterModal(false)}
@@ -586,13 +588,13 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                         <div className="p-6 space-y-4">
                             {/* Status Filter */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Payment Status</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.payments.filterModal.status')}</label>
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                     className="w-full px-4 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-colors"
                                 >
-                                    <option value="all">All Statuses</option>
+                                    <option value="all">{t('taxpayer.payments.filterModal.allStatuses')}</option>
                                     <option value="completed">Completed</option>
                                     <option value="pending">Pending</option>
                                     <option value="failed">Failed</option>
@@ -602,13 +604,13 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
 
                             {/* Payment Method Filter */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.payments.filterModal.method')}</label>
                                 <select
                                     value={methodFilter}
                                     onChange={(e) => setMethodFilter(e.target.value)}
                                     className="w-full px-4 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-colors"
                                 >
-                                    <option value="all">All Methods</option>
+                                    <option value="all">{t('taxpayer.payments.filterModal.allMethods')}</option>
                                     {paymentMethods.map((method) => (
                                         <option key={method.id} value={method.id}>
                                             {method.name}
@@ -620,7 +622,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             {/* Date Range */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">From Date</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.payments.filterModal.fromDate')}</label>
                                     <input
                                         type="date"
                                         value={dateFrom}
@@ -629,7 +631,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">To Date</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.payments.filterModal.toDate')}</label>
                                     <input
                                         type="date"
                                         value={dateTo}
@@ -646,13 +648,13 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                 onClick={resetFilters}
                                 className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                             >
-                                Reset
+                                {t('taxpayer.payments.filterModal.reset')}
                             </button>
                             <button
                                 onClick={handleFilterApply}
                                 className="flex-1 px-4 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors"
                             >
-                                Apply Filters
+                                {t('taxpayer.payments.filterModal.apply')}
                             </button>
                         </div>
                     </div>
@@ -665,7 +667,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
                         <div className="flex items-center justify-between p-6 border-b border-slate-200">
                             <div>
-                                <h3 className="text-lg font-semibold text-slate-900">Payment Details</h3>
+                                <h3 className="text-lg font-semibold text-slate-900">{t('taxpayer.payments.detailsModal.title')}</h3>
                                 <p className="text-sm text-slate-500">{selectedPayment.invoice_number}</p>
                             </div>
                             <button
@@ -679,7 +681,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                         <div className="p-6 space-y-4">
                             {/* Status */}
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-slate-600">Status</span>
+                                <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.status')}</span>
                                 <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(selectedPayment.status)}`}>
                                     {getStatusIcon(selectedPayment.status)}
                                     {selectedPayment.status}
@@ -689,23 +691,23 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             {/* Amount Breakdown */}
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-slate-600">Subtotal</span>
+                                    <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.subtotal')}</span>
                                     <span className="text-sm">{formatCurrency(selectedPayment.amount)}</span>
                                 </div>
                                 {selectedPayment.tax_amount > 0 && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-slate-600">Tax</span>
+                                        <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.tax')}</span>
                                         <span className="text-sm">{formatCurrency(selectedPayment.tax_amount)}</span>
                                     </div>
                                 )}
                                 {selectedPayment.penalty_amount > 0 && (
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-slate-600">Penalty</span>
+                                        <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.penalty')}</span>
                                         <span className="text-sm text-amber-600">{formatCurrency(selectedPayment.penalty_amount)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center pt-2 border-t border-slate-100">
-                                    <span className="text-sm font-medium text-slate-700">Total</span>
+                                    <span className="text-sm font-medium text-slate-700">{t('taxpayer.payments.detailsModal.total')}</span>
                                     <span className="text-lg font-bold text-[#003366]">
                                         {formatCurrency(selectedPayment.total_amount || selectedPayment.amount)}
                                     </span>
@@ -714,13 +716,13 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
 
                             {/* Invoice */}
                             <div className="flex justify-between">
-                                <span className="text-sm text-slate-600">Invoice</span>
+                                <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.invoice')}</span>
                                 <span className="text-sm font-medium">{selectedPayment.invoice_number}</span>
                             </div>
 
                             {/* Order */}
                             <div className="flex justify-between">
-                                <span className="text-sm text-slate-600">Order Number</span>
+                                <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.orderNumber')}</span>
                                 <Link
                                     href={`/taxpayer/orders/${selectedPayment.order?.order_number}`}
                                     className="text-sm text-[#003366] hover:underline"
@@ -732,14 +734,14 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             {/* Transaction ID */}
                             {selectedPayment.transaction_id && (
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-slate-600">Transaction ID</span>
+                                    <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.transactionId')}</span>
                                     <span className="text-sm font-mono">{selectedPayment.transaction_id}</span>
                                 </div>
                             )}
 
                             {/* Payment Method */}
                             <div className="flex justify-between">
-                                <span className="text-sm text-slate-600">Payment Method</span>
+                                <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.paymentMethod')}</span>
                                 <div className="flex items-center gap-2">
                                     {getPaymentMethodIcon(selectedPayment.paymentMethod)}
                                     <span className="text-sm">{getPaymentMethodLabel(selectedPayment.paymentMethod)}</span>
@@ -751,22 +753,22 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                 <>
                                     {selectedPayment.payment_provider_response.phone_number && (
                                         <div className="flex justify-between">
-                                            <span className="text-sm text-slate-600">Phone Number</span>
+                                            <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.phoneNumber')}</span>
                                             <span className="text-sm">{selectedPayment.payment_provider_response.phone_number}</span>
                                         </div>
                                     )}
                                     
                                     {selectedPayment.payment_provider_response.bank_name && (
                                         <div className="border-t border-slate-100 pt-4 mt-2">
-                                            <p className="text-sm font-medium text-slate-700 mb-2">Bank Details</p>
+                                            <p className="text-sm font-medium text-slate-700 mb-2">{t('taxpayer.payments.detailsModal.bankDetails')}</p>
                                             <div className="space-y-2">
                                                 <div className="flex justify-between text-sm">
-                                                    <span className="text-slate-600">Bank:</span>
+                                                    <span className="text-slate-600">{t('taxpayer.payments.detailsModal.bank')}:</span>
                                                     <span>{selectedPayment.payment_provider_response.bank_name}</span>
                                                 </div>
                                                 {selectedPayment.payment_provider_response.bank_account_number && (
                                                     <div className="flex justify-between text-sm">
-                                                        <span className="text-slate-600">Account:</span>
+                                                        <span className="text-slate-600">{t('taxpayer.payments.detailsModal.account')}:</span>
                                                         <span>{selectedPayment.payment_provider_response.bank_account_number}</span>
                                                     </div>
                                                 )}
@@ -776,7 +778,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
 
                                     {selectedPayment.payment_provider_response.card_provider && (
                                         <div className="flex justify-between">
-                                            <span className="text-sm text-slate-600">Card Provider</span>
+                                            <span className="text-sm text-slate-600">{t('taxpayer.payments.detailsModal.cardProvider')}</span>
                                             <span className="text-sm">{selectedPayment.payment_provider_response.card_provider}</span>
                                         </div>
                                     )}
@@ -793,17 +795,17 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                             {/* Dates */}
                             <div className="border-t border-slate-100 pt-4 mt-2">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-slate-600">Payment Date</span>
+                                    <span className="text-slate-600">{t('taxpayer.payments.detailsModal.paymentDate')}</span>
                                     <span>{selectedPayment.payment_date ? formatDate(selectedPayment.payment_date) : 'N/A'}</span>
                                 </div>
                                 {selectedPayment.confirmation_date && (
                                     <div className="flex justify-between text-sm mt-2">
-                                        <span className="text-slate-600">Confirmed</span>
+                                        <span className="text-slate-600">{t('taxpayer.payments.detailsModal.confirmed')}</span>
                                         <span>{formatDate(selectedPayment.confirmation_date)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-sm mt-2">
-                                    <span className="text-slate-600">Created</span>
+                                    <span className="text-slate-600">{t('taxpayer.payments.detailsModal.created')}</span>
                                     <span>{formatDate(selectedPayment.created_at)}</span>
                                 </div>
                             </div>
@@ -814,7 +816,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                 onClick={() => setShowDetailsModal(false)}
                                 className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                             >
-                                Close
+                                {t('taxpayer.payments.detailsModal.close')}
                             </button>
                             {selectedPayment.status === 'completed' && (
                                 <button
@@ -825,7 +827,7 @@ export default function TaxpayerPaymentsIndex({ payments, paymentMethods, filter
                                     className="flex-1 px-4 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors flex items-center justify-center gap-2"
                                 >
                                     <Download className="w-4 h-4" />
-                                    Receipt
+                                    {t('taxpayer.payments.detailsModal.receipt')}
                                 </button>
                             )}
                         </div>

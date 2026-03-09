@@ -55,6 +55,7 @@ export const useI18nStore = create<I18nState>()(
         }),
         {
             name: 'kbs-i18n-storage',
+            partialize: (state) => ({ language: state.language }),
         }
     )
 );

@@ -35,6 +35,7 @@ import {
 import { Label } from "@/components/ui/label";
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface Order {
     id: number;
@@ -54,6 +55,7 @@ interface TableParams {
 }
 
 export default function AdminProductionIndex() {
+    const { t } = useI18nStore();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -90,7 +92,7 @@ export default function AdminProductionIndex() {
             setTotalRecords(response.data.recordsTotal);
         } catch (error) {
             console.error('Failed to fetch orders', error);
-            toast.error('Failed to load production queue');
+            toast.error(t('admin.production.failedLoad'));
         } finally {
             setLoading(false);
         }
@@ -154,10 +156,10 @@ export default function AdminProductionIndex() {
                 quantity: selectedOrder.quantity
             });
 
-            toast.success(response.data.message || 'Production batch created successfully');
+            toast.success(response.data.message || t('admin.production.productionSuccess'));
             fetchOrders(); // Refresh table to show updated status
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Generation failed');
+            toast.error(error.response?.data?.message || t('admin.production.generationFailed'));
         } finally {
             setGenerating(false);
         }
@@ -175,25 +177,25 @@ export default function AdminProductionIndex() {
     const totalPages = Math.ceil(totalRecords / params.pageSize);
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Production & Generation', href: '/admin/production' }]}>
-            <Head title="Sticker Generation" />
+        <AppLayout breadcrumbs={[{ title: t('admin.production.breadcrumb'), href: '/admin/production' }]}>
+            <Head title={t('admin.production.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sticker Production</h1>
-                        <p className="text-slate-500 text-sm mt-1">Manage orders ready for stamp generation and printing.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('admin.production.title')}</h1>
+                        <p className="text-slate-500 text-sm mt-1">{t('admin.production.subtitle')}</p>
                     </div>
                 </div>
 
                 <div className="space-y-4">
                     {/* Controls / Filter */}
                     <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <div className="font-medium text-slate-900">Processing Queue (Ready for Print)</div>
+                        <div className="font-medium text-slate-900">{t('admin.production.processingQueue')}</div>
                         <div className="relative w-72">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                             <Input
-                                placeholder="Search order #..."
+                                placeholder={t('admin.production.searchPlaceholder')}
                                 className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500"
                                 value={params.search}
                                 onChange={(e) => setParams(p => ({ ...p, search: e.target.value, page: 1 }))}
@@ -206,12 +208,12 @@ export default function AdminProductionIndex() {
                         <Table>
                             <TableHeader className="bg-slate-50">
                                 <TableRow>
-                                    <TableHead className="font-semibold text-slate-600">Order #</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Taxpayer</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Product</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Qty</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                                    <TableHead className="text-right font-semibold text-slate-600">Options</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.production.thOrder')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.production.thTaxpayer')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.production.thProduct')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.production.thQty')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.production.thStatus')}</TableHead>
+                                    <TableHead className="text-right font-semibold text-slate-600">{t('admin.production.thOptions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -224,7 +226,7 @@ export default function AdminProductionIndex() {
                                 ) : orders.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                                            No orders ready for production.
+                                            {t('admin.production.noOrders')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -250,7 +252,7 @@ export default function AdminProductionIndex() {
                                                                 onClick={() => window.open(`/admin/production/${order.id}/print`, '_blank')}
                                                             >
                                                                 <Printer className="h-4 w-4" />
-                                                                Print Again
+                                                            {t('admin.production.printAgain')}
                                                             </Button>
                                                             <Button
                                                                 size="sm"
@@ -258,7 +260,7 @@ export default function AdminProductionIndex() {
                                                                 onClick={() => handlePreview(order)}
                                                             >
                                                                 <Eye className="h-4 w-4" />
-                                                                View
+                                                                {t('admin.production.view')}
                                                             </Button>
                                                         </>
                                                     ) : (
@@ -268,7 +270,7 @@ export default function AdminProductionIndex() {
                                                             onClick={() => handlePreview(order)}
                                                         >
                                                             <QrCode className="h-4 w-4" />
-                                                            Preview & Generate
+                                                            {t('admin.production.previewGenerate')}
                                                         </Button>
                                                     )}
                                                 </div>
@@ -282,7 +284,7 @@ export default function AdminProductionIndex() {
                         {totalRecords > 0 && (
                             <div className="flex items-center justify-between p-4 border-t border-slate-100">
                                 <div className="text-sm text-slate-500">
-                                    Showing {Math.min(((params.page - 1) * params.pageSize) + 1, totalRecords)} to {Math.min(params.page * params.pageSize, totalRecords)} of {totalRecords} entries
+                                    {t('admin.production.showing')} {Math.min(((params.page - 1) * params.pageSize) + 1, totalRecords)} {t('admin.production.to')} {Math.min(params.page * params.pageSize, totalRecords)} {t('admin.production.of')} {totalRecords} {t('admin.production.entries')}
                                 </div>
                                 <div className="flex gap-2">
                                     <Button
@@ -311,10 +313,10 @@ export default function AdminProductionIndex() {
                 <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
                     <DialogContent className="sm:max-w-2xl bg-white text-slate-900 border-slate-200">
                         <DialogHeader>
-                            <DialogTitle className="text-slate-900">Digital Stamp Preview</DialogTitle>
+                            <DialogTitle className="text-slate-900">{t('admin.production.stampPreview')}</DialogTitle>
                             <DialogDescription className="text-slate-500">
-                                Anticipated output for Order #{selectedOrder?.order_number}.
-                                Verify security features before generation.
+                                {t('admin.production.stampPreviewDesc')} #{selectedOrder?.order_number}.
+                                {t('admin.production.verifyFeatures')}
                             </DialogDescription>
                         </DialogHeader>
 
@@ -340,27 +342,27 @@ export default function AdminProductionIndex() {
                                     {/* Right Side: Info */}
                                     <div className="flex-1 p-4 flex flex-col justify-between relative">
                                         <div className="text-center border-b border-[#003366]/20 pb-2">
-                                            <h3 className="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Republique Democratique du Congo</h3>
-                                            <h2 className="text-sm font-black text-[#003366] uppercase mt-1">Bureau of Standards</h2>
+                                            <h3 className="text-[10px] font-bold text-slate-500 tracking-widest uppercase">{t('admin.production.drcTitle')}</h3>
+                                            <h2 className="text-sm font-black text-[#003366] uppercase mt-1">{t('admin.production.bureauTitle')}</h2>
                                         </div>
 
                                         <div className="space-y-1 my-2">
                                             <div className="flex justify-between text-xs">
-                                                <span className="text-slate-500">Product:</span>
+                                                <span className="text-slate-500">{t('admin.production.productLabel')}</span>
                                                 <span className="font-bold text-slate-900 truncate max-w-[120px]">{selectedOrder.product_name}</span>
                                             </div>
                                             <div className="flex justify-between text-xs">
-                                                <span className="text-slate-500">Taxpayer:</span>
+                                                <span className="text-slate-500">{t('admin.production.taxpayerLabel')}</span>
                                                 <span className="font-bold text-slate-900 truncate max-w-[120px]">{selectedOrder.taxpayer_name}</span>
                                             </div>
                                             <div className="flex justify-between text-xs">
-                                                <span className="text-slate-500">Value:</span>
-                                                <span className="font-bold text-[#003366]">Excisable</span>
+                                                <span className="text-slate-500">{t('admin.production.valueLabel')}</span>
+                                                <span className="font-bold text-[#003366]">{t('admin.production.excisable')}</span>
                                             </div>
                                         </div>
 
                                         <div className="text-[8px] text-center text-slate-400 mt-auto">
-                                            AUTHENTICATED • SECURE • TRACEABLE
+                                            {t('admin.production.authenticated')}
                                         </div>
                                     </div>
                                 </div>
@@ -368,23 +370,23 @@ export default function AdminProductionIndex() {
                                 {/* Order Stats / Generated Info */}
                                 <div className="w-full bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm space-y-2">
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Quantity to Generate:</span>
-                                        <span className="font-medium">{selectedOrder.quantity.toLocaleString()} units</span>
+                                        <span className="text-slate-500">{t('admin.production.quantityToGenerate')}</span>
+                                        <span className="font-medium">{selectedOrder.quantity.toLocaleString()} {t('admin.production.unitsLabel')}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-slate-500">Estimated Batch Size:</span>
-                                        <span className="font-medium">~{Math.ceil(selectedOrder.quantity / 1000)} Rolls</span>
+                                        <span className="text-slate-500">{t('admin.production.estimatedBatch')}</span>
+                                        <span className="font-medium">~{Math.ceil(selectedOrder.quantity / 1000)} {t('admin.production.rollsLabel')}</span>
                                     </div>
                                     {previewSerial && !generatedStats && (
                                         <div className="mt-3 pt-3 border-t border-slate-200">
-                                            <div className="text-xs font-medium text-slate-600 mb-2">Estimated Serial Range</div>
+                                            <div className="text-xs font-medium text-slate-600 mb-2">{t('admin.production.estimatedSerialRange')}</div>
                                             <div className="grid grid-cols-2 gap-2 text-xs">
                                                 <div className="bg-white p-2 border rounded">
-                                                    <span className="text-slate-500 block">Start Serial</span>
+                                                    <span className="text-slate-500 block">{t('admin.production.startSerial')}</span>
                                                     <span className="font-mono font-bold">{previewSerial.serial_start}</span>
                                                 </div>
                                                 <div className="bg-white p-2 border rounded">
-                                                    <span className="text-slate-500 block">End Serial</span>
+                                                    <span className="text-slate-500 block">{t('admin.production.endSerial')}</span>
                                                     <span className="font-mono font-bold">{previewSerial.serial_end}</span>
                                                 </div>
                                             </div>
@@ -393,15 +395,15 @@ export default function AdminProductionIndex() {
                                     {generatedStats && (
                                         <div className="mt-4 pt-4 border-t border-slate-200">
                                             <div className="flex items-center gap-2 text-emerald-600 font-medium mb-2">
-                                                <CheckCircle className="w-4 h-4" /> Generation Complete
+                                                <CheckCircle className="w-4 h-4" /> {t('admin.production.generationComplete')}
                                             </div>
                                             <div className="grid grid-cols-2 gap-2 text-xs">
                                                 <div className="bg-white p-2 border rounded">
-                                                    <span className="text-slate-500 block">Start Serial</span>
+                                                    <span className="text-slate-500 block">{t('admin.production.startSerial')}</span>
                                                     <span className="font-mono font-bold">{generatedStats.serial_start}</span>
                                                 </div>
                                                 <div className="bg-white p-2 border rounded">
-                                                    <span className="text-slate-500 block">End Serial</span>
+                                                    <span className="text-slate-500 block">{t('admin.production.endSerial')}</span>
                                                     <span className="font-mono font-bold">{generatedStats.serial_end}</span>
                                                 </div>
                                             </div>
@@ -412,7 +414,7 @@ export default function AdminProductionIndex() {
                         )}
 
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="outline" onClick={() => setPreviewOpen(false)} className="border-slate-300">Close</Button>
+                            <Button variant="outline" onClick={() => setPreviewOpen(false)} className="border-slate-300">{t('admin.production.close')}</Button>
                             {!generatedStats ? (
                                 <Button
                                     className="bg-[#003366] hover:bg-[#002244]"
@@ -420,7 +422,7 @@ export default function AdminProductionIndex() {
                                     disabled={generating}
                                 >
                                     {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
-                                    Start Production
+                                    {t('admin.production.startProduction')}
                                 </Button>
                             ) : (
                                 <div className="flex gap-2">
@@ -429,7 +431,7 @@ export default function AdminProductionIndex() {
                                         onClick={() => window.open(`/admin/production/${selectedOrder!.id}/print`, '_blank')}
                                     >
                                         <Printer className="mr-2 h-4 w-4" />
-                                        Print Batch
+                                        {t('admin.production.printBatch')}
                                     </Button>
                                     {selectedOrder && selectedOrder.status !== 'ready_for_delivery' && (
                                         <Button
@@ -437,16 +439,16 @@ export default function AdminProductionIndex() {
                                             onClick={async () => {
                                                 try {
                                                     await axios.post(`/admin/production/${selectedOrder.id}/ready`);
-                                                    toast.success('Order marked as ready for delivery');
+                                                    toast.success(t('admin.production.readySuccess'));
                                                     setPreviewOpen(false);
                                                     fetchOrders();
                                                 } catch (e: any) {
-                                                    toast.error(e.response?.data?.message || 'Failed to update status');
+                                                    toast.error(e.response?.data?.message || t('admin.production.failedReady'));
                                                 }
                                             }}
                                         >
                                             <Truck className="mr-2 h-4 w-4" />
-                                            Ready for Delivery
+                                            {t('admin.production.readyForDelivery')}
                                         </Button>
                                     )}
                                 </div>

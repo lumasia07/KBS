@@ -19,12 +19,13 @@ import { OrderSummary } from './OrderSummary';
 import { OrderConfirmation } from './OrderConfirmation';
 import type { DeliveryMethod, PaymentMethod } from '@/types/order';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 const steps = [
-    { id: 'review', label: 'Review', icon: Package },
-    { id: 'delivery', label: 'Delivery', icon: Truck },
-    { id: 'documents', label: 'Documents', icon: FileText },
-    { id: 'payment', label: 'Payment', icon: CreditCard },
+    { id: 'review', labelKey: 'taxpayer.orders.orderForm.steps.review', icon: Package },
+    { id: 'delivery', labelKey: 'taxpayer.orders.orderForm.steps.delivery', icon: Truck },
+    { id: 'documents', labelKey: 'taxpayer.orders.orderForm.steps.documents', icon: FileText },
+    { id: 'payment', labelKey: 'taxpayer.orders.orderForm.steps.payment', icon: CreditCard },
 ];
 
 export function OrderForm() {
@@ -46,6 +47,7 @@ export function OrderForm() {
     } = useOrderStore();
 
     const [uploadedFiles, setUploadedFiles] = useState<Record<string, File | null>>({});
+    const { t } = useI18nStore();
 
     const handleFileUpload = (field: string, file: File | null) => {
         setUploadedFiles((prev) => ({ ...prev, [field]: file }));
@@ -130,7 +132,7 @@ export function OrderForm() {
                                         className={`text-sm font-medium ${isActive ? 'text-[#003366]' : 'text-slate-500'
                                             }`}
                                     >
-                                        {step.label}
+                                        {t(step.labelKey)}
                                     </span>
                                 </button>
                                 {index < steps.length - 1 && (
@@ -154,7 +156,7 @@ export function OrderForm() {
                         {currentStep === 'review' && (
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-6">
-                                    Review Your Order
+                                    {t('taxpayer.orders.orderForm.reviewTitle')}
                                 </h2>
                                 <div className="space-y-4">
                                     {cartItems.map((item) => (
@@ -188,7 +190,7 @@ export function OrderForm() {
                         {currentStep === 'delivery' && (
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-6">
-                                    Delivery Details
+                                    {t('taxpayer.orders.orderForm.deliveryTitle')}
                                 </h2>
 
                                 {/* Delivery Method Selection */}
@@ -212,10 +214,10 @@ export function OrderForm() {
                                                     : 'text-slate-900'
                                                 }`}
                                         >
-                                            Pickup
+                                            {t('taxpayer.orders.orderForm.pickup')}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-1">
-                                            Collect at KBS office
+                                            {t('taxpayer.orders.orderForm.pickupDesc')}
                                         </p>
                                     </button>
                                     <button
@@ -237,10 +239,10 @@ export function OrderForm() {
                                                     : 'text-slate-900'
                                                 }`}
                                         >
-                                            Delivery
+                                            {t('taxpayer.orders.orderForm.delivery')}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-1">
-                                            Ship to your address
+                                            {t('taxpayer.orders.orderForm.deliveryDesc')}
                                         </p>
                                     </button>
                                 </div>
@@ -249,45 +251,45 @@ export function OrderForm() {
                                 {delivery.method === 'delivery' && (
                                     <div className="space-y-4">
                                         <div>
-                                            <Label htmlFor="address">Delivery Address *</Label>
+                                            <Label htmlFor="address">{t('taxpayer.orders.orderForm.deliveryAddress')}</Label>
                                             <Input
                                                 id="address"
                                                 value={delivery.address || ''}
                                                 onChange={(e) =>
                                                     setDelivery({ address: e.target.value })
                                                 }
-                                                placeholder="Enter your full address"
+                                                placeholder={t('taxpayer.orders.orderForm.deliveryAddressPlaceholder')}
                                                 className="mt-1"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <Label htmlFor="city">City</Label>
+                                                <Label htmlFor="city">{t('taxpayer.orders.orderForm.city')}</Label>
                                                 <Input
                                                     id="city"
                                                     value={delivery.city || ''}
                                                     onChange={(e) =>
                                                         setDelivery({ city: e.target.value })
                                                     }
-                                                    placeholder="City"
+                                                    placeholder={t('taxpayer.orders.orderForm.city')}
                                                     className="mt-1"
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor="province">Province</Label>
+                                                <Label htmlFor="province">{t('taxpayer.orders.orderForm.province')}</Label>
                                                 <Input
                                                     id="province"
                                                     value={delivery.province || ''}
                                                     onChange={(e) =>
                                                         setDelivery({ province: e.target.value })
                                                     }
-                                                    placeholder="Province"
+                                                    placeholder={t('taxpayer.orders.orderForm.province')}
                                                     className="mt-1"
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <Label htmlFor="phone">Phone Number *</Label>
+                                            <Label htmlFor="phone">{t('taxpayer.orders.orderForm.phone')}</Label>
                                             <Input
                                                 id="phone"
                                                 value={delivery.phone || ''}
@@ -299,14 +301,14 @@ export function OrderForm() {
                                             />
                                         </div>
                                         <div>
-                                            <Label htmlFor="notes">Delivery Notes</Label>
+                                            <Label htmlFor="notes">{t('taxpayer.orders.orderForm.deliveryNotes')}</Label>
                                             <Input
                                                 id="notes"
                                                 value={delivery.notes || ''}
                                                 onChange={(e) =>
                                                     setDelivery({ notes: e.target.value })
                                                 }
-                                                placeholder="Any special instructions..."
+                                                placeholder={t('taxpayer.orders.orderForm.deliveryNotesPlaceholder')}
                                                 className="mt-1"
                                             />
                                         </div>
@@ -316,7 +318,7 @@ export function OrderForm() {
                                 {delivery.method === 'pickup' && (
                                     <div className="bg-slate-50 rounded-xl p-4">
                                         <h4 className="font-semibold text-slate-900 mb-2">
-                                            Pickup Location
+                                            {t('taxpayer.orders.orderForm.pickupLocation')}
                                         </h4>
                                         <p className="text-sm text-slate-600">
                                             KBS Headquarters
@@ -326,7 +328,7 @@ export function OrderForm() {
                                             Kinshasa, DR Congo
                                         </p>
                                         <p className="text-xs text-slate-500 mt-2">
-                                            Mon-Fri: 8:00 AM - 4:00 PM
+                                            {t('taxpayer.orders.orderForm.pickupHours')}
                                         </p>
                                     </div>
                                 )}
@@ -337,10 +339,10 @@ export function OrderForm() {
                         {currentStep === 'documents' && (
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-2">
-                                    Upload Documents
+                                    {t('taxpayer.orders.orderForm.documentsTitle')}
                                 </h2>
                                 <p className="text-sm text-slate-500 mb-6">
-                                    Upload required documents for verification
+                                    {t('taxpayer.orders.orderForm.documentsSubtitle')}
                                 </p>
 
                                 <div className="space-y-4">
@@ -352,10 +354,10 @@ export function OrderForm() {
                                             </div>
                                             <div className="flex-1">
                                                 <p className="font-medium text-slate-900">
-                                                    Import Declaration
+                                                    {t('taxpayer.orders.orderForm.importDeclaration')}
                                                 </p>
                                                 <p className="text-xs text-slate-500">
-                                                    For imported products only
+                                                    {t('taxpayer.orders.orderForm.importDeclarationDesc')}
                                                 </p>
                                             </div>
                                             <label className="cursor-pointer">
@@ -373,8 +375,8 @@ export function OrderForm() {
                                                 <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors inline-flex items-center gap-2">
                                                     <Upload className="w-4 h-4" />
                                                     {uploadedFiles['import_declaration']
-                                                        ? 'Change'
-                                                        : 'Upload'}
+                                                        ? t('taxpayer.orders.orderForm.change')
+                                                        : t('taxpayer.orders.orderForm.upload')}
                                                 </span>
                                             </label>
                                         </div>
@@ -394,10 +396,10 @@ export function OrderForm() {
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="font-medium text-slate-900">
-                                                        Health Certificate *
+                                                        {t('taxpayer.orders.orderForm.healthCertificate')}
                                                     </p>
                                                     <p className="text-xs text-amber-700">
-                                                        Required for your selected products
+                                                        {t('taxpayer.orders.orderForm.healthCertificateDesc')}
                                                     </p>
                                                 </div>
                                                 <label className="cursor-pointer">
@@ -415,8 +417,8 @@ export function OrderForm() {
                                                     <span className="px-4 py-2 bg-amber-200 text-amber-800 rounded-lg text-sm font-medium hover:bg-amber-300 transition-colors inline-flex items-center gap-2">
                                                         <Upload className="w-4 h-4" />
                                                         {uploadedFiles['health_certificate']
-                                                            ? 'Change'
-                                                            : 'Upload'}
+                                                            ? t('taxpayer.orders.orderForm.change')
+                                                            : t('taxpayer.orders.orderForm.upload')}
                                                     </span>
                                                 </label>
                                             </div>
@@ -436,10 +438,10 @@ export function OrderForm() {
                                             </div>
                                             <div className="flex-1">
                                                 <p className="font-medium text-slate-900">
-                                                    Certificate of Conformity
+                                                    {t('taxpayer.orders.orderForm.certOfConformity')}
                                                 </p>
                                                 <p className="text-xs text-slate-500">
-                                                    Product conformity certificate
+                                                    {t('taxpayer.orders.orderForm.certOfConformityDesc')}
                                                 </p>
                                             </div>
                                             <label className="cursor-pointer">
@@ -457,8 +459,8 @@ export function OrderForm() {
                                                 <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors inline-flex items-center gap-2">
                                                     <Upload className="w-4 h-4" />
                                                     {uploadedFiles['certificate_of_conformity']
-                                                        ? 'Change'
-                                                        : 'Upload'}
+                                                        ? t('taxpayer.orders.orderForm.change')
+                                                        : t('taxpayer.orders.orderForm.upload')}
                                                 </span>
                                             </label>
                                         </div>
@@ -476,27 +478,27 @@ export function OrderForm() {
                         {currentStep === 'payment' && (
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900 mb-6">
-                                    Select Payment Method
+                                    {t('taxpayer.orders.orderForm.selectPaymentMethod')}
                                 </h2>
 
                                 <div className="space-y-4">
                                     {[
                                         {
                                             id: 'mobile_money',
-                                            label: 'Mobile Money',
-                                            description: 'M-Pesa, Airtel Money, Orange Money',
+                                            labelKey: 'taxpayer.orders.orderForm.mobileMoney',
+                                            descKey: 'taxpayer.orders.orderForm.mobileMoneyDesc',
                                             icon: '📱',
                                         },
                                         {
                                             id: 'bank_transfer',
-                                            label: 'Bank Transfer',
-                                            description: 'Transfer to KBS bank account',
+                                            labelKey: 'taxpayer.orders.orderForm.bankTransfer',
+                                            descKey: 'taxpayer.orders.orderForm.bankTransferDesc',
                                             icon: '🏦',
                                         },
                                         {
                                             id: 'cash',
-                                            label: 'Cash Payment',
-                                            description: 'Pay at our office counter',
+                                            labelKey: 'taxpayer.orders.orderForm.cashPayment',
+                                            descKey: 'taxpayer.orders.orderForm.cashPaymentDesc',
                                             icon: '💵',
                                         },
                                     ].map((method) => (
@@ -518,10 +520,10 @@ export function OrderForm() {
                                                             : 'text-slate-900'
                                                         }`}
                                                 >
-                                                    {method.label}
+                                                    {t(method.labelKey)}
                                                 </p>
                                                 <p className="text-sm text-slate-500">
-                                                    {method.description}
+                                                    {t(method.descKey)}
                                                 </p>
                                             </div>
                                             {paymentMethod === method.id && (
@@ -534,8 +536,7 @@ export function OrderForm() {
                                 {paymentMethod && (
                                     <div className="mt-6 p-4 bg-blue-50 rounded-xl">
                                         <p className="text-sm text-blue-800">
-                                            <span className="font-semibold">Note:</span> Payment
-                                            instructions will be sent after order verification.
+                                            <span className="font-semibold">{t('taxpayer.orders.orderForm.paymentNote')}</span>
                                         </p>
                                     </div>
                                 )}
@@ -551,7 +552,7 @@ export function OrderForm() {
                             className="border-slate-200"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
+                            {t('taxpayer.orders.orderForm.back')}
                         </Button>
 
                         {currentStep === 'payment' ? (
@@ -563,11 +564,11 @@ export function OrderForm() {
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Submitting...
+                                        {t('taxpayer.orders.orderForm.submitting')}
                                     </>
                                 ) : (
                                     <>
-                                        Submit Order
+                                        {t('taxpayer.orders.orderForm.submit')}
                                         <CheckCircle className="w-4 h-4 ml-2" />
                                     </>
                                 )}
@@ -578,7 +579,7 @@ export function OrderForm() {
                                 disabled={!canProceed()}
                                 className="bg-gradient-to-r from-[#003366] to-[#0052A3] hover:from-[#002244] hover:to-[#003366] text-white"
                             >
-                                Continue
+                                {t('taxpayer.orders.orderForm.continue')}
                                 <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                         )}
