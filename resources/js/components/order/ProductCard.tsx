@@ -5,15 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import type { Product, PackagingType } from '@/types/order';
 import { useOrderStore } from '@/stores/useOrderStore';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface ProductCardProps {
     product: Product;
 }
 
-const packagingOptions: { value: PackagingType; label: string }[] = [
-    { value: 'roll', label: 'Roll' },
-    { value: 'sheet', label: 'Sheet' },
-    { value: 'individual', label: 'Individual' },
+const packagingOptions: { value: PackagingType; labelKey: string }[] = [
+    { value: 'roll', labelKey: 'taxpayer.orders.productCard.packagingOptions.roll' },
+    { value: 'sheet', labelKey: 'taxpayer.orders.productCard.packagingOptions.sheet' },
+    { value: 'individual', labelKey: 'taxpayer.orders.productCard.packagingOptions.individual' },
 ];
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -21,6 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
     const [packaging, setPackaging] = useState<PackagingType>('roll');
     const addToCart = useOrderStore((state) => state.addToCart);
     const setCartOpen = useOrderStore((state) => state.setCartOpen);
+    const { t } = useI18nStore();
 
     const handleAddToCart = () => {
         addToCart(product, quantity, packaging);
@@ -73,12 +75,12 @@ export function ProductCard({ product }: ProductCardProps) {
                 {product.requires_health_certificate ? (
                     <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
                         <AlertTriangle className="w-4 h-4" />
-                        <span className="text-xs font-medium">Health Certificate Required</span>
+                        <span className="text-xs font-medium">{t('taxpayer.orders.productCard.healthCertRequired')}</span>
                     </div>
                 ) : (
                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
                         <ShieldCheck className="w-4 h-4" />
-                        <span className="text-xs font-medium">No Certificate Required</span>
+                        <span className="text-xs font-medium">{t('taxpayer.orders.productCard.noCertRequired')}</span>
                     </div>
                 )}
 
@@ -94,7 +96,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
                 {/* Packaging Selection */}
                 <div>
-                    <label className="text-xs font-medium text-slate-500 mb-2 block">Packaging</label>
+                    <label className="text-xs font-medium text-slate-500 mb-2 block">{t('taxpayer.orders.productCard.packaging')}</label>
                     <div className="flex gap-2">
                         {packagingOptions.map((option) => (
                             <button
@@ -105,7 +107,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                     }`}
                             >
-                                {option.label}
+                                {t(option.labelKey)}
                             </button>
                         ))}
                     </div>
@@ -113,7 +115,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
                 {/* Quantity Selector */}
                 <div>
-                    <label className="text-xs font-medium text-slate-500 mb-2 block">Quantity</label>
+                    <label className="text-xs font-medium text-slate-500 mb-2 block">{t('taxpayer.orders.productCard.quantity')}</label>
                     <div className="flex items-center gap-3">
                         <button
                             onClick={decrementQuantity}
@@ -142,7 +144,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 {/* Subtotal */}
                 <div className="pt-3 border-t border-slate-100">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-500">Subtotal</span>
+                        <span className="text-sm text-slate-500">{t('taxpayer.orders.productCard.subtotal')}</span>
                         <span className="text-lg font-bold text-[#003366]">
                             {formatPrice(quantity * product.stamp_price_per_unit)} CDF
                         </span>
@@ -155,7 +157,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     className="w-full bg-gradient-to-r from-[#003366] to-[#0052A3] hover:from-[#002244] hover:to-[#003366] text-white py-3 rounded-xl font-medium transition-all duration-300 group-hover:shadow-lg"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add to Cart
+                    {t('taxpayer.orders.productCard.addToCart')}
                 </Button>
             </div>
         </div>

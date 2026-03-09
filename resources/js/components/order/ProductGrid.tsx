@@ -3,6 +3,7 @@ import { Search, Loader2, Package } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ProductCard } from './ProductCard';
 import { useOrderStore } from '@/stores/useOrderStore';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 export function ProductGrid() {
     const {
@@ -15,6 +16,7 @@ export function ProductGrid() {
         getFilteredProducts,
         getCategories,
     } = useOrderStore();
+    const { t } = useI18nStore();
 
     useEffect(() => {
         fetchProducts();
@@ -32,7 +34,7 @@ export function ProductGrid() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <Input
                         type="text"
-                        placeholder="Search products by name or code..."
+                        placeholder={t('taxpayer.orders.productGrid.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10 py-3 bg-white border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366]"
@@ -49,7 +51,7 @@ export function ProductGrid() {
                             : 'bg-white text-slate-600 border border-slate-200 hover:border-[#003366] hover:text-[#003366]'
                         }`}
                 >
-                    All Products
+                    {t('taxpayer.orders.productGrid.allProducts')}
                 </button>
                 {categories.map((category) => (
                     <button
@@ -69,16 +71,16 @@ export function ProductGrid() {
             {productsLoading ? (
                 <div className="flex flex-col items-center justify-center py-16">
                     <Loader2 className="w-10 h-10 text-[#003366] animate-spin mb-4" />
-                    <p className="text-slate-500">Loading products...</p>
+                    <p className="text-slate-500">{t('taxpayer.orders.productGrid.noProducts')}</p>
                 </div>
             ) : filteredProducts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200">
                     <Package className="w-16 h-16 text-slate-300 mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">No Products Found</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('taxpayer.orders.productGrid.noProducts')}</h3>
                     <p className="text-slate-500 text-sm">
                         {searchQuery
-                            ? 'Try adjusting your search terms'
-                            : 'No products available in this category'}
+                            ? t('taxpayer.orders.productGrid.noProductsAdjust')
+                            : t('taxpayer.orders.productGrid.noProductsCategory')}
                     </p>
                 </div>
             ) : (
@@ -92,7 +94,7 @@ export function ProductGrid() {
             {/* Results Summary */}
             {!productsLoading && filteredProducts.length > 0 && (
                 <div className="text-center text-sm text-slate-500">
-                    Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                    {t('taxpayer.orders.productGrid.showing').replace('{count}', String(filteredProducts.length))}
                     {selectedCategory && ` in ${selectedCategory}`}
                 </div>
             )}

@@ -50,6 +50,7 @@ import {
 import axios from 'axios';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/utils';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 // ============== Types ==============
 interface PaymentMethod {
@@ -152,6 +153,7 @@ const getIconComponent = (iconName: string | null) => {
 // ============== Main Component ==============
 export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
     // ============== State ==============
+    const { t } = useI18nStore();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -232,7 +234,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
             setTotalRecords(response.data.recordsTotal);
         } catch (error) {
             console.error('Failed to fetch orders', error);
-            toast.error('Failed to load orders');
+            toast.error(t('admin.orders.failedLoad'));
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -299,11 +301,11 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
         setProcessingId(selectedOrder.id);
         try {
             await axios.post(`/admin/orders/${selectedOrder.id}/approve`);
-            toast.success('Order approved successfully');
+            toast.success(t('admin.orders.approvedSuccess'));
             await fetchOrders();
             closeModal('approve');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to approve order');
+            toast.error(error.response?.data?.message || t('admin.orders.failedApprove'));
         } finally {
             setProcessingId(null);
         }
@@ -312,18 +314,18 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
     const handleReject = async () => {
         if (!selectedOrder) return;
         if (!rejectionReason.trim()) {
-            toast.error('Please provide a rejection reason');
+            toast.error(t('admin.orders.rejectionReasonLabel'));
             return;
         }
 
         setProcessingId(selectedOrder.id);
         try {
             await axios.post(`/admin/orders/${selectedOrder.id}/reject`, { reason: rejectionReason });
-            toast.success('Order rejected successfully');
+            toast.success(t('admin.orders.rejectedSuccess'));
             await fetchOrders();
             closeModal('reject');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to reject order');
+            toast.error(error.response?.data?.message || t('admin.orders.failedReject'));
         } finally {
             setProcessingId(null);
         }
@@ -331,7 +333,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 
     const validatePayment = (): boolean => {
         if (!selectedPaymentMethod) {
-            toast.error('Please select a payment method');
+            toast.error(t('admin.orders.selectPaymentMethod'));
             return false;
         }
 
@@ -406,14 +408,14 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
             const response = await axios.post('/taxpayer/payments/store', paymentData);
 
             if (response.data.success) {
-                toast.success('Payment recorded successfully');
+                toast.success(t('admin.orders.paymentSuccess'));
                 await fetchOrders();
                 closeModal('payment');
             } else {
                 toast.error(response.data.message || 'Failed to record payment');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to record payment');
+            toast.error(error.response?.data?.message || t('admin.orders.failedPayment'));
         } finally {
             setProcessingId(null);
         }
@@ -427,7 +429,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
     );
 
     const renderPaymentMethod = (methodCode?: string, reference?: string) => {
-        if (!methodCode) return <span className="text-xs text-slate-400">Not specified</span>;
+        if (!methodCode) return <span className="text-xs text-slate-400">{t('admin.orders.notSpecified')}</span>;
 
         const method = paymentMethods.find(m => m.code === methodCode);
         const IconComponent = method ? getIconComponent(method.icon) : CreditCard;
@@ -440,7 +442,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
                 </div>
                 {reference && (
                     <div className="text-xs text-slate-500 mt-1">
-                        Ref: {reference}
+                        {t('admin.orders.ref')} {reference}
                     </div>
                 )}
             </div>
@@ -456,7 +458,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
             <>
                 {selectedPaymentMethod.type === 'mobile_money' && settings.requires_phone && (
                     <div>
-                        <Label htmlFor="phoneNumber">Phone Number Used</Label>
+                        <Label htmlFor="phoneNumber">{t('admin.orders.phoneNumberUsed')}</Label>
                         <Input
                             id="phoneNumber"
                             placeholder="+243 XXX XXX XXX"
@@ -465,14 +467,14 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
                             className="mt-1"
                         />
                         <p className="text-xs text-slate-500 mt-1">
-                            Format: +243XXXXXXXXX or 0XXXXXXXXX
+                            {t('admin.orders.phoneFormat')}
                         </p>
                     </div>
                 )}
 
                 {selectedPaymentMethod.type === 'bank_transfer' && settings.requires_bank_name && (
                     <div>
-                        <Label htmlFor="bankName">Bank Name</Label>
+                        <Label htmlFor="bankName">{t('admin.orders.bankName')}</Label>
                         <Input
                             id="bankName"
                             placeholder="e.g., Equity Bank, Rawbank..."
@@ -485,7 +487,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 
                 {selectedPaymentMethod.type === 'card' && settings.requires_card_provider && (
                     <div>
-                        <Label htmlFor="cardProvider">Card Provider</Label>
+                        <Label htmlFor="cardProvider">{t('admin.orders.cardProvider')}</Label>
                         <Select
                             value={paymentForm.card_provider}
                             onValueChange={(value) => updatePaymentForm('card_provider', value)}
@@ -505,7 +507,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 
                 {settings.requires_reference && selectedPaymentMethod.type !== 'cash' && (
                     <div>
-                        <Label htmlFor="paymentReference">Transaction Reference</Label>
+                        <Label htmlFor="paymentReference">{t('admin.orders.transactionReference')}</Label>
                         <Input
                             id="paymentReference"
                             placeholder="Enter transaction ID or reference"
@@ -521,14 +523,14 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 
     // ============== Render ==============
     return (
-        <AppLayout breadcrumbs={[{ title: 'Order Management', href: '/admin/orders' }]}>
-            <Head title="Manage Orders" />
+        <AppLayout breadcrumbs={[{ title: t('admin.orders.breadcrumb'), href: '/admin/orders' }]}>
+            <Head title={t('admin.orders.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-                        Order Management
+                        {t('admin.orders.title')}
                     </h1>
                     <Button
                         variant="outline"
@@ -537,32 +539,32 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
                         disabled={refreshing}
                     >
                         <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                        Refresh
+                        {t('admin.orders.refresh')}
                     </Button>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-4">
                     <StatCard
-                        title="Pending Payment"
+                        title={t('admin.orders.pendingPayment')}
                         value={stats.pendingPayment}
                         color="amber"
                         icon={DollarSign}
                     />
                     <StatCard
-                        title="Pending Approval"
+                        title={t('admin.orders.pendingApproval')}
                         value={stats.pendingApproval}
                         color="blue"
                         icon={Clock}
                     />
                     <StatCard
-                        title="Paid"
+                        title={t('admin.orders.paid')}
                         value={stats.paid}
                         color="purple"
                         icon={CheckCircle}
                     />
                     <StatCard
-                        title="Total Orders"
+                        title={t('admin.orders.totalOrders')}
                         value={stats.total}
                         color="emerald"
                         icon={Calendar}
@@ -573,7 +575,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
                 <SearchBar
                     value={params.search}
                     onChange={handleSearch}
-                    placeholder="Search by order #, taxpayer name, or reference..."
+                    placeholder={t('admin.orders.searchPlaceholder')}
                 />
 
                 {/* Orders Table */}
@@ -677,7 +679,7 @@ const StatCard = ({ title, value, color, icon: Icon }: any) => {
 // Search Bar Component
 const SearchBar = ({ value, onChange, placeholder }: any) => (
     <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div className="font-medium text-slate-900">All Stamp Orders</div>
+        <div className="font-medium text-slate-900">{useI18nStore.getState().t('admin.orders.allStampOrders')}</div>
         <div className="relative w-72">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
             <Input
@@ -706,14 +708,14 @@ const OrdersTable = ({
         <Table>
             <TableHeader className="bg-slate-50">
                 <TableRow>
-                    <TableHead className="font-semibold text-slate-600">Order #</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Taxpayer</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Product</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Amount</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Payment</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Date</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thOrder')}</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thTaxpayer')}</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thProduct')}</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thAmount')}</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thStatus')}</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thPayment')}</TableHead>
+                    <TableHead className="font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thDate')}</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-600">{useI18nStore.getState().t('admin.orders.thActions')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -726,7 +728,7 @@ const OrdersTable = ({
                 ) : orders.length === 0 ? (
                     <TableRow>
                         <TableCell colSpan={8} className="h-24 text-center text-slate-500">
-                            No orders found.
+                            {useI18nStore.getState().t('admin.orders.noOrders')}
                         </TableCell>
                     </TableRow>
                 ) : (
@@ -742,7 +744,7 @@ const OrdersTable = ({
                             <TableCell className="text-slate-600">{order.product_name}</TableCell>
                             <TableCell>
                                 <div className="font-medium text-slate-900">{formatCurrency(order.grand_total)}</div>
-                                <div className="text-xs text-slate-500">{order.quantity.toLocaleString()} units</div>
+                                <div className="text-xs text-slate-500">{order.quantity.toLocaleString()} {useI18nStore.getState().t('admin.orders.units')}</div>
                             </TableCell>
                             <TableCell>{renderStatusBadge(order.status)}</TableCell>
                             <TableCell>{renderPaymentMethod(order.payment_method_code, order.payment_reference)}</TableCell>
@@ -759,7 +761,7 @@ const OrdersTable = ({
                                             disabled={processingId === order.id}
                                         >
                                             <DollarSign className="h-4 w-4 mr-1" />
-                                            Receive
+                                            {useI18nStore.getState().t('admin.orders.receive')}
                                         </Button>
                                     )}
 
@@ -862,11 +864,11 @@ const DetailsModal = ({
 
     // Available status options
     const statusOptions = [
-        { value: 'in_production', label: 'In Production', color: 'blue' },
-        { value: 'ready_for_delivery', label: 'Ready for Delivery', color: 'blue' },
-        { value: 'delivered', label: 'Delivered', color: 'emerald' },
-        { value: 'cancelled', label: 'Cancelled', color: 'red' },
-        { value: 'rejected', label: 'Rejected', color: 'red' },
+        { value: 'in_production', label: useI18nStore.getState().t('admin.orders.inProduction'), color: 'blue' },
+        { value: 'ready_for_delivery', label: useI18nStore.getState().t('admin.orders.readyForDelivery'), color: 'blue' },
+        { value: 'delivered', label: useI18nStore.getState().t('admin.orders.delivered'), color: 'emerald' },
+        { value: 'cancelled', label: useI18nStore.getState().t('admin.orders.cancelled'), color: 'red' },
+        { value: 'rejected', label: useI18nStore.getState().t('admin.orders.rejected'), color: 'red' },
     ];
 
     // Set selected status when order changes
@@ -884,15 +886,15 @@ const DetailsModal = ({
             const response = await axios.post(`/admin/orders/${order.id}/status`, { status: newStatus });
 
             if (response.data.success) {
-                toast.success(`Order status updated to ${newStatus.replace('_', ' ')}`);
+                toast.success(`${useI18nStore.getState().t('admin.orders.statusUpdated')} ${newStatus.replace('_', ' ')}`);
                 await fetchOrders();
                 onClose();
             } else {
-                toast.error(response.data.message || 'Failed to update status');
+                toast.error(response.data.message || useI18nStore.getState().t('admin.orders.failedStatusUpdate'));
             }
 
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to update status');
+            toast.error(error.response?.data?.message || useI18nStore.getState().t('admin.orders.failedStatusUpdate'));
         } finally {
             setUpdatingStatus(false);
         }
@@ -910,9 +912,9 @@ const DetailsModal = ({
                 {order && (
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <DetailField label="Taxpayer" value={order.taxpayer_name} />
+                            <DetailField label={useI18nStore.getState().t('admin.orders.taxpayer')} value={order.taxpayer_name} />
                             <div>
-                                <Label className="text-slate-500">Status</Label>
+                                <Label className="text-slate-500">{useI18nStore.getState().t('admin.orders.status')}</Label>
                                 <div className="flex items-center gap-2 mt-1">
                                     {renderStatusBadge(order.status)}
 
@@ -923,7 +925,7 @@ const DetailsModal = ({
                                         disabled={updatingStatus}
                                     >
                                         <SelectTrigger className="w-[180px] h-8">
-                                            <SelectValue placeholder="Change status" />
+                                            <SelectValue placeholder={useI18nStore.getState().t('admin.orders.changeStatus')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {statusOptions.map((option) => (
@@ -951,48 +953,48 @@ const DetailsModal = ({
                                 </div>
                             </div>
 
-                            <DetailField label="Product" value={order.product_name} />
-                            <DetailField label="Packaging" value={order.packaging_type} />
-                            <DetailField label="Quantity" value={order.quantity.toLocaleString()} />
+                            <DetailField label={useI18nStore.getState().t('admin.orders.product')} value={order.product_name} />
+                            <DetailField label={useI18nStore.getState().t('admin.orders.packaging')} value={order.packaging_type} />
+                            <DetailField label={useI18nStore.getState().t('admin.orders.quantity')} value={order.quantity.toLocaleString()} />
                             <DetailField
-                                label="Grand Total"
+                                label={useI18nStore.getState().t('admin.orders.grandTotal')}
                                 value={<span className="font-bold text-lg">{formatCurrency(order.grand_total)}</span>}
                             />
 
                             <div className="col-span-2">
                                 <DetailField
-                                    label="Delivery Address"
-                                    value={order.delivery_method === 'pickup' ? 'Store Pickup' : order.delivery_address}
+                                    label={useI18nStore.getState().t('admin.orders.deliveryAddress')}
+                                    value={order.delivery_method === 'pickup' ? useI18nStore.getState().t('admin.orders.storePickup') : order.delivery_address}
                                 />
                             </div>
 
                             <DetailField
-                                label="Payment Method"
+                                label={useI18nStore.getState().t('admin.orders.paymentMethod')}
                                 value={renderPaymentMethod(order.payment_method_code)}
                             />
 
                             {order.payment_reference && (
                                 <DetailField
-                                    label="Payment Ref"
+                                    label={useI18nStore.getState().t('admin.orders.paymentRef')}
                                     value={<span className="font-mono text-sm">{order.payment_reference}</span>}
                                 />
                             )}
 
                             <DetailField
-                                label="Date Placed"
+                                label={useI18nStore.getState().t('admin.orders.datePlaced')}
                                 value={new Date(order.created_at).toLocaleString()}
                             />
 
                             {order.payment_date && (
                                 <DetailField
-                                    label="Payment Date"
+                                    label={useI18nStore.getState().t('admin.orders.paymentDate')}
                                     value={new Date(order.payment_date).toLocaleDateString()}
                                 />
                             )}
 
                             {order.rejection_reason && (
                                 <div className="col-span-2 bg-red-50 p-3 rounded-md border border-red-100">
-                                    <Label className="text-red-600 font-semibold mb-1 block">Rejection Reason</Label>
+                                    <Label className="text-red-600 font-semibold mb-1 block">{useI18nStore.getState().t('admin.orders.rejectionReason')}</Label>
                                     <div className="text-red-700 text-sm">{order.rejection_reason}</div>
                                 </div>
                             )}
@@ -1000,7 +1002,7 @@ const DetailsModal = ({
                     </div>
                 )}
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>Close</Button>
+                    <Button variant="outline" onClick={onClose}>{useI18nStore.getState().t('admin.orders.close')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -1012,21 +1014,20 @@ const ApproveModal = ({ open, onClose, order, onConfirm, processing }: any) => (
     <Dialog open={open} onOpenChange={onClose}>
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Approve Order</DialogTitle>
+                <DialogTitle>{useI18nStore.getState().t('admin.orders.approveTitle')}</DialogTitle>
                 <DialogDescription>
-                    Are you sure you want to approve Order <b>{order?.order_number}</b>?
-                    This will move the order to Processing status.
+                    {useI18nStore.getState().t('admin.orders.approveDesc')} <b>{order?.order_number}</b>{useI18nStore.getState().t('admin.orders.approveDescSuffix')}
                 </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-                <Button variant="outline" onClick={onClose}>Cancel</Button>
+                <Button variant="outline" onClick={onClose}>{useI18nStore.getState().t('admin.orders.cancel')}</Button>
                 <Button
                     className="bg-emerald-600 hover:bg-emerald-700"
                     onClick={onConfirm}
                     disabled={processing}
                 >
                     {processing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                    Confirm Approval
+                    {useI18nStore.getState().t('admin.orders.confirmApproval')}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -1040,32 +1041,31 @@ const RejectModal = ({ open, onClose, order, reason, onReasonChange, onConfirm, 
             <DialogHeader>
                 <DialogTitle className="text-red-600 flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5" />
-                    Reject Order
+                    {useI18nStore.getState().t('admin.orders.rejectTitle')}
                 </DialogTitle>
                 <DialogDescription>
-                    You are about to reject Order <b>{order?.order_number}</b>.
-                    Please provide a reason for the taxpayer.
+                    {useI18nStore.getState().t('admin.orders.rejectDesc')} <b>{order?.order_number}</b>{useI18nStore.getState().t('admin.orders.rejectDescSuffix')}
                 </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-                <Label htmlFor="reason" className="mb-2 block">Rejection Reason</Label>
+                <Label htmlFor="reason" className="mb-2 block">{useI18nStore.getState().t('admin.orders.rejectionReasonLabel')}</Label>
                 <textarea
                     id="reason"
                     className="flex min-h-[100px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-                    placeholder="e.g., Invalid Import Declaration document..."
+                    placeholder={`${useI18nStore.getState().t('admin.orders.rejectionPlaceholder')}`}
                     value={reason}
                     onChange={(e) => onReasonChange(e.target.value)}
                 />
             </div>
             <DialogFooter>
-                <Button variant="outline" onClick={onClose}>Cancel</Button>
+                <Button variant="outline" onClick={onClose}>{useI18nStore.getState().t('admin.orders.cancel')}</Button>
                 <Button
                     variant="destructive"
                     onClick={onConfirm}
                     disabled={processing}
                 >
                     {processing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
-                    Reject Order
+                    {useI18nStore.getState().t('admin.orders.rejectOrder')}
                 </Button>
             </DialogFooter>
         </DialogContent>
@@ -1091,10 +1091,10 @@ const PaymentModal = ({
             <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5 text-emerald-600" />
-                    Record Payment
+                    {useI18nStore.getState().t('admin.orders.recordPayment')}
                 </DialogTitle>
                 <DialogDescription>
-                    Record payment received for Order #{order?.order_number}
+                    {useI18nStore.getState().t('admin.orders.recordPaymentDesc')} #{order?.order_number}
                 </DialogDescription>
             </DialogHeader>
 
@@ -1102,7 +1102,7 @@ const PaymentModal = ({
                 <div className="py-4 space-y-4">
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
                         <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-600">Amount Due:</span>
+                            <span className="text-sm text-slate-600">{useI18nStore.getState().t('admin.orders.amountDue')}</span>
                             <span className="text-lg font-bold text-emerald-600">
                                 {formatCurrency(order.grand_total)}
                             </span>
@@ -1114,13 +1114,13 @@ const PaymentModal = ({
                     </div>
 
                     <div>
-                        <Label htmlFor="paymentMethod">Payment Method</Label>
+                        <Label htmlFor="paymentMethod">{useI18nStore.getState().t('admin.orders.paymentMethod')}</Label>
                         <Select
                             value={paymentForm.payment_method_id?.toString() || ''}
                             onValueChange={(value) => onMethodChange(parseInt(value))}
                         >
                             <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Select payment method" />
+                                <SelectValue placeholder={useI18nStore.getState().t('admin.orders.selectPaymentMethod')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {paymentMethods.map((method: PaymentMethod) => {
@@ -1141,7 +1141,7 @@ const PaymentModal = ({
                     {renderPaymentFields()}
 
                     <div>
-                        <Label htmlFor="paymentDate">Payment Date</Label>
+                        <Label htmlFor="paymentDate">{useI18nStore.getState().t('admin.orders.paymentDateLabel')}</Label>
                         <Input
                             id="paymentDate"
                             type="date"
@@ -1155,7 +1155,7 @@ const PaymentModal = ({
 
             <DialogFooter className="gap-2">
                 <Button variant="outline" onClick={onClose}>
-                    Cancel
+                    {useI18nStore.getState().t('admin.orders.cancel')}
                 </Button>
                 <Button
                     className="bg-emerald-600 hover:bg-emerald-700"
@@ -1167,7 +1167,7 @@ const PaymentModal = ({
                     ) : (
                         <CheckCircle className="mr-2 h-4 w-4" />
                     )}
-                    Record Payment
+                    {useI18nStore.getState().t('admin.orders.recordPaymentBtn')}
                 </Button>
             </DialogFooter>
         </DialogContent>

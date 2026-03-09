@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface LegalRepresentativeStepProps {
     data: {
@@ -15,12 +16,15 @@ interface LegalRepresentativeStepProps {
 }
 
 export default function LegalRepresentativeStep({ data, setData, errors }: LegalRepresentativeStepProps) {
+    const { t } = useI18nStore();
     return (
         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-            <h2 className="text-2xl font-semibold text-black mb-4">Legal Representative</h2>
+            <h2 className="text-2xl font-semibold text-black mb-4">{t('registration.steps.legalRoot.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                    <Label htmlFor="legal_representative_name" className="text-sm font-medium text-slate-600">Full Name</Label>
+                <div>
+                    <Label htmlFor="legal_representative_name" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.repName')}
+                    </Label>
                     <Input
                         id="legal_representative_name"
                         type="text"
@@ -28,12 +32,14 @@ export default function LegalRepresentativeStep({ data, setData, errors }: Legal
                         onChange={(e) => setData('legal_representative_name', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter full legal representative name"
+                        placeholder={t('registration.fields.repNamePlaceholder') as string}
                     />
                     <InputError message={errors.legal_representative_name} />
                 </div>
                 <div>
-                    <Label htmlFor="legal_representative_email" className="text-sm font-medium text-slate-600">Email Address</Label>
+                    <Label htmlFor="legal_representative_email" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.repEmail')}
+                    </Label>
                     <Input
                         id="legal_representative_email"
                         type="email"
@@ -41,12 +47,14 @@ export default function LegalRepresentativeStep({ data, setData, errors }: Legal
                         onChange={(e) => setData('legal_representative_email', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter email address"
+                        placeholder={t('registration.fields.repEmailPlaceholder') as string}
                     />
                     <InputError message={errors.legal_representative_email} />
                 </div>
                 <div>
-                    <Label htmlFor="legal_representative_phone" className="text-sm font-medium text-slate-600">Phone Number</Label>
+                    <Label htmlFor="legal_representative_phone" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.repPhone')}
+                    </Label>
                     <Input
                         id="legal_representative_phone"
                         type="tel"
@@ -54,12 +62,14 @@ export default function LegalRepresentativeStep({ data, setData, errors }: Legal
                         onChange={(e) => setData('legal_representative_phone', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter phone number"
+                        placeholder={t('registration.fields.repPhonePlaceholder') as string}
                     />
                     <InputError message={errors.legal_representative_phone} />
                 </div>
                 <div>
-                    <Label htmlFor="legal_representative_id_number" className="text-sm font-medium text-slate-600">ID Number (National ID/Passport)</Label>
+                    <Label htmlFor="legal_representative_id_number" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.repId')}
+                    </Label>
                     <Input
                         id="legal_representative_id_number"
                         type="text"

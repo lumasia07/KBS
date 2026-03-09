@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputError from '@/components/input-error';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface District { id: number; name: string; }
 interface Commune { id: number; name: string; district_id: number; }
@@ -34,12 +35,16 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
         return quartiers.filter(q => q.commune_id.toString() === data.commune_id.toString());
     }, [data.commune_id, quartiers]);
 
+    const { t } = useI18nStore();
+
     return (
         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-            <h2 className="text-2xl font-semibold text-black mb-4">Location Details</h2>
+            <h2 className="text-2xl font-semibold text-black mb-4">{t('registration.steps.location.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <Label htmlFor="district_id" className="text-sm font-medium text-slate-600">District</Label>
+                    <Label htmlFor="district_id" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.district')}
+                    </Label>
                     <Select
                         value={data.district_id?.toString()}
                         onValueChange={(value) => {
@@ -49,7 +54,7 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                         }}
                     >
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
-                            <SelectValue placeholder="Select district" />
+                            <SelectValue placeholder={t('registration.fields.districtPlaceholder') as string} />
                         </SelectTrigger>
                         <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {districts.map((d) => (
@@ -60,7 +65,9 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                     <InputError message={errors.district_id} />
                 </div>
                 <div>
-                    <Label htmlFor="commune_id" className="text-sm font-medium text-slate-600">Commune</Label>
+                    <Label htmlFor="commune_id" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.commune')}
+                    </Label>
                     <Select
                         value={data.commune_id?.toString()}
                         onValueChange={(value) => {
@@ -70,7 +77,7 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                         disabled={!data.district_id}
                     >
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
-                            <SelectValue placeholder="Select commune" />
+                            <SelectValue placeholder={t('registration.fields.communePlaceholder') as string} />
                         </SelectTrigger>
                         <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {filteredCommunes.map((c) => (
@@ -81,14 +88,16 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                     <InputError message={errors.commune_id} />
                 </div>
                 <div>
-                    <Label htmlFor="quartier_id" className="text-sm font-medium text-slate-600">Quartier</Label>
+                    <Label htmlFor="quartier_id" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.quartier')}
+                    </Label>
                     <Select
                         value={data.quartier_id?.toString()}
                         onValueChange={(value) => setData('quartier_id', value)}
                         disabled={!data.commune_id}
                     >
                         <SelectTrigger className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900">
-                            <SelectValue placeholder="Select quartier" />
+                            <SelectValue placeholder={t('registration.fields.quartierPlaceholder') as string} />
                         </SelectTrigger>
                         <SelectContent className="z-50 bg-white border-2 border-[#003366] rounded-lg text-slate-900 shadow-xl animate-in fade-in-0 zoom-in-95 [&_[data-radix-select-item]]:cursor-pointer [&_[data-radix-select-item]]:py-2.5 [&_[data-radix-select-item]]:px-3 [&_[data-radix-select-item]]:transition-all [&_[data-radix-select-item]]:duration-150 [&_[data-radix-select-item]:hover]:bg-[#003366]/10 [&_[data-radix-select-item][data-highlighted]]:bg-[#003366] [&_[data-radix-select-item][data-highlighted]]:text-white [&_[data-radix-select-item]:focus]:outline-none">
                             {filteredQuartiers.map((q) => (
@@ -99,19 +108,23 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                     <InputError message={errors.quartier_id} />
                 </div>
                 <div>
-                    <Label htmlFor="avenue" className="text-sm font-medium text-slate-600">Avenue/Street</Label>
+                    <Label htmlFor="avenue" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.avenue')}
+                    </Label>
                     <Input
                         id="avenue"
                         type="text"
                         value={data.avenue}
                         onChange={(e) => setData('avenue', e.target.value)}
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter avenue or street name"
+                        placeholder={t('registration.fields.avenuePlaceholder') as string}
                     />
                     <InputError message={errors.avenue} />
                 </div>
                 <div className="md:col-span-2">
-                    <Label htmlFor="physical_address" className="text-sm font-medium text-slate-600">Complete Physical Address</Label>
+                    <Label htmlFor="physical_address" className="text-sm font-medium text-slate-600">
+                        {t('registration.fields.address')}
+                    </Label>
                     <Input
                         id="physical_address"
                         type="text"
@@ -119,7 +132,7 @@ export default function LocationDetailsStep({ data, setData, errors, districts, 
                         onChange={(e) => setData('physical_address', e.target.value)}
                         required
                         className="border-2 border-[#003366] focus:border-[#003366] focus:ring-[#003366] mt-1 text-slate-900"
-                        placeholder="Enter complete address with building number, etc."
+                        placeholder={t('registration.fields.addressPlaceholder') as string}
                     />
                     <InputError message={errors.physical_address} />
                 </div>

@@ -12,6 +12,7 @@ import {
 import { toast } from 'sonner';
 import { useTaxpayerProductStore, type Product } from '@/stores/taxpayer-product-store';
 import AppLayout from '@/layouts/app-layout';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface Props {
     myProducts: Product[];
@@ -20,14 +21,15 @@ interface Props {
 export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const { t, language } = useI18nStore();
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Dashboard',
+            title: t('taxpayer.sidebar.dashboard'),
             href: '/taxpayer/dashboard',
         },
         {
-            title: 'My Products',
+            title: t('taxpayer.sidebar.myProducts'),
             href: '/taxpayer/products',
         },
     ];
@@ -117,21 +119,21 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="My Products" />
+            <Head title={t('taxpayer.products.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">My Product Catalogue</h1>
-                        <p className="text-sm text-slate-500">Manage products registered under your enterprise</p>
+                        <h1 className="text-2xl font-bold text-slate-900">{t('taxpayer.products.title')}</h1>
+                        <p className="text-sm text-slate-500">{t('taxpayer.products.subtitle')}</p>
                     </div>
                     <Link
                         href="/taxpayer/products/create"
                         className="flex items-center gap-2 px-4 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors shadow-md"
                     >
                         <Plus className="w-4 h-4" />
-                        Add Product
+                        {t('taxpayer.products.addButton')}
                     </Link>
                 </div>
 
@@ -140,7 +142,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                     <div className="bg-gradient-to-br from-[#003366] to-[#002244] rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Total Products</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.products.stats.totalProducts')}</p>
                                 <p className="text-2xl font-bold">{products.length}</p>
                             </div>
                             <Package className="w-8 h-8 text-white/30" />
@@ -149,7 +151,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                     <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Active Products</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.products.stats.activeProducts')}</p>
                                 <p className="text-2xl font-bold">{products.filter(p => p.status === 'active').length}</p>
                             </div>
                             <CheckCircle2 className="w-8 h-8 text-white/30" />
@@ -158,7 +160,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                     <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white shadow-md">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/70">Pending Approval</p>
+                                <p className="text-xs text-white/70">{t('taxpayer.products.stats.pendingApproval')}</p>
                                 <p className="text-2xl font-bold">{products.filter(p => p.status === 'pending').length}</p>
                             </div>
                             <FileCheck className="w-8 h-8 text-white/30" />
@@ -169,20 +171,20 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                 {/* Products Table */}
                 <div className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-slate-200">
-                        <h2 className="text-lg font-semibold text-slate-900">Registered Products</h2>
+                        <h2 className="text-lg font-semibold text-slate-900">{t('taxpayer.products.tableTitle')}</h2>
                     </div>
 
                     {products.length === 0 ? (
                         <div className="p-12 text-center">
                             <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-slate-600 mb-2">No products yet</h3>
-                            <p className="text-sm text-slate-400 mb-4">Add products to your catalogue to start ordering stamps.</p>
+                            <h3 className="text-lg font-medium text-slate-600 mb-2">{t('taxpayer.products.emptyState')}</h3>
+                            <p className="text-sm text-slate-400 mb-4">{t('taxpayer.products.emptyStateMessage')}</p>
                             <Link
                                 href="/taxpayer/products/create"
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors"
                             >
                                 <Plus className="w-4 h-4" />
-                                Add Your First Product
+                                {t('taxpayer.products.addFirstProduct')}
                             </Link>
                         </div>
                     ) : (
@@ -190,11 +192,11 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                             <table className="w-full">
                                 <thead className="bg-slate-50">
                                     <tr>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Product</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Category</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Certificate</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Status</th>
-                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">Actions</th>
+                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.products.table.product')}</th>
+                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.products.table.category')}</th>
+                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.products.table.certificate')}</th>
+                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.products.table.status')}</th>
+                                        <th className="text-left text-sm font-medium text-slate-500 px-6 py-3">{t('taxpayer.products.table.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -221,10 +223,10 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                                                         className="flex items-center gap-2 text-[#003366] hover:underline"
                                                     >
                                                         <FileCheck className="w-4 h-4" />
-                                                        <span className="text-xs">View Cert</span>
+                                                        <span className="text-xs">{t('taxpayer.products.table.viewCert')}</span>
                                                     </a>
                                                 ) : (
-                                                    <span className="text-xs text-slate-400">No file</span>
+                                                    <span className="text-xs text-slate-400">{t('taxpayer.products.table.noCert')}</span>
                                                 )}
                                                 {product.health_certificate_number && (
                                                     <p className="text-xs text-slate-500 mt-1">#{product.health_certificate_number}</p>
@@ -275,7 +277,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                     <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
                         <div className="flex items-center justify-between p-6 border-b border-slate-200">
                             <div>
-                                <h3 className="text-lg font-semibold text-slate-900">Edit Product</h3>
+                                <h3 className="text-lg font-semibold text-slate-900">{t('taxpayer.products.editModal.title')}</h3>
                                 <p className="text-sm text-slate-500">{selectedProduct.name}</p>
                             </div>
                             <button
@@ -290,7 +292,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                             {/* Health Certificate */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Health Certificate #</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.products.editModal.healthCertNumber')}</label>
                                     <input
                                         type="text"
                                         value={editForm.data.health_certificate_number}
@@ -300,7 +302,7 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Expiry Date</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.products.editModal.expiryDate')}</label>
                                     <input
                                         type="date"
                                         value={editForm.data.health_certificate_expiry}
@@ -312,20 +314,20 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
 
                             {/* Status */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.products.editModal.status')}</label>
                                 <select
                                     value={editForm.data.status}
                                     onChange={(e) => editForm.setData('status', e.target.value)}
                                     className="w-full px-4 py-2.5 bg-white text-slate-900 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-colors"
                                 >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
+                                    <option value="active">{t('taxpayer.products.editModal.active')}</option>
+                                    <option value="inactive">{t('taxpayer.products.editModal.inactive')}</option>
                                 </select>
                             </div>
 
                             {/* Notes */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Notes (Optional)</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">{t('taxpayer.products.editModal.notes')}</label>
                                 <textarea
                                     value={editForm.data.notes}
                                     onChange={(e) => editForm.setData('notes', e.target.value)}
@@ -341,14 +343,14 @@ export default function TaxpayerProductsIndex({ myProducts = [] }: Props) {
                                     onClick={() => setShowEditModal(false)}
                                     className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                                 >
-                                    Cancel
+                                    {t('taxpayer.products.editModal.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={editForm.processing}
                                     className="flex-1 px-4 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#002244] transition-colors disabled:opacity-50"
                                 >
-                                    {editForm.processing ? 'Saving...' : 'Save Changes'}
+                                    {editForm.processing ? t('taxpayer.products.editModal.saving') : t('taxpayer.products.editModal.saveChanges')}
                                 </button>
                             </div>
                         </form>

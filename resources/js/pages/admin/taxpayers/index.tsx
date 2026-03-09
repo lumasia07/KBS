@@ -34,6 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface Taxpayer {
     id: string;
@@ -58,6 +59,7 @@ interface TableParams {
 }
 
 export default function AdminTaxpayersIndex() {
+    const { t } = useI18nStore();
     const [taxpayers, setTaxpayers] = useState<Taxpayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalRecords, setTotalRecords] = useState(0);
@@ -93,7 +95,7 @@ export default function AdminTaxpayersIndex() {
             setTotalRecords(response.data.recordsTotal);
         } catch (error) {
             console.error('Failed to fetch taxpayers', error);
-            toast.error('Failed to load taxpayers');
+            toast.error(t('admin.taxpayers.failedLoad'));
         } finally {
             setLoading(false);
         }
@@ -116,11 +118,11 @@ export default function AdminTaxpayersIndex() {
         setProcessingId(selectedTaxpayer.id);
         try {
             await axios.post(`/admin/taxpayers/${selectedTaxpayer.id}/approve`);
-            toast.success('Taxpayer approved successfully');
+            toast.success(t('admin.taxpayers.approvedSuccess'));
             fetchTaxpayers();
             setDetailsOpen(false);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to approve taxpayer');
+            toast.error(error.response?.data?.message || t('admin.taxpayers.failedApprove'));
         } finally {
             setProcessingId(null);
         }
@@ -131,12 +133,12 @@ export default function AdminTaxpayersIndex() {
         setProcessingId(selectedTaxpayer.id);
         try {
             await axios.post(`/admin/taxpayers/${selectedTaxpayer.id}/reject`, { rejection_reason: rejectionReason });
-            toast.success('Taxpayer rejected successfully');
+            toast.success(t('admin.taxpayers.rejectedSuccess'));
             fetchTaxpayers();
             setRejectOpen(false);
             setDetailsOpen(false);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to reject taxpayer');
+            toast.error(error.response?.data?.message || t('admin.taxpayers.failedReject'));
         } finally {
             setProcessingId(null);
         }
@@ -155,25 +157,25 @@ export default function AdminTaxpayersIndex() {
     const totalPages = Math.ceil(totalRecords / params.pageSize);
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Taxpayers', href: '/admin/taxpayers' }]}>
-            <Head title="Taxpayer Management" />
+        <AppLayout breadcrumbs={[{ title: t('admin.taxpayers.breadcrumb'), href: '/admin/taxpayers' }]}>
+            <Head title={t('admin.taxpayers.headTitle')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Taxpayers</h1>
-                        <p className="text-slate-500 text-sm mt-1">Manage registered companies and approval status.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('admin.taxpayers.title')}</h1>
+                        <p className="text-slate-500 text-sm mt-1">{t('admin.taxpayers.subtitle')}</p>
                     </div>
                 </div>
 
                 <div className="space-y-4">
                     {/* Controls */}
                     <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <div className="font-medium text-slate-900">Registered Companies</div>
+                        <div className="font-medium text-slate-900">{t('admin.taxpayers.registeredCompanies')}</div>
                         <div className="relative w-72">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                             <Input
-                                placeholder="Search Name, TIN..."
+                                placeholder={t('admin.taxpayers.searchPlaceholder')}
                                 className="pl-9 bg-slate-50 border-slate-200 focus:border-blue-500"
                                 value={params.search}
                                 onChange={(e) => setParams(p => ({ ...p, search: e.target.value, page: 1 }))}
@@ -186,11 +188,11 @@ export default function AdminTaxpayersIndex() {
                         <Table>
                             <TableHeader className="bg-slate-50">
                                 <TableRow>
-                                    <TableHead className="font-semibold text-slate-600">Company</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">TIN</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Sector</TableHead>
-                                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                                    <TableHead className="text-right font-semibold text-slate-600">Actions</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.taxpayers.thCompany')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.taxpayers.thTIN')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.taxpayers.thSector')}</TableHead>
+                                    <TableHead className="font-semibold text-slate-600">{t('admin.taxpayers.thStatus')}</TableHead>
+                                    <TableHead className="text-right font-semibold text-slate-600">{t('admin.taxpayers.thActions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -203,7 +205,7 @@ export default function AdminTaxpayersIndex() {
                                 ) : taxpayers.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="h-24 text-center text-slate-500">
-                                            No taxpayers found.
+                                            {t('admin.taxpayers.noTaxpayers')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -241,7 +243,7 @@ export default function AdminTaxpayersIndex() {
                         {totalRecords > 0 && (
                             <div className="flex items-center justify-between p-4 border-t border-slate-100">
                                 <div className="text-sm text-slate-500">
-                                    Showing {Math.min(((params.page - 1) * params.pageSize) + 1, totalRecords)} to {Math.min(params.page * params.pageSize, totalRecords)} of {totalRecords} entries
+                                    {t('admin.taxpayers.showing')} {Math.min(((params.page - 1) * params.pageSize) + 1, totalRecords)} {t('admin.taxpayers.to')} {Math.min(params.page * params.pageSize, totalRecords)} {t('admin.taxpayers.of')} {totalRecords} {t('admin.taxpayers.entries')}
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="outline" size="sm" onClick={() => setParams(p => ({ ...p, page: p.page - 1 }))} disabled={params.page === 1 || loading}>
@@ -265,43 +267,43 @@ export default function AdminTaxpayersIndex() {
                                 {selectedTaxpayer?.company_name}
                             </DialogTitle>
                             <DialogDescription className="text-slate-500">
-                                Registration Details & Validation Status
+                                {t('admin.taxpayers.registrationDetails')}
                             </DialogDescription>
                         </DialogHeader>
 
                         {selectedTaxpayer && (
                             <div className="grid grid-cols-2 gap-6 py-4">
                                 <div className="space-y-4">
-                                    <h3 className="font-semibold text-slate-900 border-b pb-2">Company Information</h3>
+                                    <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.taxpayers.companyInformation')}</h3>
                                     <div className="grid grid-cols-1 gap-2 text-sm">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Tax ID (TIN)</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.taxpayers.taxId')}</span>
                                             <span className="font-mono font-medium">{selectedTaxpayer.tax_identification_number}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">RCCM Number</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.taxpayers.rccmNumber')}</span>
                                             <span className="font-medium">{selectedTaxpayer.trade_register_number}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Business Sector</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.taxpayers.businessSector')}</span>
                                             <span className="font-medium">{selectedTaxpayer.sector_name}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h3 className="font-semibold text-slate-900 border-b pb-2">Contact & Rep</h3>
+                                    <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.taxpayers.contactRep')}</h3>
                                     <div className="grid grid-cols-1 gap-2 text-sm">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Address</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.taxpayers.address')}</span>
                                             <span className="font-medium">{selectedTaxpayer.physical_address}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Email / Phone</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.taxpayers.emailPhone')}</span>
                                             <span className="font-medium">{selectedTaxpayer.email} • {selectedTaxpayer.phone_number}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-slate-500 text-xs">Legal Representative</span>
+                                            <span className="text-slate-500 text-xs">{t('admin.taxpayers.legalRepresentative')}</span>
                                             <span className="font-medium">{selectedTaxpayer.legal_representative_name} ({selectedTaxpayer.legal_representative_phone})</span>
                                         </div>
                                     </div>
@@ -310,12 +312,12 @@ export default function AdminTaxpayersIndex() {
                         )}
 
                         <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
-                            <Button variant="outline" onClick={() => setDetailsOpen(false)}>Close</Button>
+                            <Button variant="outline" onClick={() => setDetailsOpen(false)}>{t('admin.taxpayers.close')}</Button>
 
                             {selectedTaxpayer?.registration_status === 'pending' && (
                                 <>
                                     <Button variant="destructive" onClick={() => setRejectOpen(true)}>
-                                        <XCircle className="mr-2 h-4 w-4" /> Reject
+                                        <XCircle className="mr-2 h-4 w-4" /> {t('admin.taxpayers.reject')}
                                     </Button>
                                     <Button
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -323,7 +325,7 @@ export default function AdminTaxpayersIndex() {
                                         disabled={!!processingId}
                                     >
                                         {processingId === selectedTaxpayer?.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                        Approve Registration
+                                        {t('admin.taxpayers.approveRegistration')}
                                     </Button>
                                 </>
                             )}
@@ -335,25 +337,25 @@ export default function AdminTaxpayersIndex() {
                 <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
                     <DialogContent className="sm:max-w-md bg-white text-slate-900">
                         <DialogHeader>
-                            <DialogTitle>Reject Registration</DialogTitle>
+                            <DialogTitle>{t('admin.taxpayers.rejectRegistration')}</DialogTitle>
                             <DialogDescription>
-                                Please provide a reason for rejecting this taxpayer application.
+                                {t('admin.taxpayers.rejectDescription')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label>Rejection Reason</Label>
+                                <Label>{t('admin.taxpayers.rejectionReason')}</Label>
                                 <Textarea
-                                    placeholder="e.g. Invalid RCCM document..."
+                                    placeholder={t('admin.taxpayers.rejectionPlaceholder')}
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                 />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setRejectOpen(false)}>Cancel</Button>
+                            <Button variant="ghost" onClick={() => setRejectOpen(false)}>{t('admin.taxpayers.cancel')}</Button>
                             <Button variant="destructive" onClick={confirmReject} disabled={!rejectionReason}>
-                                Confirm Reject
+                                {t('admin.taxpayers.confirmReject')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

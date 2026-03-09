@@ -9,6 +9,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
+import { useI18nStore } from '@/stores/useI18nStore';
 
 interface LoginProps {
     status?: string;
@@ -16,37 +17,38 @@ interface LoginProps {
     canRegister: boolean;
     portalType?: 'admin' | 'agent' | 'taxpayer';
 }
-
-const portalConfig = {
-    admin: {
-        title: 'Admin Portal Login',
-        description: 'Sign in to access the administrative dashboard',
-    },
-    agent: {
-        title: 'Agent Portal Login',
-        description: 'Sign in to access your field agent dashboard',
-    },
-    taxpayer: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
-    },
-};
-
 export default function Login({
     status,
     canResetPassword,
     canRegister,
     portalType = 'taxpayer',
 }: LoginProps) {
+    const { t } = useI18nStore();
+
+    const portalConfig = {
+        admin: {
+            title: t('auth.login.adminTitle'),
+            description: t('auth.login.adminDesc'),
+        },
+        agent: {
+            title: t('auth.login.agentTitle'),
+            description: t('auth.login.agentDesc'),
+        },
+        taxpayer: {
+            title: t('auth.login.title'),
+            description: t('auth.login.description'),
+        },
+    };
+
     const config = portalConfig[portalType] || portalConfig.taxpayer;
     const [showPassword, setShowPassword] = useState(false);
 
     return (
         <AuthLayout
-            title={config.title}
-            description={config.description}
+            title={config.title as string}
+            description={config.description as string}
         >
-            <Head title="Log in" />
+            <Head title={t('auth.login.submit') as string} />
 
             <Form
                 {...store.form()}
@@ -58,7 +60,7 @@ export default function Login({
                         <div className="grid gap-5">
                             <div className="grid gap-2">
                                 <label htmlFor="email" className="text-sm font-medium text-slate-700">
-                                    Email address
+                                    {t('auth.login.email')}
                                 </label>
                                 <input
                                     id="email"
@@ -68,7 +70,7 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder={t('auth.login.emailPlaceholder') as string}
                                     className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-transparent transition-all"
                                 />
                                 <InputError message={errors.email} />
@@ -77,7 +79,7 @@ export default function Login({
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between">
                                     <label htmlFor="password" className="text-sm font-medium text-slate-700">
-                                        Password
+                                        {t('auth.login.password')}
                                     </label>
                                     {canResetPassword && (
                                         <Link
@@ -85,7 +87,7 @@ export default function Login({
                                             className="text-sm text-[#003366] hover:text-[#002244] font-medium hover:underline"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                            {t('auth.login.forgotPassword')}
                                         </Link>
                                     )}
                                 </div>
@@ -97,7 +99,7 @@ export default function Login({
                                         required
                                         tabIndex={2}
                                         autoComplete="current-password"
-                                        placeholder="Enter your password"
+                                        placeholder={t('auth.login.passwordPlaceholder') as string}
                                         className="w-full px-4 py-3 pr-12 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-transparent transition-all"
                                     />
                                     <button
@@ -121,7 +123,7 @@ export default function Login({
                                     className="w-4 h-4 rounded border-slate-300 text-[#003366] focus:ring-[#003366]"
                                 />
                                 <label htmlFor="remember" className="text-sm text-slate-600">
-                                    Remember me
+                                    {t('auth.login.remember')}
                                 </label>
                             </div>
 
@@ -133,19 +135,19 @@ export default function Login({
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                {t('auth.login.submit')}
                             </Button>
                         </div>
 
                         {canRegister && (
                             <div className="text-center text-sm text-slate-600">
-                                Don't have an account?{' '}
+                                {t('auth.login.noAccount')}{' '}
                                 <Link
                                     href="/taxpayer/register"
                                     tabIndex={5}
                                     className="text-[#003366] font-semibold hover:text-[#002244] hover:underline"
                                 >
-                                    Sign up
+                                    {t('auth.login.signup')}
                                 </Link>
                             </div>
                         )}
