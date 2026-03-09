@@ -650,16 +650,30 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 // ============== Sub-components ==============
 
 // Stat Card Component
-const StatCard = ({ title, value, color, icon: Icon }: any) => (
-    <Card className={`bg-gradient-to-br from-${color}-500 to-${color}-600 text-white`}>
-        <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white/80">{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-        </CardContent>
-    </Card>
-);
+const StatCard = ({ title, value, color, icon: Icon }: any) => {
+    const colorMap: any = {
+        blue: "from-blue-500 to-blue-600",
+        amber: "from-amber-500 to-amber-600",
+        purple: "from-purple-500 to-purple-600",
+        emerald: "from-emerald-500 to-emerald-600",
+        red: "from-red-500 to-red-600",
+    };
+
+    return (
+        <Card className={`bg-gradient-to-br ${colorMap[color] || colorMap.blue} text-white`}>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium text-white/80">
+                    {title}
+                </CardTitle>
+                {Icon && <Icon className="h-5 w-5 text-white/80" />}
+            </CardHeader>
+
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+            </CardContent>
+        </Card>
+    );
+};
 
 // Search Bar Component
 const SearchBar = ({ value, onChange, placeholder }: any) => (
