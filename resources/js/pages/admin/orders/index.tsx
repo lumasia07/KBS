@@ -650,6 +650,7 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 }
 
 // ============== Sub-components ==============
+
 // Stat Card Component
 const StatCard = ({ title, value, color, icon: Icon }: any) => {
     const colorMap: any = {
