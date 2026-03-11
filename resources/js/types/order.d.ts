@@ -23,7 +23,7 @@ export interface Product {
     code: string;
     name: string;
     description: string | null;
-    category: string;
+    category: string | { id: number; name: string; parent_id: number | null };
     unit_type: string;
     stamp_price_per_unit: number;
     requires_health_certificate: boolean;
