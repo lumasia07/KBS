@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -15,15 +16,37 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
+        'decree_reference',
         'description',
+        'origin_type',
+        'production_type',
+        'applicable_standards',
         'requires_certificate',
-        'is_active'
+        'is_active',
+        'parent_id',
+        'sort_order',
     ];
 
     protected $casts = [
         'requires_certificate' => 'boolean',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'applicable_standards' => 'array',
     ];
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function scopeTopLevel($query)
+    {
+        return $query->whereNull('parent_id');
+    }
 
     /**
      * Certificate types required for this category

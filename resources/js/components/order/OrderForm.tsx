@@ -62,6 +62,8 @@ export function OrderForm() {
             toast.success('Order submitted successfully!', {
                 description: `Order ${order.order_number} is now pending verification.`,
             });
+        } else {
+            toast.error('Failed to submit order. Please try again.');
         }
     };
 

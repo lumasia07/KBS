@@ -651,16 +651,21 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
 
 // ============== Sub-components ==============
 
-// Stat Card Component
-const StatCard = ({ title, value, color, icon: Icon }: any) => (
-    <Card className={`bg-gradient-to-br from-${color}-500 to-${color}-600 text-white`}>
-        <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white/80">{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-        </CardContent>
-    </Card>
+// Stat Card Component — matches dashboard KPI style
+const StatCard = ({ title, value, icon: Icon }: { title: string; value: number; color?: string; icon: any }) => (
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003366] to-[#002244] p-6 shadow-lg hover:shadow-xl transition-all duration-300 group">
+        <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full" />
+        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-white/5 rounded-full" />
+        <div className="relative flex items-start justify-between">
+            <div>
+                <p className="text-sm font-medium text-white/70">{title}</p>
+                <p className="text-3xl font-bold text-white mt-2">{value}</p>
+            </div>
+            <div className="bg-white/10 p-3 rounded-xl group-hover:bg-white/20 transition-colors">
+                <Icon className="w-6 h-6 text-white" />
+            </div>
+        </div>
+    </div>
 );
 
 // Search Bar Component

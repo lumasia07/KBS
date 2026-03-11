@@ -313,6 +313,8 @@ export const fr = {
         clearAll: "Tout effacer",
         activeFilters: "Filtres actifs :",
         cdf: "CDF",
+        adminPortal: "Portail Administrateur",
+        agentPortal: "Portail Agent",
     },
     statuses: {
         delivered: "Livré",

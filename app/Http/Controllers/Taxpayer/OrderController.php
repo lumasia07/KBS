@@ -188,4 +188,14 @@ class OrderController extends Controller
             'taxpayerInfo' => $taxpayerInfo
         ]);
     }
+
+    public function show(StampOrder $order)
+    {
+        $taxpayerInfo = Auth::user()->taxpayer;
+
+        return Inertia::render('taxpayer/order/checkout', [
+            'order' => $order,
+            'taxpayerInfo' => $taxpayerInfo
+        ]);
+    }
 }
