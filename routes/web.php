@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,6 +28,15 @@ use App\Models\Report;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| Stamp QR Verification (public — no auth required)
+|--------------------------------------------------------------------------
+*/
+Route::get('/verify/{serial}', [VerificationController::class, 'verify'])
+    ->name('verify.stamp')
+    ->where('serial', '[A-Za-z0-9\-]+');
 
 
 /*
