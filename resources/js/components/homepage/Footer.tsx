@@ -87,11 +87,11 @@ export function Footer() {
 
       <footer className="relative overflow-hidden">
         {/* Top gradient section */}
-        <div className="bg-gradient-to-br from-[#003366] via-[#00264d] to-[#001a33] text-white">
+        <div className="bg-gradient-to-br from-[#1a0a2e] via-[#0d1b3e] to-[#003366] text-white">
           {/* Decorative elements */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FFD700] via-amber-400 to-[#FFD700]"></div>
-          <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-amber-500/5 to-transparent rounded-full -translate-x-32 -translate-y-32"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-blue-500/5 to-transparent rounded-full translate-x-48 translate-y-48"></div>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 via-[#FFD700] to-violet-500"></div>
+          <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-violet-500/5 to-transparent rounded-full -translate-x-32 -translate-y-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-violet-500/5 to-transparent rounded-full translate-x-48 translate-y-48"></div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* Quick Access Bar */}

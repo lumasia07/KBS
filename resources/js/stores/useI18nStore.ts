@@ -31,31 +31,36 @@ const resolvePath = (obj: any, path: string) => {
     return path.split('.').reduce((prev, curr) => (prev ? prev[curr] : null), obj);
 };
 
+// Creates a new `t` function bound to a specific language.
+// A new reference is created each time so zustand detects the change and re-renders subscribers.
+const createT = (lang: Language) => (key: TranslationKey): string => {
+    const dict = dictionaries[lang] || dictionaries['fr'];
+    const translation = resolvePath(dict, key);
+
+    if (translation === undefined || translation === null) {
+        const fallback = resolvePath(dictionaries['en'], key);
+        return fallback !== undefined && fallback !== null ? fallback : key;
+    }
+
+    return translation;
+};
+
 export const useI18nStore = create<I18nState>()(
     persist(
-        (set, get) => ({
+        (set) => ({
             // French is the default local language
             language: 'fr',
-            setLanguage: (lang: Language) => set({ language: lang }),
-            t: (key: TranslationKey) => {
-                const { language } = get();
-                const dict = dictionaries[language] || dictionaries['fr'];
-
-                // Resolve nested keys e.g., 'header.home'
-                const translation = resolvePath(dict, key);
-
-                // Fallback to English, then the key itself if not found
-                if (translation === undefined || translation === null) {
-                    const fallback = resolvePath(dictionaries['en'], key);
-                    return fallback !== undefined && fallback !== null ? fallback : key;
-                }
-
-                return translation;
-            },
+            setLanguage: (lang: Language) => set({ language: lang, t: createT(lang) }),
+            t: createT('fr'),
         }),
         {
             name: 'kbs-i18n-storage',
             partialize: (state) => ({ language: state.language }),
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.t = createT(state.language);
+                }
+            },
         }
     )
 );

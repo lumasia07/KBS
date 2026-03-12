@@ -98,7 +98,7 @@ export function HowItWorks() {
                     }`}
                   style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="absolute inset-0 bg-blue-600/5 rounded-2xl transform rotate-3 transition-transform group-hover:rotate-2 duration-500"></div>
+                  <div className="absolute inset-0 bg-violet-600/5 rounded-2xl transform rotate-3 transition-transform group-hover:rotate-2 duration-500"></div>
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-100 aspect-[4/3]">
                     <img
                       src={step.image}
@@ -122,8 +122,8 @@ export function HowItWorks() {
                   style={{ animationDelay: `${index * 150 + 200}ms` }}
                 >
                   <div className="inline-flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                      <step.icon className="w-6 h-6 text-[#003366]" />
+                    <div className="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center">
+                      <step.icon className="w-6 h-6 text-violet-700" />
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900">{step.title}</h3>
                   </div>
@@ -150,7 +150,7 @@ export function HowItWorks() {
         <div className={`mt-24 text-center ${isVisible ? 'animate-fade-in-up delay-500' : 'opacity-0'}`}>
           <button
             onClick={() => router.visit('/register')}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#003366] hover:bg-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#1a0a2e] hover:from-[#1a0a2e] hover:to-[#003366] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
           >
             {t('howItWorks.cta')}
           </button>

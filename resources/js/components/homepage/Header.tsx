@@ -60,7 +60,7 @@ function NavItem({ label, href, hasDropdown, dropdownItems }: NavItemProps) {
             >
                 <span className="relative">
                     {label}
-                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-[#FFD700] to-amber-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></span>
+                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-500 via-[#FFD700] to-violet-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></span>
                 </span>
                 {hasDropdown && (
                     <ChevronDown
@@ -85,7 +85,7 @@ function NavItem({ label, href, hasDropdown, dropdownItems }: NavItemProps) {
 
                         <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden min-w-[280px] backdrop-blur-xl bg-white/95">
                             {/* Gradient header */}
-                            <div className="h-1.5 bg-gradient-to-r from-[#FFD700] via-amber-400 to-[#FFD700]"></div>
+                            <div className="h-1.5 bg-gradient-to-r from-violet-500 via-[#FFD700] to-violet-500"></div>
 
                             <div className="p-3">
                                 {dropdownItems.map((item, index) => (
@@ -216,9 +216,11 @@ export function Header() {
       `}</style>
 
             <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-                ? 'bg-white/95 backdrop-blur-xl shadow-lg py-2'
-                : 'bg-white/90 backdrop-blur-lg py-3'
+                ? 'bg-white shadow-lg py-2'
+                : 'bg-white py-3'
                 }`}>
+                {/* Bottom border gradient */}
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#003366] via-violet-500 to-[#003366]"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16 lg:h-20">
                         {/* Logo Section */}

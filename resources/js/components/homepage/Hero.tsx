@@ -17,9 +17,9 @@ export function Hero() {
   const { t } = useI18nStore();
 
   const features = [
-    { icon: <ShieldCheck className="w-4 h-4" />, text: t('hero.features.compliance'), color: "text-emerald-400" },
-    { icon: <Award className="w-4 h-4" />, text: t('hero.features.standards'), color: "text-blue-400" },
-    { icon: <CheckCircle className="w-4 h-4" />, text: t('hero.features.verification'), color: "text-amber-400" },
+    { icon: <ShieldCheck className="w-4 h-4" />, text: t('hero.features.compliance'), color: "text-violet-400" },
+    { icon: <Award className="w-4 h-4" />, text: t('hero.features.standards'), color: "text-amber-400" },
+    { icon: <CheckCircle className="w-4 h-4" />, text: t('hero.features.verification'), color: "text-emerald-400" },
   ]
 
   return (
@@ -44,30 +44,39 @@ export function Hero() {
           style={{
             backgroundImage: `
               linear-gradient(
-                to right,
-                rgba(0, 20, 40, 0.9) 0%,
-                rgba(0, 30, 60, 0.8) 50%,
-                rgba(0, 20, 40, 0.9) 100%
+                135deg,
+                rgba(26, 10, 46, 0.92) 0%,
+                rgba(13, 27, 62, 0.88) 40%,
+                rgba(0, 51, 102, 0.9) 100%
               ),
               url('/industry.jpg')
             `,
           }}
         ></div>
+        {/* Purple radial glow */}
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(255,215,0,0.06),transparent_50%)]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-2xl space-y-8">
 
 
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 backdrop-blur-sm">
+              <Sparkles className="w-4 h-4 text-violet-400" />
+              <span className="text-sm font-semibold text-violet-300 uppercase tracking-wider">{t('hero.badge')}</span>
+            </div>
+
             {/* Main Content */}
             <div className="space-y-6">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-white">
                 {t('hero.titlePrefix')}{' '}
-                <span className="text-amber-400">
+                <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
                   {t('hero.titleHighlight')}
                 </span>
               </h1>
 
-              <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
+              <p className="text-xl text-blue-200/80 leading-relaxed max-w-xl">
                 {t('hero.subtitle')}
               </p>
             </div>
@@ -78,7 +87,7 @@ export function Hero() {
                 onClick={() => router.visit('/login')}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold bg-[#003366] hover:bg-blue-800 text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold bg-gradient-to-r from-[#003366] to-[#1a0a2e] hover:from-[#1a0a2e] hover:to-[#003366] text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 <span className="flex items-center gap-2">
                   {t('hero.enterPortal')}
@@ -105,7 +114,7 @@ export function Hero() {
                   className="flex items-center gap-3 animate-[fadeInUp_0.5s_ease-out]"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className={`p-2 rounded-lg bg-white/5 border border-white/10 ${feature.color}`}>
+                  <div className={`p-2 rounded-lg bg-white/5 border border-violet-500/10 ${feature.color}`}>
                     {feature.icon}
                   </div>
                   <span className="text-sm font-medium text-white">
