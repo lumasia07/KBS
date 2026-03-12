@@ -111,12 +111,12 @@ class TaxpayerController extends Controller
 
             $taxpayerApiKey = $this->generateApiKey();
             $taxpayerApiKeyExpiresAt = now()->addYear();
-            $taxpayerEmail = $this->generateTaxpayerEmail($validatedData['company_name']);
+            // $taxpayerEmail = $this->generateTaxpayerEmail($validatedData['company_name']);
             $taxpayerPassword = Str::random(8);
 
             $validatedData['api_key'] = $taxpayerApiKey;
             $validatedData['api_key_expires_at'] = $taxpayerApiKeyExpiresAt;
-            $validatedData['email'] = $taxpayerEmail;
+            $validatedData['email'] = $validatedData['email'] ?? $validatedData['legal_representative_email'] ?? null;
             $validatedData['registration_date'] = now()->toDateString();
             $validatedData['registration_status'] = 'pending';
 
@@ -130,10 +130,10 @@ class TaxpayerController extends Controller
                     );
                 }
 
-                $taxpayerUser = $taxpayer->users()->create([
+                $taxpayer->users()->create([
                     'first_name' => $validatedData['company_name'],
                     'last_name' => 'Admin',
-                    'email' => $taxpayerEmail,
+                    'email' => $validatedData['email'],
                     'department' => 'Administration',
                     'password' => bcrypt($taxpayerPassword),
                     'user_type' => 'taxpayer',
@@ -155,7 +155,9 @@ class TaxpayerController extends Controller
 
         // Send registration email
         try {
-            Mail::to($taxpayerUser->email)->send(
+            $receiverEmail = $this->taxpayerUser($taxpayer)->email;
+
+            Mail::to($receiverEmail)->send(
                 new TaxpayerRegistrationMail(
                     $taxpayer,
                     $taxpayerPassword
@@ -255,13 +257,13 @@ class TaxpayerController extends Controller
 
                 $validatedData = $this->processStatusChange($taxpayer, $validatedData);
 
-                $taxpayerMainUserEmail = $taxpayer->users->first()->email;
-
                 // Send status change emails
                 if ($oldStatus === 'pending') {
+                    $receiverEmail = $this->taxpayerUser($taxpayer)->email;
+
                     if ($newStatus === 'verified') {
                         // Send approval email
-                        Mail::to($taxpayerMainUserEmail)->send(
+                        Mail::to($receiverEmail)->send(
                             new TaxpayerApprovalMail(
                                 $taxpayer
                             )
@@ -269,7 +271,7 @@ class TaxpayerController extends Controller
                     } elseif ($newStatus === 'rejected') {
                         // Send rejection email
                         $rejectionReason = $validatedData['rejection_reason'] ?? 'Your application did not meet our verification requirements.';
-                        Mail::to($taxpayerMainUserEmail)->send(
+                        Mail::to($receiverEmail)->send(
                             new TaxpayerRejectMail(
                                 $taxpayer,
                                 $rejectionReason
@@ -376,7 +378,9 @@ class TaxpayerController extends Controller
 
             // Send approval email
             try {
-                Mail::to($taxpayer->email)->send(
+                $receiverEmail = $this->taxpayerUser($taxpayer)->email;
+
+                Mail::to($receiverEmail)->send(
                     new TaxpayerApprovalMail(
                         $taxpayer
                     )
@@ -440,7 +444,9 @@ class TaxpayerController extends Controller
 
             // Send rejection email
             try {
-                Mail::to($taxpayer->email)->send(
+                $receiverEmail = $this->taxpayerUser($taxpayer)->email;
+
+                Mail::to($receiverEmail)->send(
                     new TaxpayerRejectMail(
                         $taxpayer,
                         $request->rejection_reason
@@ -656,5 +662,10 @@ class TaxpayerController extends Controller
         if (!empty($updateData)) {
             $taxpayer->products()->updateExistingPivot($productId, $updateData);
         }
+    }
+
+    public function taxpayerUser(Taxpayer $taxpayer)
+    {
+        return $taxpayer->users()->first();
     }
 }
