@@ -130,7 +130,7 @@ class TaxpayerController extends Controller
                     );
                 }
 
-                $taxpayer->users()->create([
+                $taxpayerUser = $taxpayer->users()->create([
                     'first_name' => $validatedData['company_name'],
                     'last_name' => 'Admin',
                     'email' => $taxpayerEmail,
@@ -155,7 +155,7 @@ class TaxpayerController extends Controller
 
         // Send registration email
         try {
-            Mail::to($taxpayer->email)->send(
+            Mail::to($taxpayerUser->email)->send(
                 new TaxpayerRegistrationMail(
                     $taxpayer,
                     $taxpayerPassword
@@ -255,11 +255,13 @@ class TaxpayerController extends Controller
 
                 $validatedData = $this->processStatusChange($taxpayer, $validatedData);
 
+                $taxpayerMainUserEmail = $taxpayer->users->first()->email;
+
                 // Send status change emails
                 if ($oldStatus === 'pending') {
                     if ($newStatus === 'verified') {
                         // Send approval email
-                        Mail::to($taxpayer->email)->send(
+                        Mail::to($taxpayerMainUserEmail)->send(
                             new TaxpayerApprovalMail(
                                 $taxpayer
                             )
@@ -267,7 +269,7 @@ class TaxpayerController extends Controller
                     } elseif ($newStatus === 'rejected') {
                         // Send rejection email
                         $rejectionReason = $validatedData['rejection_reason'] ?? 'Your application did not meet our verification requirements.';
-                        Mail::to($taxpayer->email)->send(
+                        Mail::to($taxpayerMainUserEmail)->send(
                             new TaxpayerRejectMail(
                                 $taxpayer,
                                 $rejectionReason
@@ -511,7 +513,7 @@ class TaxpayerController extends Controller
 
     private function generateTaxpayerEmail(string $companyName)
     {
-        $domain = config('app.domain', 'taxsystem.local');
+        $domain = 'rcekin.cd';
         $slug = Str::slug($companyName);
         $random = Str::random(6);
 
