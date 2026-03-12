@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Print Batch — {{ $order->order_number }}</title>
+    {{-- QR code generator (lightweight, no dependencies) --}}
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
         /* ── Reset ── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,117 +34,240 @@
         .btn-close { background: rgba(255,255,255,.15); color: #fff; }
 
         /* ── Page container ── */
-        .page-wrap { padding: 70px 20px 20px; }
+        .page-wrap { padding: 70px 10px 10px; }
 
-        /* ── Stamp grid: 5 columns × 8 rows = 40 per page ── */
-        .stamp-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 3px;
-            max-width: 1100px;
+        /* ── Stamp sheet: 4 columns × 7 rows = 28 per A4 landscape ── */
+        .stamp-sheet {
+            width: 277mm;  /* A4 landscape minus margins */
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 0;
+            border: 0.5px solid #cbd5e1;
         }
 
-        /* ── Individual stamp (small KEBS-style) ── */
+        /* ── Individual stamp sticker ── */
         .stamp {
-            width: 100%; height: auto; aspect-ratio: 2 / 1;
-            border: 1.5px solid #003366;
-            border-radius: 3px;
+            width: 100%;
+            height: 26mm;
             display: flex;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 50%, #f8fafc 100%);
+            align-items: stretch;
             position: relative;
-            font-size: 6px;
+            background: #fff;
+            font-size: 6.5px;
             page-break-inside: avoid;
+            overflow: hidden;
+            /* Cut partition borders */
+            border-right: 1px dashed #94a3b8;
+            border-bottom: 1px dashed #94a3b8;
         }
 
-        /* Micro-pattern overlay */
+        /* Remove right border on last column */
+        .stamp:nth-child(4n) { border-right: none; }
+
+        /* Remove bottom border on last row */
+        .stamp-sheet .stamp:nth-last-child(-n+4) { border-bottom: none; }
+
+        /* Scissors icon on cut lines (screen only) */
+        .stamp::after {
+            content: '✂';
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            font-size: 8px;
+            color: #94a3b8;
+            z-index: 2;
+        }
+        .stamp:nth-child(4n)::after { display: none; }
+        .stamp-sheet .stamp:nth-last-child(-n+4)::after { display: none; }
+
+        /* ── Subtle guilloche security pattern ── */
         .stamp::before {
             content: '';
             position: absolute; inset: 0;
-            background: repeating-linear-gradient(
-                45deg,
-                transparent, transparent 3px,
-                rgba(0,51,102,0.02) 3px, rgba(0,51,102,0.02) 4px
-            );
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent, transparent 2.5mm,
+                    rgba(0,51,102,0.015) 2.5mm, rgba(0,51,102,0.015) 2.6mm
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent, transparent 2.5mm,
+                    rgba(0,51,102,0.015) 2.5mm, rgba(0,51,102,0.015) 2.6mm
+                );
             pointer-events: none;
+            z-index: 0;
         }
 
-        /* Left panel: QR + serial */
-        .stamp-left {
-            width: 28%;
-            border-right: 1px dashed rgba(0,51,102,0.3);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 2px 1px;
-            background: rgba(255,255,255,0.6);
-        }
-        .stamp-qr {
-            width: 32px; height: 32px;
-            background: #0f172a; border-radius: 1px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .stamp-qr svg { width: 24px; height: 24px; fill: #fff; }
-        .stamp-serial {
-            margin-top: 1px;
-            font-family: 'Courier New', monospace;
-            font-weight: 800; font-size: 5px;
-            color: #003366;
-            letter-spacing: 0.2px;
-        }
-
-        /* Right panel: Info */
-        .stamp-right {
-            flex: 1; padding: 2px 4px;
-            display: flex; flex-direction: column;
-            justify-content: space-between;
+        /* ── Left: QR Code area ── */
+        .stamp-qr-area {
+            width: 24mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2mm 1.5mm;
             position: relative;
+            z-index: 1;
+            border-right: 0.5px solid rgba(0,51,102,0.12);
+            background: linear-gradient(180deg, rgba(0,51,102,0.02) 0%, rgba(255,255,255,0) 100%);
         }
 
-        .stamp-header {
-            text-align: center;
-            border-bottom: 1px solid rgba(0,51,102,0.15);
-            padding-bottom: 1px;
+        .stamp-qr-code {
+            width: 18mm;
+            height: 18mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        .stamp-qr-code img,
+        .stamp-qr-code canvas,
+        .stamp-qr-code svg {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .stamp-serial {
+            margin-top: 1mm;
+            font-family: 'Courier New', monospace;
+            font-weight: 800;
+            font-size: 5px;
+            color: #003366;
+            letter-spacing: 0.3px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* ── Right: Info + Logo area ── */
+        .stamp-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5mm 2mm 1mm 2mm;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with logo */
+        .stamp-top {
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+            border-bottom: 0.5px solid rgba(0,51,102,0.15);
+            padding-bottom: 1mm;
+            margin-bottom: 1mm;
+        }
+
+        .stamp-logo {
+            width: 10mm;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        .stamp-logo img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .stamp-titles {
+            flex: 1;
+            line-height: 1.25;
+        }
+
         .stamp-country {
-            font-size: 4px; font-weight: 700;
+            font-size: 3.5px;
+            font-weight: 600;
             text-transform: uppercase;
             color: #64748b;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.6px;
         }
+
         .stamp-bureau {
-            font-size: 5.5px; font-weight: 900;
+            font-size: 5.5px;
+            font-weight: 900;
             text-transform: uppercase;
             color: #003366;
-            margin-top: 0;
+            letter-spacing: 0.3px;
         }
 
-        .stamp-details { margin: 1px 0; }
+        /* Data rows */
+        .stamp-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.3mm;
+        }
+
         .stamp-row {
-            display: flex; justify-content: space-between;
-            font-size: 5px; line-height: 1.5;
-        }
-        .stamp-label { color: #64748b; }
-        .stamp-value {
-            font-weight: 700; color: #1e293b;
-            max-width: 60px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            display: flex;
+            align-items: baseline;
+            font-size: 5.5px;
+            line-height: 1.5;
         }
 
-        .stamp-footer {
-            font-size: 3.5px; text-align: center;
-            color: #94a3b8; letter-spacing: 1px;
+        .stamp-label {
+            color: #64748b;
+            width: 12mm;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+
+        .stamp-value {
+            font-weight: 700;
+            color: #1e293b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 26mm;
+        }
+
+        /* Footer */
+        .stamp-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 0.5px solid rgba(0,51,102,0.1);
+            padding-top: 0.5mm;
+            margin-top: auto;
+        }
+
+        .stamp-footer-text {
+            font-size: 3.5px;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
         }
 
-        /* ── Diamond hologram mark ── */
+        /* Hologram diamond mark */
         .hologram {
-            position: absolute; top: 2px; right: 2px;
-            width: 10px; height: 10px;
-            background: linear-gradient(135deg, #003366, #0052a3, #ffd700, #0052a3, #003366);
+            width: 7px;
+            height: 7px;
+            background: linear-gradient(135deg, #003366 0%, #0052a3 25%, #ffd700 50%, #0052a3 75%, #003366 100%);
             clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            opacity: 0.7;
+            flex-shrink: 0;
         }
+
+        /* DRC flag color bar */
+        .flag-bar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 1.2mm;
+            z-index: 1;
+        }
+        .flag-bar span {
+            display: block;
+            height: 33.33%;
+        }
+        .flag-blue { background: #0070C0; }
+        .flag-yellow { background: #FFD700; }
+        .flag-red { background: #CE1126; }
 
         /* ── Page break helper ── */
         .page-break { page-break-after: always; break-after: page; }
@@ -154,24 +279,24 @@
 
             @page {
                 size: A4 landscape;
-                margin: 8mm;
+                margin: 5mm;
             }
 
             body { background: #fff; }
 
-            .stamp-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 2px;
-                max-width: none;
+            .stamp-sheet {
+                width: 100%;
+                border: none;
             }
 
             .stamp {
-                border-width: 1.5px;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
-            .hologram {
+            .stamp::after { display: none; } /* Hide scissors on print */
+
+            .hologram, .flag-bar span {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -182,7 +307,7 @@
     {{-- Screen-only toolbar --}}
     <div class="toolbar">
         <div>
-            <h1>Batch Print Preview — {{ $order->order_number }}</h1>
+            <h1>Batch Print Preview &mdash; {{ $order->order_number }}</h1>
             <div class="toolbar-info">
                 {{ $stamps->count() }} stamps &bull;
                 {{ $order->taxpayer->company_name ?? 'N/A' }} &bull;
@@ -197,43 +322,57 @@
     </div>
 
     <div class="page-wrap">
-        @foreach ($stamps->chunk(40) as $pageIndex => $pageStamps)
-            <div class="stamp-grid">
+        @foreach ($stamps->chunk(28) as $pageIndex => $pageStamps)
+            <div class="stamp-sheet">
                 @foreach ($pageStamps as $stamp)
                     <div class="stamp">
-                        <div class="stamp-left">
-                            <div class="stamp-qr">
-                                {{-- QR code placeholder --}}
-                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 3h7v7H3V3zm1 1v5h5V4H4zm-1 8h7v7H3v-7zm1 1v5h5v-5H4zM11 3h7v7h-7V3zm1 1v5h5V4h-5zm3 8h1v1h-1v-1zm-4 0h1v3h-1v-3zm2 0h1v1h-1v-1zm0 2h3v1h-3v-1zm0 2h1v3h-1v-3zm2 0h1v1h3v1h-1v1h-1v-1h-1v2h-1v-2h1v-1h-1v-1zm4-2h1v4h-1v-4zm-4 4h1v1h-1v-1zm2 0h1v1h-1v-1z"/>
-                                    <rect x="4.5" y="4.5" width="2" height="2"/>
-                                    <rect x="4.5" y="12.5" width="2" height="2"/>
-                                    <rect x="12.5" y="4.5" width="2" height="2"/>
-                                </svg>
-                            </div>
+                        {{-- QR Code side --}}
+                        <div class="stamp-qr-area">
+                            <div class="stamp-qr-code" data-qr="{{ $stamp->serial_number }}"></div>
                             <div class="stamp-serial">{{ $stamp->serial_number }}</div>
                         </div>
-                        <div class="stamp-right">
-                            <div class="hologram"></div>
-                            <div class="stamp-header">
-                                <div class="stamp-country">R&eacute;publique D&eacute;mocratique du Congo</div>
-                                <div class="stamp-bureau">Bureau of Standards</div>
+
+                        {{-- Info side --}}
+                        <div class="stamp-info">
+                            {{-- DRC flag bar on the right edge --}}
+                            <div class="flag-bar">
+                                <span class="flag-blue"></span>
+                                <span class="flag-yellow"></span>
+                                <span class="flag-red"></span>
                             </div>
+
+                            {{-- Header: Logo + Titles --}}
+                            <div class="stamp-top">
+                                <div class="stamp-logo">
+                                    <img src="/KBS_logo.png" alt="RCEKIN" />
+                                </div>
+                                <div class="stamp-titles">
+                                    <div class="stamp-country">R&eacute;publique D&eacute;mocratique du Congo</div>
+                                    <div class="stamp-bureau">R&eacute;gie de Contr&ocirc;le et d'Estampillage</div>
+                                </div>
+                            </div>
+
+                            {{-- Data --}}
                             <div class="stamp-details">
                                 <div class="stamp-row">
-                                    <span class="stamp-label">Product:</span>
+                                    <span class="stamp-label">Produit:</span>
                                     <span class="stamp-value">{{ $order->product->name ?? 'N/A' }}</span>
                                 </div>
                                 <div class="stamp-row">
-                                    <span class="stamp-label">Taxpayer:</span>
+                                    <span class="stamp-label">Assujetti:</span>
                                     <span class="stamp-value">{{ $order->taxpayer->company_name ?? 'N/A' }}</span>
                                 </div>
                                 <div class="stamp-row">
                                     <span class="stamp-label">Type:</span>
-                                    <span class="stamp-value">{{ $order->stampType->name ?? 'Excisable' }}</span>
+                                    <span class="stamp-value">{{ $order->stampType->name ?? 'QR Code Standard' }}</span>
                                 </div>
                             </div>
-                            <div class="stamp-footer">Authenticated &bull; Secure &bull; Traceable</div>
+
+                            {{-- Footer --}}
+                            <div class="stamp-bottom">
+                                <span class="stamp-footer-text">Authentifi&eacute; &bull; S&eacute;curis&eacute; &bull; Tra&ccedil;able</span>
+                                <div class="hologram"></div>
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -243,5 +382,31 @@
             @endif
         @endforeach
     </div>
+
+    <script>
+        // Generate real QR codes for every stamp
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.stamp-qr-code[data-qr]').forEach(function(el) {
+                var serial = el.getAttribute('data-qr');
+                // Verification URL as QR content
+                var qrContent = window.location.origin + '/verify/' + encodeURIComponent(serial);
+                try {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(qrContent);
+                    qr.make();
+                    el.innerHTML = qr.createSvgTag({ cellSize: 2, margin: 0, scalable: true });
+                    // Make the SVG fill the container
+                    var svg = el.querySelector('svg');
+                    if (svg) {
+                        svg.setAttribute('width', '100%');
+                        svg.setAttribute('height', '100%');
+                        svg.style.display = 'block';
+                    }
+                } catch(e) {
+                    console.warn('QR generation failed for', serial, e);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
