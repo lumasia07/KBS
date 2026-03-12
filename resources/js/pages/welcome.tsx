@@ -6,6 +6,7 @@ import { Hero } from '@/components/homepage/Hero';
 import { AboutSection } from '@/components/homepage/AboutSection';
 import { StatsSection } from '@/components/homepage/StatsSection';
 import { HowItWorks } from '@/components/homepage/HowItWorks';
+import { VerifySection } from '@/components/homepage/VerifySection';
 import { ContactSection } from '@/components/homepage/ContactSection';
 import { Footer } from '@/components/homepage/Footer';
 
@@ -22,6 +23,7 @@ export default function Welcome({
             <AboutSection />
             <StatsSection />
             <HowItWorks />
+            <VerifySection />
             <ContactSection />
             <Footer />
         </>

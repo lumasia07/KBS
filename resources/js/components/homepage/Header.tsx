@@ -252,7 +252,7 @@ export function Header() {
                                     hasDropdown
                                     dropdownItems={portalsDropdown}
                                 />
-                                <NavItem label={t('header.verify')} href="#" />
+                                <NavItem label={t('header.verify')} href="#verify" />
                                 <NavItem label={t('header.contact')} href="#" />
                                 <NavItem label={t('header.faq')} href="#" />
                             </div>
@@ -405,7 +405,7 @@ export function Header() {
                             </div>
 
                             <a
-                                href="#"
+                                href="#verify"
                                 className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
                             >
                                 {t('header.verify')}

@@ -30,6 +30,12 @@ use App\Http\Controllers\Api\AgentController;
  */
 Route::post('/login', [AuthController::class, 'login']);
 
+/**
+ * Stamp Verification (public)
+ */
+Route::get('/verify/{serial}', [App\Http\Controllers\VerificationController::class, 'verifyApi'])
+    ->where('serial', '[A-Za-z0-9\-]+');
+
 
 /*
 |--------------------------------------------------------------------------
