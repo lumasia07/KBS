@@ -171,6 +171,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/history', [App\Http\Controllers\Taxpayer\OrderController::class, 'history'])->name('history');
             Route::get('/{order}/checkout', [App\Http\Controllers\Taxpayer\OrderController::class, 'checkout'])->name('checkout');
             Route::post('/store', [App\Http\Controllers\Taxpayer\OrderController::class, 'store'])->name('store');
+            Route::get('/{order}', [App\Http\Controllers\Taxpayer\OrderController::class, 'show'])->name('show');
         });
 
         /*

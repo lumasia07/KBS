@@ -52,18 +52,27 @@ class ProductController extends Controller
 
         $availableProducts = $this->getAvailableProducts($user->taxpayer);
 
-        // Get active categories with their required certificate types
+        // Get active categories with their required certificate types (hierarchical)
         $categories = Category::active()
+            ->topLevel()
             ->with([
                 'certificateTypes' => function ($query) {
                     $query->wherePivot('is_required', true);
-                }
+                },
+                'children' => function ($query) {
+                    $query->where('is_active', true)->orderBy('name');
+                },
             ])
+            ->orderBy('sort_order')
             ->get()
             ->map(function ($category) {
                 return [
                     'id' => $category->id,
                     'name' => $category->name,
+                    'decree_reference' => $category->decree_reference,
+                    'origin_type' => $category->origin_type,
+                    'production_type' => $category->production_type,
+                    'applicable_standards' => $category->applicable_standards,
                     'requires_certificate' => $category->requires_certificate,
                     'required_certificate_types' => $category->certificateTypes->map(function ($certType) {
                         return [
@@ -71,6 +80,12 @@ class ProductController extends Controller
                             'name' => $certType->name,
                             'code' => $certType->code,
                             'specific_requirements' => $certType->pivot->specific_requirements,
+                        ];
+                    }),
+                    'children' => $category->children->map(function ($child) {
+                        return [
+                            'id' => $child->id,
+                            'name' => $child->name,
                         ];
                     }),
                 ];

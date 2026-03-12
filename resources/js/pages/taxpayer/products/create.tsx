@@ -41,11 +41,21 @@ interface CertificateType {
     specific_requirements?: string;
 }
 
+interface SubCategory {
+    id: number;
+    name: string;
+}
+
 interface Category {
     id: number;
     name: string;
+    decree_reference: string | null;
+    origin_type: string | null;
+    production_type: string | null;
+    applicable_standards: string[] | null;
     requires_certificate: boolean;
     required_certificate_types: CertificateType[];
+    children: SubCategory[];
 }
 
 interface Props {
@@ -79,8 +89,13 @@ export default function TaxpayerProductsCreate({ categories = [], unitTypes = []
 
     const handleCategoryChange = (categoryId: string) => {
         form.setData('category_id', categoryId);
-        const category = categories.find(c => c.id.toString() === categoryId);
-        setSelectedCategory(category || null);
+        // Find the parent category (for certificate requirements). A sub-category
+        // inherits certificate rules from its parent.
+        let parent = categories.find(c => c.id.toString() === categoryId);
+        if (!parent) {
+            parent = categories.find(c => c.children?.some(ch => ch.id.toString() === categoryId)) || null;
+        }
+        setSelectedCategory(parent || null);
         setCertificates([]);
     };
 
@@ -246,7 +261,7 @@ export default function TaxpayerProductsCreate({ categories = [], unitTypes = []
         }
 
         // Use router.post
-        router.post('/taxpayer/products', submitData, {
+        router.post('/taxpayer/products/store', submitData, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
@@ -327,10 +342,16 @@ export default function TaxpayerProductsCreate({ categories = [], unitTypes = []
                                         >
                                             <option value="">-- Select Category --</option>
                                             {categories.map((category) => (
-                                                <option key={category.id} value={category.id}>
-                                                    {category.name}
-                                                    {category.requires_certificate ? ' (Requires Certificates)' : ''}
-                                                </option>
+                                                <optgroup key={category.id} label={`${category.decree_reference ? category.decree_reference + '. ' : ''}${category.name}${category.requires_certificate ? ' (Requires Certificates)' : ''}`}>
+                                                    <option value={category.id}>
+                                                        {category.name} (General)
+                                                    </option>
+                                                    {category.children?.map((child) => (
+                                                        <option key={child.id} value={child.id}>
+                                                            {child.name}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
                                             ))}
                                         </select>
                                     </div>

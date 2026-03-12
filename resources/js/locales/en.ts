@@ -313,6 +313,8 @@ export const en = {
         clearAll: "Clear all",
         activeFilters: "Active filters:",
         cdf: "CDF",
+        adminPortal: "Admin Portal",
+        agentPortal: "Agent Portal",
     },
     statuses: {
         delivered: "Delivered",

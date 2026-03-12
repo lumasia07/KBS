@@ -263,7 +263,7 @@ export const useOrderStore = create<OrderState>()(
                         order_notes: orderNotes
                     };
 
-                    const response = await axios.post('/taxpayer/orders', payload);
+                    const response = await axios.post('/taxpayer/orders/store', payload);
                     const newOrder = response.data.order; // Assuming backend returns the order
 
                     set({
