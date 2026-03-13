@@ -99,7 +99,7 @@ class OrderController extends Controller
                 $grandTotal = $totalAmount + $taxAmount;
 
                 $randomStr = strtoupper(Str::random(5));
-                $orderNumber = "KBS-ORDER-{$year}-{$randomStr}";
+                $orderNumber = "RCEKIN-ORDER-{$year}-{$randomStr}";
 
                 $stampType = StampType::first();
                 $order = StampOrder::create([

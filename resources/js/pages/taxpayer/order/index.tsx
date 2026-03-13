@@ -125,7 +125,7 @@ export default function TaxpayerOrder() {
                                             {cartItems.length}
                                         </span>
                                         <span className="ml-2 hidden sm:inline text-xs opacity-80">
-                                            ({formatPrice(getCartGrandTotal())} CDF)
+                                            ({formatPrice(getCartGrandTotal())} FC)
                                         </span>
                                     </>
                                 )}

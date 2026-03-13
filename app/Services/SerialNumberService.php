@@ -41,7 +41,7 @@ class SerialNumberService
         $year = $year ?? date('Y');
         $sequence = $this->getNextSerial($year);
 
-        return sprintf('KBS-%s-%06d', $year, $sequence);
+        return sprintf('RCEKIN-%s-%06d', $year, $sequence);
     }
 
     /**
@@ -61,7 +61,7 @@ class SerialNumberService
     protected function syncWithDatabase(string $year): void
     {
         $maxSerial = Stamp::whereYear('created_at', $year)
-            ->where('serial_number', 'like', "KBS-{$year}-%")
+            ->where('serial_number', 'like', "RCEKIN-{$year}-%")
             ->orderBy('serial_number', 'desc')
             ->value('serial_number');
 

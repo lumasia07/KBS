@@ -387,7 +387,7 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                                                 {formatNumber(order.quantity)}
                                             </td>
                                             <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
-                                                {formatCurrency(order.amount)} CDF
+                                                {formatCurrency(order.amount)} FC
                                             </td>
                                             <td className="px-6 py-4">
                                                 <StatusBadge status={order.status} />
@@ -450,7 +450,7 @@ export default function TaxpayerDashboard(props: TaxpayerDashboardProps) {
                                         </div>
                                         <div>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">{t('taxpayer.dashboard.table.amount')}</p>
-                                            <p className="font-medium text-slate-900 dark:text-white">{formatCurrency(order.amount)} CDF</p>
+                                            <p className="font-medium text-slate-900 dark:text-white">{formatCurrency(order.amount)} FC</p>
                                         </div>
                                         <div>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">{t('taxpayer.dashboard.table.date')}</p>

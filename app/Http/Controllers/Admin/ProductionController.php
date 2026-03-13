@@ -50,8 +50,8 @@ class ProductionController extends Controller
         }
 
         return response()->json([
-            'serial_start' => sprintf('KBS-%s-%06d', date('Y'), $lastNum + 1),
-            'serial_end' => sprintf('KBS-%s-%06d', date('Y'), $lastNum + $order->quantity),
+            'serial_start' => sprintf('RCEKIN-%s-%06d', date('Y'), $lastNum + 1),
+            'serial_end' => sprintf('RCEKIN-%s-%06d', date('Y'), $lastNum + $order->quantity),
             'quantity' => $order->quantity,
             'generated' => false,
         ]);

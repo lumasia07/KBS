@@ -29,7 +29,7 @@ class TaxpayerApprovalMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('Taxpayer Account Approved - Kinshasa Bureau of Standards')
+            ->subject('Taxpayer Account Approved - Regie De Controle et D\'estamplillage de Kinshasa')
             ->view('emails.taxpayer.approve-taxpayer')
             ->with([
                 'taxpayer' => $this->taxpayer,

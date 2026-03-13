@@ -44,7 +44,7 @@ const stats = [
         description: 'Awaiting approval',
     },
     {
-        title: 'Revenue (CDF)',
+        title: 'Revenue (FC)',
         value: '45.2M',
         change: '+23.1%',
         trend: 'up',
@@ -161,7 +161,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
-                        <p className="text-sm text-slate-500">Welcome back! Here's what's happening with KBS today.</p>
+                        <p className="text-sm text-slate-500">Welcome back! Here's what's happening with RCEKIN today.</p>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-500 bg-white px-4 py-2 rounded-lg shadow-sm">
                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -233,7 +233,7 @@ export default function Dashboard() {
                             </span>
                         </div>
                         <BarChart data={monthlyRevenue} />
-                        <p className="text-xs text-slate-400 mt-4 text-center">Revenue in millions (CDF)</p>
+                        <p className="text-xs text-slate-400 mt-4 text-center">Revenue in millions (FC)</p>
                     </div>
 
                     {/* Quick Actions */}
@@ -303,9 +303,9 @@ export default function Dashboard() {
                         </div>
                         <div className="divide-y divide-slate-100">
                             {[
-                                { company: 'SODECO SARL', action: 'Payment received', amount: '+2,500,000 CDF', time: '5 min ago', status: 'success' },
+                                { company: 'SODECO SARL', action: 'Payment received', amount: '+2,500,000 FC', time: '5 min ago', status: 'success' },
                                 { company: 'RAWBANK', action: 'Order placed', amount: '500 stamps', time: '12 min ago', status: 'pending' },
-                                { company: 'CONGO TECH', action: 'Registration fee', amount: '+150,000 CDF', time: '1 hour ago', status: 'success' },
+                                { company: 'CONGO TECH', action: 'Registration fee', amount: '+150,000 FC', time: '1 hour ago', status: 'success' },
                                 { company: 'BRACONGO', action: 'Verification', amount: '50 stamps', time: '2 hours ago', status: 'success' },
                             ].map((tx, index) => (
                                 <div key={index} className="p-4 hover:bg-slate-50 transition-colors">

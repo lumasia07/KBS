@@ -137,7 +137,7 @@ class GenerateStampsJob implements ShouldQueue
                 return 0;
             }
 
-            // Extract the numeric part from serial number (e.g., KBS-2026-000001 -> 1)
+            // Extract the numeric part from serial number (e.g., RCEKIN-2026-000001 -> 1)
             preg_match('/-(\d+)$/', $lastStamp->serial_number, $matches);
             return isset($matches[1]) ? (int) $matches[1] : 0;
         });
@@ -149,7 +149,7 @@ class GenerateStampsJob implements ShouldQueue
     protected function generateSerialNumber(int $sequence): string
     {
         $year = date('Y');
-        return sprintf('KBS-%s-%06d', $year, $sequence);
+        return sprintf('RCEKIN-%s-%06d', $year, $sequence);
     }
 
     /**

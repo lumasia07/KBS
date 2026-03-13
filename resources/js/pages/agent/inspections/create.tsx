@@ -310,7 +310,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                         </p>
                                         {formData.proposed_fine > 0 && (
                                             <p className="text-sm text-red-700 mt-1">
-                                                {t('agent.create.fine')} {formData.proposed_fine.toLocaleString()} CDF
+                                                {t('agent.create.fine')} {formData.proposed_fine.toLocaleString()} FC
                                             </p>
                                         )}
                                     </div>

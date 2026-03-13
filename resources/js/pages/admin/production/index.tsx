@@ -335,7 +335,7 @@ export default function AdminProductionIndex() {
                                             <QrCode className="w-16 h-16 opacity-80" />
                                         </div>
                                         <div className="mt-2 text-[10px] font-mono font-bold text-[#003366]">
-                                            {generatedStats ? generatedStats.serial_start : (loadingPreview ? '...' : (previewSerial?.serial_start ?? 'KBS-2026-XXXXXX'))}
+                                            {generatedStats ? generatedStats.serial_start : (loadingPreview ? '...' : (previewSerial?.serial_start ?? 'RCEKIN-2026-XXXXXX'))}
                                         </div>
                                     </div>
 
