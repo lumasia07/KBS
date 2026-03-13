@@ -11,10 +11,12 @@ import {
     ClipboardCheck,
     MapPin,
     History,
-    Printer
+    ScanLine,
+    Printer,
 } from 'lucide-react';
 
 import AppLogo from './app-logo';
+
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -63,6 +65,7 @@ export function AppSidebar() {
             case 'control_agent':
                 return [
                     { title: t('admin.sidebar.dashboard'), href: '/agent/dashboard', icon: LayoutGrid },
+                    { title: t('agent.scanner.title'), href: '/agent/scanner', icon: ScanLine },
                     { title: t('admin.sidebar.myInspections'), href: '/agent/inspections', icon: ClipboardCheck },
                     { title: t('admin.sidebar.newInspection'), href: '/agent/inspections/create', icon: MapPin },
                 ];

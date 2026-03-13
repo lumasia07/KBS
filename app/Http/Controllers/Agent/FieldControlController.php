@@ -67,6 +67,14 @@ class FieldControlController extends Controller
     }
 
     /**
+     * Display stamp scanner for field agents.
+     */
+    public function scanner()
+    {
+        return Inertia::render('agent/scanner');
+    }
+
+    /**
      * Display list of agent's inspections.
      */
     public function index(Request $request)
