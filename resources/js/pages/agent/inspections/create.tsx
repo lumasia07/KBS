@@ -366,15 +366,15 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
         ]}>
             <Head title={t('agent.create.headTitle')} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
-                <div className="flex items-center gap-4">
+            <div className="flex h-full flex-1 flex-col gap-4 bg-slate-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:gap-6 sm:p-6 sm:pb-6">
+                <div className="flex items-center gap-3 sm:gap-4">
                     <Link href="/agent/inspections">
                         <Button variant="ghost" size="icon">
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('agent.create.title')}</h1>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{t('agent.create.title')}</h1>
                         <p className="text-slate-500 text-sm">{t('agent.create.subtitle')}</p>
                     </div>
                 </div>
@@ -674,7 +674,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                             onChange={(e) => setFormData(prev => ({ ...prev, offence_description: e.target.value }))}
                                         />
                                     </div>
-                                    <div className="w-1/2">
+                                    <div className="w-full md:w-1/2">
                                         <Label>{t('agent.create.proposedFine')}</Label>
                                         <Input
                                             type="number"
@@ -684,7 +684,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
                                             onChange={(e) => setFormData(prev => ({ ...prev, proposed_fine: parseFloat(e.target.value) || 0 }))}
                                         />
                                     </div>
-                                    <div className="w-1/2">
+                                    <div className="w-full md:w-1/2">
                                         <Label>{t('agent.create.offenceSeverity')}</Label>
                                         <Select value={formData.offence_severity} onValueChange={(v) => setFormData(prev => ({ ...prev, offence_severity: v }))}>
                                             <SelectTrigger className="mt-1">
@@ -705,7 +705,7 @@ export default function CreateInspection({ taxpayers = [] }: Props) {
 
                     {/* Sidebar - Summary */}
                     <div className="space-y-6">
-                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sticky top-6">
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 lg:sticky lg:top-20">
                             <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('agent.create.summary')}</h2>
                             <div className="space-y-4">
                                 <div className="text-center p-4 bg-slate-50 rounded-lg">

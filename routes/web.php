@@ -192,6 +192,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         */
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [App\Http\Controllers\Taxpayer\PaymentController::class, 'index'])->name('index');
+            Route::get('/{id}/receipt', [App\Http\Controllers\Taxpayer\PaymentController::class, 'receipt'])->name('receipt');
             Route::post('/store', [App\Http\Controllers\Taxpayer\PaymentController::class, 'store'])->name('store');
         });
 

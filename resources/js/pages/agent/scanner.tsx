@@ -233,25 +233,25 @@ export default function AgentScanner() {
         <AppLayout breadcrumbs={[{ title: t('agent.scanner.breadcrumb'), href: '/agent/scanner' }]}>
             <Head title={t('agent.scanner.headTitle')} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 bg-slate-50 p-6">
+            <div className="flex h-full flex-1 flex-col gap-4 bg-slate-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:gap-6 sm:p-6 sm:pb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">{t('agent.scanner.title')}</h1>
+                    <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{t('agent.scanner.title')}</h1>
                     <p className="text-sm text-slate-500">{t('agent.scanner.subtitle')}</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
                     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 className="text-lg font-semibold text-slate-900">{t('agent.scanner.liveScanner')}</h2>
                                 <p className="text-sm text-slate-500">{t('agent.scanner.liveScannerHint')}</p>
                             </div>
-                            <div className="flex gap-2">
-                                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                            <div className="grid grid-cols-1 gap-2 sm:flex">
+                                <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()}>
                                     <Upload className="mr-2 h-4 w-4" />
                                     {t('agent.scanner.scanImage')}
                                 </Button>
-                                <Button type="button" onClick={cameraActive ? stopCamera : startCamera}>
+                                <Button type="button" className="w-full sm:w-auto" onClick={cameraActive ? stopCamera : startCamera}>
                                     <Camera className="mr-2 h-4 w-4" />
                                     {cameraActive ? t('agent.scanner.stopCamera') : t('agent.scanner.startCamera')}
                                 </Button>
@@ -266,11 +266,11 @@ export default function AgentScanner() {
                                 {!cameraActive && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/90 text-white">
                                         <QrCode className="h-12 w-12 text-slate-300" />
-                                        <p className="text-sm text-slate-300">{t('agent.scanner.cameraIdle')}</p>
+                                        <p className="px-4 text-center text-sm text-slate-300">{t('agent.scanner.cameraIdle')}</p>
                                     </div>
                                 )}
                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                                    <div className="h-56 w-56 rounded-3xl border-2 border-emerald-400/70 shadow-[0_0_0_9999px_rgba(2,6,23,0.45)]" />
+                                    <div className="h-44 w-44 rounded-3xl border-2 border-emerald-400/70 shadow-[0_0_0_9999px_rgba(2,6,23,0.45)] sm:h-56 sm:w-56" />
                                 </div>
                             </div>
                         </div>

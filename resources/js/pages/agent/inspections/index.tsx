@@ -128,14 +128,14 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
         <AppLayout breadcrumbs={[{ title: t('agent.inspections.breadcrumb'), href: '/agent/inspections' }]}>
             <Head title={t('agent.inspections.headTitle')} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
-                <div className="flex items-center justify-between">
+            <div className="flex h-full flex-1 flex-col gap-4 bg-slate-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:gap-6 sm:p-6 sm:pb-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{t('agent.inspections.title')}</h1>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{t('agent.inspections.title')}</h1>
                         <p className="text-slate-500 text-sm mt-1">{t('agent.inspections.subtitle')}</p>
                     </div>
                     <Link href="/agent/inspections/create">
-                        <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 sm:w-auto">
                             <Plus className="h-4 w-4 mr-2" /> {t('agent.inspections.newInspection')}
                         </Button>
                     </Link>
@@ -157,9 +157,9 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
                 </div>
 
                 {/* Search Bar */}
-                <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                     <div className="font-medium text-slate-900">{t('agent.inspections.inspectionHistory')}</div>
-                    <div className="relative w-72">
+                    <div className="relative w-full sm:w-72">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                         <Input
                             placeholder={t('agent.inspections.searchPlaceholder')}
@@ -172,6 +172,7 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
 
                 {/* Table */}
                 <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    <div className="hidden md:block">
                     <Table>
                         <TableHeader className="bg-slate-50">
                             <TableRow>
@@ -232,8 +233,47 @@ export default function AgentInspectionsIndex({ stats = { total: 0, today: 0, co
                             )}
                         </TableBody>
                     </Table>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 md:hidden">
+                        {loading ? (
+                            <div className="flex h-24 items-center justify-center">
+                                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                            </div>
+                        ) : inspections.length === 0 ? (
+                            <div className="p-5 text-center text-sm text-slate-500">{t('agent.inspections.noInspections')}</div>
+                        ) : (
+                            inspections.map((insp) => (
+                                <button
+                                    key={insp.id}
+                                    type="button"
+                                    onClick={() => { setSelectedInspection(insp); setDetailsOpen(true); }}
+                                    className="w-full p-4 text-left active:bg-slate-50"
+                                >
+                                    <div className="flex items-start justify-between gap-2">
+                                        <p className="font-mono text-xs font-semibold text-slate-600">{insp.control_number}</p>
+                                        <Badge variant="outline" className={`${getStatusColor(insp.status)} font-medium`}>
+                                            {insp.status?.replace('_', ' ').toUpperCase()}
+                                        </Badge>
+                                    </div>
+                                    <p className="mt-1 font-medium text-slate-800">{insp.business || insp.business_name}</p>
+                                    <p className="mt-1 line-clamp-1 text-xs text-slate-500">{insp.location_address}</p>
+                                    <div className="mt-3 flex items-center justify-between text-xs">
+                                        <span className="text-slate-500">{formatDate(insp.control_date)}</span>
+                                        <span className={`inline-flex items-center rounded-full px-2 py-1 font-medium ${parseFloat(insp.compliance_rate) >= 80 ? 'bg-emerald-100 text-emerald-700' :
+                                            parseFloat(insp.compliance_rate) >= 50 ? 'bg-amber-100 text-amber-700' :
+                                                'bg-red-100 text-red-700'
+                                            }`}>
+                                            {insp.compliance_rate}
+                                        </span>
+                                    </div>
+                                </button>
+                            ))
+                        )}
+                    </div>
+
                     {totalRecords > 0 && (
-                        <div className="flex items-center justify-between p-4 border-t border-slate-100">
+                        <div className="flex flex-col gap-3 border-t border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="text-sm text-slate-500">
                                 {t('agent.inspections.showing')} {Math.min((page - 1) * 10 + 1, totalRecords)} {t('agent.inspections.to')} {Math.min(page * 10, totalRecords)} {t('agent.inspections.of')} {totalRecords}
                             </div>
