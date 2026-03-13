@@ -36,11 +36,11 @@ export function OrderSummary() {
                                 {item.product.name}
                             </p>
                             <p className="text-xs text-slate-500">
-                                {item.quantity} × {formatPrice(item.unit_price)} CDF
+                                {item.quantity} × {formatPrice(item.unit_price)} FC
                             </p>
                         </div>
                         <span className="font-semibold text-slate-900 ml-4">
-                            {formatPrice(item.subtotal)} CDF
+                            {formatPrice(item.subtotal)} FC
                         </span>
                     </div>
                 ))}
@@ -51,18 +51,18 @@ export function OrderSummary() {
                 <div className="flex justify-between text-sm">
                     <span className="text-slate-500">{t('taxpayer.orders.summary.subtotal')}</span>
                     <span className="font-medium text-slate-900">
-                        {formatPrice(getCartTotal())} CDF
+                        {formatPrice(getCartTotal())} FC
                     </span>
                 </div>
                 <div className="flex justify-between text-sm">
                     <span className="text-slate-500">{t('taxpayer.orders.summary.tax')}</span>
                     <span className="font-medium text-slate-900">
-                        {formatPrice(getCartTax())} CDF
+                        {formatPrice(getCartTax())} FC
                     </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-3 border-t border-slate-200">
                     <span className="text-slate-900">{t('taxpayer.orders.summary.grandTotal')}</span>
-                    <span className="text-[#003366]">{formatPrice(getCartGrandTotal())} CDF</span>
+                    <span className="text-[#003366]">{formatPrice(getCartGrandTotal())} FC</span>
                 </div>
             </div>
 

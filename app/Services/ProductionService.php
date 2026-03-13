@@ -109,8 +109,8 @@ class ProductionService
         $lastSerial = $this->getLastSerialNumber();
 
         return [
-            'serial_start' => sprintf('KBS-%s-%06d', date('Y'), $lastSerial + 1),
-            'serial_end' => sprintf('KBS-%s-%06d', date('Y'), $lastSerial + $order->quantity),
+            'serial_start' => sprintf('RCEKIN-%s-%06d', date('Y'), $lastSerial + 1),
+            'serial_end' => sprintf('RCEKIN-%s-%06d', date('Y'), $lastSerial + $order->quantity),
             'quantity' => $order->quantity,
             'estimated_completion' => now()->addMinutes(ceil($order->quantity / 10000))->format('Y-m-d H:i:s'),
         ];

@@ -133,10 +133,10 @@ export function OrderCart() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm text-slate-500">
-                                            {formatPrice(item.unit_price)} CDF × {item.quantity}
+                                            {formatPrice(item.unit_price)} FC × {item.quantity}
                                         </p>
                                         <p className="font-bold text-[#003366]">
-                                            {formatPrice(item.subtotal)} CDF
+                                            {formatPrice(item.subtotal)} FC
                                         </p>
                                     </div>
                                 </div>
@@ -153,19 +153,19 @@ export function OrderCart() {
                             <div className="flex justify-between text-sm">
                                 <span className="text-slate-500">{t('taxpayer.orders.cart.subtotal')}</span>
                                 <span className="font-medium text-slate-900">
-                                    {formatPrice(getCartTotal())} CDF
+                                    {formatPrice(getCartTotal())} FC
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-slate-500">{t('taxpayer.orders.cart.tax')}</span>
                                 <span className="font-medium text-slate-900">
-                                    {formatPrice(getCartTax())} CDF
+                                    {formatPrice(getCartTax())} FC
                                 </span>
                             </div>
                             <div className="flex justify-between text-lg font-bold pt-2 border-t border-slate-200">
                                 <span className="text-slate-900">{t('taxpayer.orders.cart.grandTotal')}</span>
                                 <span className="text-[#003366]">
-                                    {formatPrice(getCartGrandTotal())} CDF
+                                    {formatPrice(getCartGrandTotal())} FC
                                 </span>
                             </div>
                         </div>

@@ -128,7 +128,7 @@ export function Footer() {
                     <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700] to-amber-400 rounded-full blur-xl opacity-20"></div>
                     <img
                       src="/KBS_logo.png"
-                      alt="Kinshasa Bureau of Standards Logo"
+                      alt="Regie De Controle et D'estamplillage de Kinshasa Logo"
                       className="relative h-16 w-auto"
                     />
                   </div> */}

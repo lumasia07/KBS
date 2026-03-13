@@ -180,7 +180,7 @@ export function OrderForm() {
                                                 {new Intl.NumberFormat('fr-CD').format(
                                                     item.subtotal
                                                 )}{' '}
-                                                CDF
+                                                FC
                                             </span>
                                         </div>
                                     ))}
@@ -323,7 +323,7 @@ export function OrderForm() {
                                             {t('taxpayer.orders.orderForm.pickupLocation')}
                                         </h4>
                                         <p className="text-sm text-slate-600">
-                                            KBS Headquarters
+                                            RCEKIN Headquarters
                                             <br />
                                             Boulevard du 30 Juin
                                             <br />

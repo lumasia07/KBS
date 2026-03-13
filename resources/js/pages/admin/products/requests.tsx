@@ -162,7 +162,7 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-sm font-medium text-slate-700">
-                                                {Number(req.product.stamp_price).toLocaleString()} CDF
+                                                {Number(req.product.stamp_price).toLocaleString()} FC
                                             </div>
                                             <div className="text-xs text-slate-500 capitalize">{t('admin.products.perUnit')} {req.product.unit_type}</div>
                                         </TableCell>
@@ -262,7 +262,7 @@ export default function AdminProductRequests({ requests = [] }: Props) {
                                                 value={stampPrice}
                                                 onChange={(e) => setStampPrice(e.target.value)}
                                             />
-                                            <span className="absolute right-3 top-2.5 text-sm text-slate-500">CDF</span>
+                                            <span className="absolute right-3 top-2.5 text-sm text-slate-500">FC</span>
                                         </div>
                                         <p className="text-xs text-slate-500">{t('admin.products.pricePerUnit')} {selectedRequest.product.unit_type} {t('admin.products.unitSuffix')}</p>
                                     </div>

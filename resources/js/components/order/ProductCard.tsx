@@ -28,7 +28,7 @@ export function ProductCard({ product }: ProductCardProps) {
         addToCart(product, quantity, packaging);
         setCartOpen(true);
         toast.success(`${product.name} added to cart`, {
-            description: `${quantity} ${product.unit_type}(s) at ${product.stamp_price_per_unit} CDF each`,
+            description: `${quantity} ${product.unit_type}(s) at ${product.stamp_price_per_unit} FC each`,
         });
     };
 
@@ -90,7 +90,7 @@ export function ProductCard({ product }: ProductCardProps) {
                         <span className="text-2xl font-bold text-slate-900">
                             {formatPrice(product.stamp_price_per_unit)}
                         </span>
-                        <span className="text-sm text-slate-500 ml-1">CDF/{product.unit_type}</span>
+                        <span className="text-sm text-slate-500 ml-1">FC/{product.unit_type}</span>
                     </div>
                 </div>
 
@@ -146,7 +146,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-500">{t('taxpayer.orders.productCard.subtotal')}</span>
                         <span className="text-lg font-bold text-[#003366]">
-                            {formatPrice(quantity * product.stamp_price_per_unit)} CDF
+                            {formatPrice(quantity * product.stamp_price_per_unit)} FC
                         </span>
                     </div>
                 </div>

@@ -47,7 +47,7 @@ export function OrderHistory() {
             style: 'currency',
             currency: 'CDF',
             minimumFractionDigits: 0,
-        }).format(amount);
+        }).format(amount).replace('CDF', 'FC').replace('CDF\xa0', 'FC\xa0').replace('\xa0CDF', '\xa0FC');
     };
 
     const handleViewDetails = (order: any) => {

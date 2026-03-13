@@ -79,7 +79,7 @@ export function OrderConfirmation() {
                         <div>
                             <p className="text-xs text-slate-500 mb-1">{t('taxpayer.orders.confirmation.totalAmount')}</p>
                             <p className="text-xl font-bold text-[#003366]">
-                                {formatPrice(submittedOrder.grand_total)} CDF
+                                {formatPrice(submittedOrder.grand_total)} FC
                             </p>
                         </div>
                     </div>

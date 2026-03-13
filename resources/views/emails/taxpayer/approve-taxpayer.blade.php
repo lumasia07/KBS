@@ -12,7 +12,7 @@
 
     <div style="text-align: center; margin-bottom: 20px;">
         <img src="{{ $message->embed(public_path('KBS_logo.png')) }}"
-            alt="Kinshasa Bureau of Standards" style="max-width: 150px;">
+            alt="Regie De Controle et D'estamplillage de Kinshasa" style="max-width: 150px;">
     </div>
 
     <div
@@ -22,7 +22,7 @@
 
     <p><strong>Dear {{ $taxpayer->company_name }},</strong></p>
 
-    <p>Your taxpayer registration has been <strong>approved</strong> by the Kinshasa Bureau of Standards.</p>
+    <p>Your taxpayer registration has been <strong>approved</strong> by the Regie De Controle et D'estamplillage de Kinshasa.</p>
 
     <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <h3 style="margin-top: 0; font-size: 16px;">Account Status: <span style="color: #28a745;">ACTIVE</span></h3>
@@ -50,7 +50,7 @@
             📞 +243 XX XXX XXXX</p>
 
         <p style="font-size: 12px; text-align: center; margin-top: 20px;">
-            © {{ date('Y') }} Kinshasa Bureau of Standards
+            © {{ date('Y') }} Regie De Controle et D'estamplillage de Kinshasa
         </p>
     </div>
 

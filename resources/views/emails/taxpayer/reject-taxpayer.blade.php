@@ -12,7 +12,7 @@
 
     <div style="text-align: center; margin-bottom: 20px;">
         <img src="{{ $message->embed(public_path('KBS_logo.png')) }}"
-            alt="Kinshasa Bureau of Standards" style="max-width: 150px;">
+            alt="Regie De Controle et D'estamplillage de Kinshasa" style="max-width: 150px;">
     </div>
 
     <div
@@ -55,7 +55,7 @@
             📞 +243 XX XXX XXXX</p>
 
         <p style="font-size: 12px; text-align: center; margin-top: 20px;">
-            © {{ date('Y') }} Kinshasa Bureau of Standards
+            © {{ date('Y') }} Regie De Controle et D'estamplillage de Kinshasa
         </p>
     </div>
 

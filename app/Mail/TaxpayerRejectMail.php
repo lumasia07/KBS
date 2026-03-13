@@ -31,7 +31,7 @@ class TaxpayerRejectMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('Application Update - Kinshasa Bureau of Standards')
+            ->subject('Application Update - Regie De Controle et D\'estamplillage de Kinshasa')
             ->view('emails.taxpayer.reject-taxpayer')
             ->with([
                 'taxpayer' => $this->taxpayer,

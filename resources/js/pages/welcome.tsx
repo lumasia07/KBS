@@ -17,7 +17,7 @@ export default function Welcome({
 }) {
     return (
         <>
-            <Head title="Kinshasa Bureau of Standards" />
+            <Head title="Regie De Controle et D'estamplillage de Kinshasa" />
             <Header />
             <Hero />
             <AboutSection />

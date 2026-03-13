@@ -23,7 +23,7 @@ export default function AuthSimpleLayout({
                     <Link href={home()}>
                         <img
                             src="/KBS_logo.png"
-                            alt="Kinshasa Bureau of Standards Logo"
+                            alt="Regie De Controle et D'estamplillage de Kinshasa Logo"
                             className="h-14 w-auto max-w-[240px] object-contain"
                         />
                     </Link>
@@ -58,7 +58,7 @@ export default function AuthSimpleLayout({
                 {/* Decorative text */}
                 <div className="absolute bottom-12 left-12 right-12 z-10">
                     <p className="text-white text-2xl font-bold mb-2">
-                        Kinshasa Bureau of Standards
+                        Regie De Controle et D'estamplillage de Kinshasa
                     </p>
                     <p className="text-white/80 text-base">
                         Official Stamping System for Enterprises

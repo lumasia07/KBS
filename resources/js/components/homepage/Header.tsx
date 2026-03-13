@@ -231,7 +231,7 @@ export function Header() {
                             >
                                 <img
                                     src="/KBS_logo.png"
-                                    alt="Kinshasa Bureau of Standards Logo"
+                                    alt="Regie De Controle et D'estamplillage de Kinshasa Logo"
                                     className="relative h-14 lg:h-20 w-auto max-w-[500px] lg:max-w-[500px] object-contain transition-transform duration-300 group-hover:scale-105"
 
                                 />
