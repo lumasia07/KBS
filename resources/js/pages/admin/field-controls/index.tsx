@@ -62,6 +62,9 @@ interface FieldControl {
     offence_declared: boolean;
     offence_description: string;
     proposed_fine: number;
+    offence_severity?: string | null;
+    photos_paths?: string[] | null;
+    documents_paths?: string[] | null;
 }
 
 interface Stats {
@@ -100,6 +103,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
     const [rejectOpen, setRejectOpen] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [detailsLoading, setDetailsLoading] = useState(false);
 
     const fetchControls = async () => {
         setLoading(true);
@@ -133,9 +137,21 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
         return () => clearTimeout(timeout);
     }, [params.page, params.search]);
 
-    const handleView = (control: FieldControl) => {
-        setSelectedControl(control);
+    const handleView = async (control: FieldControl) => {
         setDetailsOpen(true);
+        setDetailsLoading(true);
+        try {
+            const response = await axios.get(`/admin/field-controls/${control.id}`);
+            setSelectedControl({
+                ...response.data.control,
+                agent_name: response.data.agent_name || response.data.control?.agent_name || 'sjpwn',
+            });
+        } catch (error) {
+            toast.error(t('admin.fieldControls.failedLoad'));
+            setDetailsOpen(false);
+        } finally {
+            setDetailsLoading(false);
+        }
     };
 
     const confirmApprove = async () => {
@@ -187,6 +203,39 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
             month: 'short',
             day: 'numeric'
         });
+    };
+
+    const normalizeStoredPath = (rawPath: string) => {
+        if (!rawPath) {
+            return '';
+        }
+        try {
+            const path = new URL(rawPath, window.location.origin).pathname;
+            return path.startsWith('/storage/') ? path.replace('/storage/', '') : path.replace(/^\//, '');
+        } catch {
+            return rawPath.startsWith('/storage/') ? rawPath.replace('/storage/', '') : rawPath.replace(/^\//, '');
+        }
+    };
+
+    const getAttachmentUrl = (path: string) => {
+        if (!selectedControl?.id) {
+            return '#';
+        }
+        return `/admin/field-controls/${selectedControl.id}/attachment?path=${encodeURIComponent(normalizeStoredPath(path))}`;
+    };
+
+    const getComplianceRateNumber = (control: FieldControl | null) => {
+        if (!control) {
+            return 0;
+        }
+        const parsed = Number.parseFloat(String(control.compliance_rate));
+        if (Number.isFinite(parsed)) {
+            return parsed;
+        }
+        if (!control.total_items_checked || control.total_items_checked <= 0) {
+            return 0;
+        }
+        return (control.compliant_items / control.total_items_checked) * 100;
     };
 
     const totalPages = Math.ceil(totalRecords / params.pageSize);
@@ -298,7 +347,7 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                                     parseFloat(control.compliance_rate) >= 50 ? 'bg-amber-100 text-amber-700' :
                                                         'bg-red-100 text-red-700'
                                                     }`}>
-                                                    {control.compliance_rate}
+                                                    {control.compliance_rate}%
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -337,8 +386,8 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
 
                 {/* Details Modal */}
                 <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-                    <DialogContent className="sm:max-w-4xl bg-white text-slate-900 border-slate-200">
-                        <DialogHeader>
+                    <DialogContent className="sm:max-w-4xl max-h-[88vh] bg-white text-slate-900 border-slate-200 p-0 overflow-hidden">
+                        <DialogHeader className="px-6 pt-6 pb-3 border-b border-slate-200">
                             <DialogTitle className="text-xl font-bold flex items-center gap-2">
                                 <ShieldCheck className="h-6 w-6 text-blue-600" />
                                 Control #{selectedControl?.control_number}
@@ -348,8 +397,13 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                             </DialogDescription>
                         </DialogHeader>
 
-                        {selectedControl && (
-                            <div className="grid grid-cols-2 gap-6 py-4">
+                        {detailsLoading ? (
+                            <div className="py-12 px-6">
+                                <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-500" />
+                            </div>
+                        ) : selectedControl && (
+                            <div className="overflow-y-auto px-6 py-4 max-h-[calc(88vh-180px)]">
+                                <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.inspectionInfo')}</h3>
                                     <div className="grid grid-cols-1 gap-2 text-sm">
@@ -398,19 +452,52 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                     </div>
                                     <div className="mt-2">
                                         <span className="text-slate-500 text-xs">{t('admin.fieldControls.complianceRate')}</span>
-                                        <div className={`text-2xl font-bold ${parseFloat(selectedControl.compliance_rate) >= 80 ? 'text-emerald-600' :
-                                            parseFloat(selectedControl.compliance_rate) >= 50 ? 'text-amber-600' :
+                                        <div className={`text-2xl font-bold ${getComplianceRateNumber(selectedControl) >= 80 ? 'text-emerald-600' :
+                                            getComplianceRateNumber(selectedControl) >= 50 ? 'text-amber-600' :
                                                 'text-red-600'
                                             }`}>
-                                            {selectedControl.compliance_rate}
+                                            {getComplianceRateNumber(selectedControl).toFixed(2)}%
                                         </div>
                                     </div>
                                 </div>
 
+                                {selectedControl.recommendations && (
+                                    <div className="col-span-2 space-y-2">
+                                        <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.recommendations')}</h3>
+                                        <p className="text-sm text-slate-600 whitespace-pre-line">{selectedControl.recommendations}</p>
+                                    </div>
+                                )}
+
                                 {selectedControl.observations && (
                                     <div className="col-span-2 space-y-2">
                                         <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.observations')}</h3>
-                                        <p className="text-sm text-slate-600">{selectedControl.observations}</p>
+                                        <p className="text-sm text-slate-600 whitespace-pre-line">{selectedControl.observations}</p>
+                                    </div>
+                                )}
+
+                                {!!selectedControl.photos_paths?.length && (
+                                    <div className="col-span-2 space-y-2">
+                                        <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.photosEvidence')}</h3>
+                                        <div className="space-y-1">
+                                            {selectedControl.photos_paths?.map((photo, index) => (
+                                                <a key={index} href={getAttachmentUrl(photo)} target="_blank" rel="noreferrer" className="block text-sm text-blue-600 hover:underline break-all">
+                                                    {photo}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!!selectedControl.documents_paths?.length && (
+                                    <div className="col-span-2 space-y-2">
+                                        <h3 className="font-semibold text-slate-900 border-b pb-2">{t('admin.fieldControls.documentsEvidence')}</h3>
+                                        <div className="space-y-1">
+                                            {selectedControl.documents_paths?.map((document, index) => (
+                                                <a key={index} href={getAttachmentUrl(document)} target="_blank" rel="noreferrer" className="block text-sm text-blue-600 hover:underline break-all">
+                                                    {document}
+                                                </a>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
 
@@ -420,20 +507,26 @@ export default function AdminFieldControlsIndex({ stats = { total: 0, completed:
                                             <AlertTriangle className="h-4 w-4" /> {t('admin.fieldControls.offenceDeclared')}
                                         </h3>
                                         <p className="text-sm text-red-700 mt-1">{selectedControl.offence_description}</p>
+                                        {selectedControl.offence_severity && (
+                                            <p className="text-sm text-red-700 mt-1">
+                                                {t('admin.fieldControls.offenceSeverity')} {selectedControl.offence_severity.replace('_', ' ')}
+                                            </p>
+                                        )}
                                         {selectedControl.proposed_fine > 0 && (
                                             <p className="text-sm font-medium text-red-800 mt-2">
-                                                {t('admin.fieldControls.proposedFine')} ${selectedControl.proposed_fine.toLocaleString()}
+                                                {t('admin.fieldControls.proposedFine')} {selectedControl.proposed_fine.toLocaleString()} FC
                                             </p>
                                         )}
                                     </div>
                                 )}
+                                </div>
                             </div>
                         )}
 
-                        <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
+                        <DialogFooter className="gap-2 sm:gap-0 border-t border-slate-200 px-6 py-4 bg-white sticky bottom-0">
                             <Button variant="outline" onClick={() => setDetailsOpen(false)}>{t('admin.fieldControls.close')}</Button>
 
-                            {selectedControl?.status === 'completed' && (
+                            {(selectedControl?.status === 'completed' || selectedControl?.status === 'requires_followup') && (
                                 <>
                                     <Button variant="destructive" onClick={() => setRejectOpen(true)}>
                                         <XCircle className="mr-2 h-4 w-4" /> {t('admin.fieldControls.flagIssue')}

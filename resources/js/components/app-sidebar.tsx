@@ -7,18 +7,14 @@ import {
     ShieldCheck,
     BarChart3,
     Settings,
-    HelpCircle,
-    Stamp,
     Package,
     ClipboardCheck,
     MapPin,
-    Target,
-    FileCheck,
     History,
-    AlertTriangle,
     Printer
 } from 'lucide-react';
 
+import AppLogo from './app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -33,8 +29,6 @@ import {
 } from '@/components/ui/sidebar';
 import { useI18nStore } from '@/stores/useI18nStore';
 import { type NavItem, type SharedData } from '@/types';
-
-import AppLogo from './app-logo';
 
 function getDashboardUrlForUserType(userType: string | undefined): string {
     switch (userType) {
@@ -51,7 +45,7 @@ function getDashboardUrlForUserType(userType: string | undefined): string {
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const { t, language } = useI18nStore();
+    const { t } = useI18nStore();
     const userType = auth?.user?.user_type as string | undefined;
     const dashboardUrl = getDashboardUrlForUserType(userType);
 
@@ -88,7 +82,6 @@ export function AppSidebar() {
 
     const footerNavItems: NavItem[] = [
         { title: t('common.settings'), href: '/settings/profile', icon: Settings },
-        { title: t('common.helpSupport'), href: '/help', icon: HelpCircle },
     ];
 
     return (

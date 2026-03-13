@@ -9,8 +9,6 @@ import {
     Clock,
     ArrowUpRight,
     Target,
-    AlertTriangle,
-    Navigation,
     CheckSquare,
     XCircle,
     Plus
@@ -62,8 +60,6 @@ interface Props {
 const quickActions = [
     { label: useI18nStore.getState().t('agent.dashboard.inspect'), icon: ClipboardCheck, href: '/agent/inspections/create', color: 'bg-blue-500' },
     { label: useI18nStore.getState().t('agent.dashboard.history'), icon: Target, href: '/agent/inspections', color: 'bg-emerald-500' },
-    { label: useI18nStore.getState().t('agent.dashboard.report'), icon: AlertTriangle, href: '#', color: 'bg-red-500' },
-    { label: useI18nStore.getState().t('agent.dashboard.route'), icon: Navigation, href: '#', color: 'bg-purple-500' },
 ];
 
 export default function AgentDashboard({

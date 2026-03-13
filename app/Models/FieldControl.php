@@ -39,6 +39,10 @@ class FieldControl extends Model
         'offence_description',
         'proposed_fine',
         'offence_severity',
+        'review_status',
+        'reviewed_by',
+        'reviewed_at',
+        'review_notes',
         'is_synced',
         'sync_date'
     ];
@@ -56,6 +60,7 @@ class FieldControl extends Model
         'proposed_fine' => 'decimal:2',
         'offence_declared' => 'boolean',
         'is_synced' => 'boolean',
+        'reviewed_at' => 'datetime',
         'photos_paths' => 'array',
         'documents_paths' => 'array'
     ];
@@ -78,6 +83,11 @@ class FieldControl extends Model
     public function stampVerifications()
     {
         return $this->hasMany(StampVerification::class);
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 
     public function getComplianceRateAttribute()
