@@ -133,6 +133,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('field-controls')->name('field-controls.')->group(function () {
             Route::get('/', [FieldControlController::class, 'index'])->name('index');
             Route::get('/{control}', [FieldControlController::class, 'show'])->name('show');
+            Route::get('/{control}/attachment', [FieldControlController::class, 'attachment'])->name('attachment');
             Route::post('/{control}/approve', [FieldControlController::class, 'approve'])->name('approve');
             Route::post('/{control}/reject', [FieldControlController::class, 'reject'])->name('reject');
         });
@@ -218,9 +219,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Agent\FieldControlController::class, 'dashboard'])
             ->name('dashboard');
 
+        Route::get('/taxpayers/search', [App\Http\Controllers\Agent\FieldControlController::class, 'searchTaxpayers'])
+            ->name('taxpayers.search');
+
         Route::prefix('inspections')->name('inspections.')->group(function () {
             Route::get('/', [App\Http\Controllers\Agent\FieldControlController::class, 'index'])->name('index');
             Route::get('/create', [App\Http\Controllers\Agent\FieldControlController::class, 'create'])->name('create');
+            Route::post('/upload-photos', [App\Http\Controllers\Agent\FieldControlController::class, 'uploadPhotos'])->name('upload-photos');
+            Route::post('/upload-documents', [App\Http\Controllers\Agent\FieldControlController::class, 'uploadDocuments'])->name('upload-documents');
             Route::post('/', [App\Http\Controllers\Agent\FieldControlController::class, 'store'])->name('store');
             Route::get('/{control}', [App\Http\Controllers\Agent\FieldControlController::class, 'show'])->name('show');
         });

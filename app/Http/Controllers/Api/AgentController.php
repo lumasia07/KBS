@@ -90,7 +90,7 @@ class AgentController extends Controller
             'taxpayer_id' => 'nullable|exists:taxpayers,id',
             'business_name' => 'required|string|max:255',
             'location_address' => 'required|string|max:500',
-            'control_type' => 'required|in:routine,random,follow_up,complaint',
+            'control_type' => 'required|in:routine,random,targeted,complaint_based',
             'total_items_checked' => 'required|integer|min:0',
             'compliant_items' => 'required|integer|min:0',
             'non_compliant_items' => 'required|integer|min:0',
@@ -98,9 +98,26 @@ class AgentController extends Controller
             'observations' => 'nullable|string',
             'recommendations' => 'nullable|string',
             'offence_declared' => 'boolean',
-            'offence_description' => 'nullable|string',
+            'offence_description' => 'nullable|string|required_if:offence_declared,true',
             'proposed_fine' => 'nullable|numeric|min:0',
+            'offence_severity' => 'nullable|in:minor,moderate,severe,critical|required_if:offence_declared,true',
+            'photos_paths' => 'nullable|array',
+            'photos_paths.*' => 'string|max:2048',
+            'documents_paths' => 'nullable|array',
+            'documents_paths.*' => 'string|max:2048',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
+
+        if (($validated['compliant_items'] + $validated['non_compliant_items']) > $validated['total_items_checked']) {
+            return response()->json([
+                'message' => 'Compliant and non-compliant totals cannot exceed total items checked.'
+            ], 422);
+        }
+
+        $status = ($validated['offence_declared'] ?? false) || ($validated['non_compliant_items'] ?? 0) > 0
+            ? 'requires_followup'
+            : 'completed';
 
         // Generate control number logic duplicated from existing controller
         // Ideally this should be in a Service class
@@ -114,18 +131,24 @@ class AgentController extends Controller
             'taxpayer_id' => $validated['taxpayer_id'],
             'business_name' => $validated['business_name'],
             'location_address' => $validated['location_address'],
+            'latitude' => $validated['latitude'] ?? 0,
+            'longitude' => $validated['longitude'] ?? 0,
             'control_type' => $validated['control_type'],
             'control_date' => now(),
             'total_items_checked' => $validated['total_items_checked'],
             'compliant_items' => $validated['compliant_items'],
             'non_compliant_items' => $validated['non_compliant_items'],
             'counterfeit_items' => $validated['counterfeit_items'],
-            'status' => 'completed',
+            'status' => $status,
+            'review_status' => 'pending_review',
             'observations' => $validated['observations'],
             'recommendations' => $validated['recommendations'],
+            'photos_paths' => $validated['photos_paths'] ?? null,
+            'documents_paths' => $validated['documents_paths'] ?? null,
             'offence_declared' => $validated['offence_declared'] ?? false,
             'offence_description' => $validated['offence_description'],
             'proposed_fine' => $validated['proposed_fine'],
+            'offence_severity' => $validated['offence_severity'] ?? null,
             'is_synced' => true,
             'sync_date' => now(),
         ]);
