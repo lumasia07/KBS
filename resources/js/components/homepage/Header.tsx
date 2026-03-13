@@ -132,6 +132,7 @@ export function Header() {
     const [isLangOpen, setIsLangOpen] = useState(false)
 
     const { t, language, setLanguage } = useI18nStore();
+    const faqLabel = (t('header.faq') as string) || '';
 
     useEffect(() => {
         const handleScroll = () => {
@@ -235,6 +236,7 @@ export function Header() {
                                     className="relative h-14 lg:h-20 w-auto max-w-[500px] lg:max-w-[500px] object-contain transition-transform duration-300 group-hover:scale-105"
 
                                 />
+
                             </a>
                         </div>
 
@@ -254,7 +256,7 @@ export function Header() {
                                 />
                                 <NavItem label={t('header.verify')} href="#verify" />
                                 <NavItem label={t('header.contact')} href="#" />
-                                <NavItem label={t('header.faq')} href="#" />
+                                {faqLabel && <NavItem label={faqLabel} href="#" />}
                             </div>
 
                             {/* Search Button */}
@@ -416,12 +418,14 @@ export function Header() {
                             >
                                 {t('header.contact')}
                             </a>
-                            <a
-                                href="#"
-                                className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
-                            >
-                                {t('header.faq')}
-                            </a>
+                            {faqLabel && (
+                                <a
+                                    href="#"
+                                    className="block px-4 py-3 rounded-lg hover:bg-slate-100 transition-colors text-slate-700 font-medium"
+                                >
+                                    {faqLabel}
+                                </a>
+                            )}
 
                             <div className="pt-4 px-4">
                                 <button

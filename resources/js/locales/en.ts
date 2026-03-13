@@ -1,5 +1,6 @@
 export const en = {
     header: {
+        brandName: "KINSHASA CONTROL AND STAMPING BOARD",
         home: "Home",
         services: "Services",
         portals: "Portals",
@@ -31,16 +32,17 @@ export const en = {
         },
     },
     hero: {
-        badge: "Official Portal",
-        titlePrefix: "Transform Compliance with",
-        titleHighlight: "Digital Stamping",
-        subtitle: "Join Kinshasa's premier digital transformation initiative. Experience secure, automated compliance management that accelerates business growth while ensuring regulatory excellence.",
+        badge: "",
+        titleTop: "WELCOME TO",
+        titleMain: "PORTAL",
+        titleBottom: "OFFICIAL",
+        subtitle: "",
         enterPortal: "Enter Digital Portal",
         registerBusiness: "Register Your Business",
         features: {
-            compliance: "Regulatory Compliance",
-            standards: "Quality Standards",
-            verification: "Product Verification"
+            compliance: "",
+            standards: "",
+            verification: ""
         }
     },
     howItWorks: {

@@ -3,11 +3,7 @@ import { router } from '@inertiajs/react'
 import {
   ShieldCheck,
   ArrowRight,
-  Lock,
-  Sparkles,
   CheckCircle,
-  Zap,
-  Globe,
   Award
 } from 'lucide-react'
 import { useI18nStore } from '@/stores/useI18nStore';
@@ -15,12 +11,13 @@ import { useI18nStore } from '@/stores/useI18nStore';
 export function Hero() {
   const [isHovered, setIsHovered] = useState(false)
   const { t } = useI18nStore();
+  const subtitleText = (t('hero.subtitle') as string) || '';
 
   const features = [
     { icon: <ShieldCheck className="w-4 h-4" />, text: t('hero.features.compliance'), color: "text-violet-400" },
     { icon: <Award className="w-4 h-4" />, text: t('hero.features.standards'), color: "text-amber-400" },
     { icon: <CheckCircle className="w-4 h-4" />, text: t('hero.features.verification'), color: "text-emerald-400" },
-  ]
+  ].filter((feature) => Boolean(feature.text));
 
   return (
     <>
@@ -35,6 +32,8 @@ export function Hero() {
             transform: translateY(0);
           }
         }
+
+
       `}</style>
 
       <div className="relative overflow-hidden min-h-[600px] flex items-center py-16">
@@ -61,24 +60,25 @@ export function Hero() {
           <div className="max-w-2xl space-y-8">
 
 
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 backdrop-blur-sm">
-              <Sparkles className="w-4 h-4 text-violet-400" />
-              <span className="text-sm font-semibold text-violet-300 uppercase tracking-wider">{t('hero.badge')}</span>
-            </div>
-
             {/* Main Content */}
             <div className="space-y-6">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight text-white">
-                {t('hero.titlePrefix')}{' '}
-                <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
-                  {t('hero.titleHighlight')}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight uppercase">
+                <span className="block text-amber-300">
+                  {t('hero.titleTop')}
+                </span>
+                <span className="block text-white">
+                  {t('hero.titleMain')}
+                </span>
+                <span className="block text-white">
+                  {t('hero.titleBottom')}
                 </span>
               </h1>
 
-              <p className="text-xl text-blue-200/80 leading-relaxed max-w-xl">
-                {t('hero.subtitle')}
-              </p>
+              {subtitleText && (
+                <p className="text-xl text-blue-200/80 leading-relaxed max-w-xl">
+                  {subtitleText}
+                </p>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -107,22 +107,24 @@ export function Hero() {
             </div>
 
             {/* Features */}
-            <div className="flex flex-wrap gap-6 pt-8">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 animate-[fadeInUp_0.5s_ease-out]"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className={`p-2 rounded-lg bg-white/5 border border-violet-500/10 ${feature.color}`}>
-                    {feature.icon}
+            {features.length > 0 && (
+              <div className="flex flex-wrap gap-6 pt-8">
+                {features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 animate-[fadeInUp_0.5s_ease-out]"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className={`p-2 rounded-lg bg-white/5 border border-violet-500/10 ${feature.color}`}>
+                      {feature.icon}
+                    </div>
+                    <span className="text-sm font-medium text-white">
+                      {feature.text}
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-white">
-                    {feature.text}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

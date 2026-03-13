@@ -1,5 +1,6 @@
 export const fr = {
     header: {
+        brandName: "REGIE DE CONTROLE ET D'ESTAMPILLAGE DE KINSHASA",
         home: "Accueil",
         services: "Services",
         portals: "Portails",
@@ -8,22 +9,22 @@ export const fr = {
         faq: "FAQ",
         searchPlaceholder: "Rechercher des services, documents ou aide...",
         signIn: "Se connecter",
-        signInPortal: "Se connecter au Portail",
+        signInPortal: "Se connecter au portail",
         menus: {
             services: {
-                stampRegistration: "Enregistrement de Timbres",
-                stampRegistrationDesc: "S'inscrire pour des timbres officiels",
+                stampRegistration: "Enregistrement des timbres",
+                stampRegistrationDesc: "Demander des timbres officiels",
                 complianceCerts: "Certificats de Conformité",
                 complianceCertsDesc: "Demander des documents de conformité",
-                verification: "Services de Vérification",
+                verification: "Services de vérification",
                 verificationDesc: "Vérifier l'authenticité des documents",
-                licensing: "Licences Commerciales",
+                licensing: "Licences commerciales",
                 licensingDesc: "Demander des licences commerciales",
             },
             portals: {
                 taxpayer: "Portail Contribuable",
                 taxpayerDesc: "Accéder à votre compte contribuable",
-                agent: "Portail Agent",
+                agent: "Portail Agent de contrôle",
                 agentDesc: "Pour les agents de vérification",
                 admin: "Portail Administrateur",
                 adminDesc: "Accès administratif",
@@ -31,77 +32,78 @@ export const fr = {
         },
     },
     hero: {
-        badge: "Portail Officiel",
-        titlePrefix: "Transformez la Conformité avec le",
-        titleHighlight: "Timbrage Numérique",
-        subtitle: "Rejoignez la première initiative de transformation numérique de Kinshasa. Profitez d'une gestion de conformité sécurisée et automatisée qui accélère la croissance des entreprises tout en assurant l'excellence réglementaire.",
-        enterPortal: "Accéder au Portail",
-        registerBusiness: "Enregistrer Votre Entreprise",
+        badge: "Portail officiel",
+        titleTop: "BIENVENUE AU",
+        titleMain: "PORTAIL",
+        titleBottom: "OFFICIEL",
+        subtitle: "Plateforme officielle de contrôle et d'estampillage pour la conformité réglementaire des entreprises à Kinshasa.",
+        enterPortal: "Accéder au portail",
+        registerBusiness: "Enregistrer votre entreprise",
         features: {
-            compliance: "Conformité Réglementaire",
-            standards: "Normes de Qualité",
-            verification: "Vérification des Produits"
+            compliance: "Conformité réglementaire",
+            standards: "Normes de qualité",
+            verification: "Vérification des produits"
         }
     },
     howItWorks: {
         title: "Standardisation des Produits & Conformité",
-        subtitle: "Notre flux de travail optimisé garantit une conformité rapide, la standardisation des produits et un recouvrement efficace des recettes en quatre étapes intégrées.",
+        subtitle: "Notre processus structuré garantit la conformité, la standardisation des produits et un recouvrement efficace des recettes en quatre étapes intégrées.",
         steps: {
             step1: {
-                title: "Enregistrer Votre Entreprise",
-                description: "Créez votre compte sécurisé en tant qu'Assujetti. Téléchargez simplement votre pièce d'identité officielle et vos documents d'enregistrement d'entreprise pour être vérifié instantanément.",
+                title: "Enregistrer votre entreprise",
+                description: "Créez votre compte sécurisé en qualité d'assujetti. Téléchargez votre pièce d'identité officielle et vos documents d'immatriculation pour vérification.",
                 benefits: [
-                    "Vérification instantanée de l'identité numérique",
-                    "Téléchargement & stockage sécurisé de documents",
-                    "Statut fiscal officiel d'Assujetti"
+                    "Vérification numérique de l'identité",
+                    "Téléversement et conservation sécurisés des documents",
+                    "Statut fiscal officiel d'assujetti"
                 ]
             },
             step2: {
                 title: "Commander des Timbres Fiscaux",
-                description: "Sélectionnez les timbres et la quantité requis. Notre système calcule automatiquement les droits et génère une Note de Perception sécurisée pour vos dossiers.",
+                description: "Sélectionnez les timbres requis et les quantités nécessaires. Le système calcule automatiquement les droits et génère une Note de perception sécurisée.",
                 benefits: [
                     "Calcul automatisé des droits",
-                    "Capacités de commande en gros",
-                    "Génération instantanée de Note de Perception"
+                    "Prise en charge des commandes en volume",
+                    "Génération immédiate de la Note de perception"
                 ]
             },
             step3: {
-                title: "Paiement Sécurisé",
-                description: "Effectuez votre transaction de manière transparente via des partenaires bancaires agréés ou des services de mobile money. Recevez une confirmation et des reçus numériques instantanés.",
+                title: "Paiement sécurisé",
+                description: "Effectuez votre transaction via des partenaires bancaires agréés ou des services de mobile money. Recevez immédiatement une confirmation et des justificatifs numériques.",
                 benefits: [
-                    "Intégration Banque & Mobile Money",
+                    "Intégration bancaire et mobile money",
                     "Confirmation de paiement immédiate",
                     "Reçus numériques traçables"
                 ]
             },
             step4: {
                 title: "Vérifier & Suivre",
-                description: "Suivez l'état de votre commande en temps réel. À la livraison, les timbres peuvent être vérifiés instantanément via notre application mobile sécurisée.",
+                description: "Suivez l'état de votre commande en temps réel. À la livraison, les timbres peuvent être vérifiés immédiatement via l'application mobile sécurisée.",
                 benefits: [
                     "Vérification d'authenticité en temps réel",
                     "Protection anti-contrefaçon",
-                    "Vérification intégrée à l'application mobile"
+                    "Vérification intégrée dans l'application mobile"
                 ]
             }
         },
-        cta: "Commencer Votre Enregistrement"
+        cta: "Commencer votre enregistrement"
     },
     featuresGrid: {
         titlePrefix: "Simplifiez la Conformité avec",
         titleHighlight: "l'Efficacité Numérique",
-        subtitle: "Moderniser le recouvrement des recettes et la conformité grâce à une infrastructure numérique sécurisée conçue pour les entreprises de Kinshasa.",
+        subtitle: "Moderniser le recouvrement des recettes et la conformité grâce à une infrastructure numérique sécurisée, conçue pour les entreprises de Kinshasa.",
         features: {
             registration: {
                 title: "Enregistrement des Contribuables",
-                description: "Enregistrement numérique pour les Assujettis avec des flux de vérification automatisés. Créez votre profil sécurisé en quelques minutes."
+                description: "Enregistrement numérique des assujettis avec des circuits de vérification automatisés. Créez votre profil sécurisé en quelques minutes."
             },
             ordering: {
                 title: "Commande de Timbres",
-                description: "Commande et suivi sécurisés des timbres fiscaux directement via le portail. Gestion des stocks en temps réel."
+                description: "Commande et suivi sécurisés des timbres fiscaux directement via le portail, avec gestion des stocks en temps réel."
             },
             payments: {
                 title: "Paiements Intelligents",
-                description: "Génération intégrée de Note de Perception avec compatibilité bancaire et mobile money. Rapprochement des paiements instantané."
+                description: "Génération intégrée de la Note de perception avec compatibilité bancaire et mobile money. Rapprochement instantané des paiements."
             }
         },
         exploreFeature: "Explorer la fonctionnalité",
@@ -115,17 +117,17 @@ export const fr = {
     },
     footer: {
         quickLinks: {
-            stampRegistration: "Enregistrement de Timbres",
-            taxCalculator: "Calculateur d'Impôts",
+            stampRegistration: "Enregistrement des timbres",
+            taxCalculator: "Calculateur fiscal",
             feeSchedule: "Grille Tarifaire",
-            verifyDoc: "Vérifier Document",
-            agentPortal: "Portail Agent",
-            liveSupport: "Support en Direct"
+            verifyDoc: "Vérifier un document",
+            agentPortal: "Portail Agent de contrôle",
+            liveSupport: "Assistance en direct"
         },
         about: {
-            title: "Bureau de Kinshasa",
-            subtitle: "des Normes et Réglementations",
-            description: "Le système officiel de timbrage intégré pour la collecte sécurisée des recettes, la vérification de conformité et la gouvernance numérique en République Démocratique du Congo."
+            title: "Régie de contrôle",
+            subtitle: "et d'estampillage de Kinshasa",
+            description: "Système officiel intégré d'estampillage pour la collecte sécurisée des recettes, la vérification de la conformité et la gouvernance numérique en République démocratique du Congo."
         },
         newsletter: {
             title: "Restez Informé(e)",
@@ -163,7 +165,7 @@ export const fr = {
             hours: "Lun-Ven : 8h00 - 18h00"
         },
         social: {
-            title: "Rejoignez Nous"
+            title: "Suivez-nous"
         },
         bottom: {
             systemStatus: "État du Système",
