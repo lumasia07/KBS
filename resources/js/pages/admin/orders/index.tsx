@@ -187,10 +187,11 @@ export default function AdminOrderIndex({ paymentMethods = [] }: Props) {
     });
 
     // ============== Memoized Values ==============
-    const activePaymentMethods = useMemo(() =>
-        paymentMethods.filter(m => m.is_active).sort((a, b) => a.sort_order - b.sort_order),
-        [paymentMethods]
-    );
+    const activePaymentMethods = useMemo(() => {
+        const sorted = [...paymentMethods].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+        const active = sorted.filter((m) => m.is_active !== false);
+        return active.length > 0 ? active : sorted;
+    }, [paymentMethods]);
 
     const selectedPaymentMethod = useMemo(() =>
         paymentMethods.find(m => m.id === paymentForm.payment_method_id),

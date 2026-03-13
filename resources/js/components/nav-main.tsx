@@ -23,8 +23,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                             asChild
+                            size="lg"
                             isActive={urlIsActive(item.href)}
                             tooltip={{ children: item.title }}
+                            className="h-11 rounded-xl"
                         >
                             <Link href={item.href} prefetch>
                                 {item.icon && <item.icon />}

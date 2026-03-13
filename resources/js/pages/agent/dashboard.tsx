@@ -107,26 +107,26 @@ export default function AgentDashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('agent.dashboard.headTitle')} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 bg-slate-50">
+            <div className="flex h-full flex-1 flex-col gap-4 bg-slate-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:gap-6 sm:p-6 sm:pb-6">
                 {/* Header with Welcome and Quick Actions */}
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">{t('agent.dashboard.title')}</h1>
+                        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">{t('agent.dashboard.title')}</h1>
                         <p className="text-sm text-slate-500">{t('agent.dashboard.subtitle')}</p>
                     </div>
 
                     {/* Quick Actions - Bank App Style */}
-                    <div className="flex items-center gap-6">
+                    <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6">
                         {quickActions.map((action, index) => (
                             <Link
                                 key={index}
                                 href={action.href}
-                                className="flex flex-col items-center gap-2 group"
+                                className="group flex flex-col items-center gap-2 rounded-2xl bg-white p-2.5 shadow-sm transition-all hover:shadow md:bg-transparent md:p-0 md:shadow-none"
                             >
-                                <div className={`w-14 h-14 rounded-full ${action.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200`}>
+                                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${action.color} shadow-md transition-transform duration-200 group-hover:scale-110 sm:h-14 sm:w-14 sm:rounded-full sm:shadow-lg`}>
                                     <action.icon className="w-6 h-6 text-white" />
                                 </div>
-                                <span className="text-xs font-medium text-slate-600 group-hover:text-slate-900">{action.label}</span>
+                                <span className="text-center text-[11px] font-medium text-slate-600 group-hover:text-slate-900 sm:text-xs">{action.label}</span>
                             </Link>
                         ))}
                     </div>
@@ -156,9 +156,9 @@ export default function AgentDashboard({
                 </div>
 
                 {/* Today's Schedule - Full Width */}
-                <div className="rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="p-6 border-b border-slate-200">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <h2 className="text-lg font-semibold text-slate-900">{t('agent.dashboard.todaySchedule')}</h2>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-slate-500">{todaySchedule.length} {t('agent.dashboard.inspectionsCount')}</span>
@@ -180,11 +180,11 @@ export default function AgentDashboard({
                         ) : (
                             todaySchedule.map((item, index) => (
                                 <div key={index} className="p-4 hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 text-center">
+                                    <div className="grid grid-cols-[auto_1fr] gap-3 sm:flex sm:items-center sm:gap-4">
+                                        <div className="w-14 text-left sm:w-16 sm:text-center">
                                             <span className="text-sm font-bold text-slate-900">{item.time}</span>
                                         </div>
-                                        <div className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-emerald-500' :
+                                        <div className={`h-2 w-2 self-center rounded-full ${item.status === 'completed' ? 'bg-emerald-500' :
                                             item.status === 'in_progress' ? 'bg-blue-500 animate-pulse' : 'bg-slate-300'
                                             }`} />
                                         <div className="flex-1">
@@ -194,10 +194,10 @@ export default function AgentDashboard({
                                                 <span>{item.address}</span>
                                             </div>
                                         </div>
-                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                                        <span className="justify-self-start rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 sm:justify-self-auto">
                                             {item.type}
                                         </span>
-                                        <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                                        <span className={`justify-self-start rounded-full px-3 py-1.5 text-xs font-medium sm:justify-self-auto ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
                                             item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
                                                 'bg-slate-100 text-slate-600'
                                             }`}>
@@ -213,7 +213,7 @@ export default function AgentDashboard({
                 </div>
 
                 {/* Recent Inspections - Full Width */}
-                <div className="rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="p-6 border-b border-slate-200">
                         <div className="flex items-center justify-between">
                             <h2 className="text-lg font-semibold text-slate-900">{t('agent.dashboard.recentInspections')}</h2>
@@ -231,7 +231,7 @@ export default function AgentDashboard({
                         ) : (
                             recentInspections.map((inspection, index) => (
                                 <div key={index} className="p-4 hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${inspection.result === 'passed' ? 'bg-emerald-100' : 'bg-red-100'
                                                 }`}>
@@ -248,7 +248,7 @@ export default function AgentDashboard({
                                                 </p>
                                             </div>
                                         </div>
-                                        <span className="text-sm text-slate-400">{inspection.date}</span>
+                                        <span className="pl-13 text-xs text-slate-400 sm:pl-0 sm:text-sm">{inspection.date}</span>
                                     </div>
                                 </div>
                             ))

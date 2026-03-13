@@ -35,12 +35,12 @@ export function AppSidebarHeader({
             : t('common.adminPortal') || 'Admin Portal';
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4 bg-[#003366] text-white">
-            <div className="flex items-center gap-2">
-                <SidebarTrigger className="-ml-1 text-white hover:bg-white/10 hover:text-white" />
-                <div className="flex items-center gap-2">
-                    <LayoutGrid className="w-5 h-5" />
-                    <span className="font-semibold">{portalName}</span>
+        <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-[#003366]/95 px-3 text-white backdrop-blur-sm transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sm:h-16 sm:px-4">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <SidebarTrigger className="h-9 w-9 text-white hover:bg-white/10 hover:text-white" />
+                <div className="flex min-w-0 items-center gap-2">
+                    <LayoutGrid className="h-5 w-5 shrink-0" />
+                    <span className="truncate text-sm font-semibold sm:text-base">{portalName}</span>
                 </div>
             </div>
 
@@ -48,7 +48,7 @@ export function AppSidebarHeader({
             <div className="relative" ref={langRef}>
                 <button
                     onClick={() => setIsLangOpen(!isLangOpen)}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-white/90 hover:text-white text-sm font-medium"
+                    className="flex h-9 items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white"
                 >
                     <Globe className="w-4 h-4" />
                     <span className="uppercase text-xs">{language}</span>

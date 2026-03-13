@@ -226,7 +226,7 @@ class PaymentController extends Controller
     {
         $payment = Payment::where('id', $id)
             ->where('taxpayer_id', Auth::user()->taxpayer->id)
-            ->with(['order', 'paymentMethod'])
+            ->with(['order.product', 'taxpayer', 'paymentMethod'])
             ->firstOrFail();
 
         if ($payment->status !== 'completed') {
@@ -236,8 +236,8 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        return Inertia::render('taxpayer/payment/receipt', [
-            'payment' => $payment
+        return view('taxpayer.payment.receipt', [
+            'payment' => $payment,
         ]);
     }
 
