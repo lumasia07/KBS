@@ -1190,6 +1190,7 @@ export const en = {
             subtitle: "Your daily inspection schedule and field activities.",
             // Quick actions
             inspect: "Inspect",
+            scan: "Scan",
             history: "History",
             report: "Report",
             route: "Route",
@@ -1325,6 +1326,69 @@ export const en = {
             errorCountMismatch: "Compliant + non-compliant items cannot exceed total items checked",
             errorCounterfeitMismatch: "Counterfeit items cannot exceed non-compliant items",
             errorFailed: "Failed to save inspection",
+        },
+        scanner: {
+            breadcrumb: "Scanner",
+            headTitle: "Stamp Scanner",
+            title: "Stamp Scanner",
+            subtitle: "Scan or enter a serial number to verify a stamp instantly in the field.",
+            liveScanner: "Live Scanner",
+            liveScannerHint: "Use the device camera to read a QR code on a stamp.",
+            scanImage: "Scan Image",
+            startCamera: "Start Camera",
+            stopCamera: "Stop Camera",
+            cameraIdle: "Camera preview is idle. Start the camera or scan from an image.",
+            unsupported: "This browser does not support QR detection. Use manual verification or upload an image instead.",
+            cameraDenied: "Camera access was denied or is unavailable on this device.",
+            noCodeFound: "No QR code was detected in the selected image.",
+            imageScanFailed: "The selected image could not be scanned.",
+            manualVerify: "Manual Verification",
+            manualVerifyHint: "Enter the serial number exactly as shown on the stamp.",
+            serialPlaceholder: "Enter serial number",
+            verifyButton: "Verify Stamp",
+            serialNumber: "Serial Number",
+            product: "Product",
+            taxpayer: "Taxpayer",
+            verificationCount: "Verification Count",
+            reset: "Reset",
+            states: {
+                idle: {
+                    title: "Ready to verify",
+                    description: "Scan a QR code or enter a serial number to inspect a stamp.",
+                },
+                valid: {
+                    title: "Authentic stamp",
+                    description: "This stamp is valid and registered in the system.",
+                },
+                expired: {
+                    title: "Expired stamp",
+                    description: "This stamp exists but it is no longer valid for active use.",
+                },
+                not_activated: {
+                    title: "Not activated",
+                    description: "This stamp exists but has not yet been activated in the system.",
+                },
+                counterfeit: {
+                    title: "Counterfeit or blocked",
+                    description: "This stamp is flagged as revoked, blocked, or otherwise invalid.",
+                },
+                reported_lost: {
+                    title: "Reported lost or stolen",
+                    description: "This stamp was reported lost or stolen and should be treated as suspicious.",
+                },
+                invalid: {
+                    title: "Invalid stamp",
+                    description: "The serial was found but its status is not accepted as valid.",
+                },
+                not_found: {
+                    title: "Stamp not found",
+                    description: "No matching stamp was found for the scanned or entered serial number.",
+                },
+                error: {
+                    title: "Verification failed",
+                    description: "The stamp could not be verified right now. Try again shortly.",
+                },
+            },
         },
     },
     stats: {

@@ -1168,6 +1168,7 @@ export const fr = {
             subtitle: "Votre programme d'inspection quotidien et activités de terrain.",
             // Quick actions
             inspect: "Inspecter",
+            scan: "Scanner",
             history: "Historique",
             report: "Rapport",
             route: "Itinéraire",
@@ -1303,6 +1304,69 @@ export const fr = {
             errorCountMismatch: "Les articles conformes et non conformes ne peuvent pas dépasser le total vérifié",
             errorCounterfeitMismatch: "Les articles contrefaits ne peuvent pas dépasser les articles non conformes",
             errorFailed: "Échec de l'enregistrement de l'inspection",
+        },
+        scanner: {
+            breadcrumb: "Scanner",
+            headTitle: "Scanner d'Estampille",
+            title: "Scanner d'Estampille",
+            subtitle: "Scannez ou saisissez un numéro de série pour vérifier instantanément une estampille sur le terrain.",
+            liveScanner: "Scanner en direct",
+            liveScannerHint: "Utilisez la caméra de l'appareil pour lire un code QR apposé sur l'estampille.",
+            scanImage: "Scanner une image",
+            startCamera: "Démarrer la caméra",
+            stopCamera: "Arrêter la caméra",
+            cameraIdle: "L'aperçu caméra est inactif. Démarrez la caméra ou scannez à partir d'une image.",
+            unsupported: "Ce navigateur ne prend pas en charge la détection QR. Utilisez la vérification manuelle ou téléversez une image.",
+            cameraDenied: "L'accès à la caméra a été refusé ou n'est pas disponible sur cet appareil.",
+            noCodeFound: "Aucun code QR n'a été détecté dans l'image sélectionnée.",
+            imageScanFailed: "L'image sélectionnée n'a pas pu être analysée.",
+            manualVerify: "Vérification manuelle",
+            manualVerifyHint: "Saisissez le numéro de série exactement comme il apparaît sur l'estampille.",
+            serialPlaceholder: "Saisir le numéro de série",
+            verifyButton: "Vérifier l'estampille",
+            serialNumber: "Numéro de série",
+            product: "Produit",
+            taxpayer: "Contribuable",
+            verificationCount: "Nombre de vérifications",
+            reset: "Réinitialiser",
+            states: {
+                idle: {
+                    title: "Prêt pour la vérification",
+                    description: "Scannez un code QR ou saisissez un numéro de série pour contrôler une estampille.",
+                },
+                valid: {
+                    title: "Estampille authentique",
+                    description: "Cette estampille est valide et enregistrée dans le système.",
+                },
+                expired: {
+                    title: "Estampille expirée",
+                    description: "Cette estampille existe mais n'est plus valide pour un usage actif.",
+                },
+                not_activated: {
+                    title: "Estampille non activée",
+                    description: "Cette estampille existe mais n'a pas encore été activée dans le système.",
+                },
+                counterfeit: {
+                    title: "Contrefaite ou bloquée",
+                    description: "Cette estampille est signalée comme révoquée, bloquée ou autrement invalide.",
+                },
+                reported_lost: {
+                    title: "Perdue ou volée",
+                    description: "Cette estampille a été déclarée perdue ou volée et doit être considérée comme suspecte.",
+                },
+                invalid: {
+                    title: "Estampille invalide",
+                    description: "Le numéro de série a été trouvé mais son statut n'est pas accepté comme valide.",
+                },
+                not_found: {
+                    title: "Estampille introuvable",
+                    description: "Aucune estampille correspondante n'a été trouvée pour le numéro scanné ou saisi.",
+                },
+                error: {
+                    title: "Échec de la vérification",
+                    description: "L'estampille ne peut pas être vérifiée pour le moment. Réessayez dans un instant.",
+                },
+            },
         },
     },
     stats: {

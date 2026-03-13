@@ -9,6 +9,8 @@ import {
     Clock,
     ArrowUpRight,
     Target,
+    AlertTriangle,
+    ScanLine,
     CheckSquare,
     XCircle,
     Plus
@@ -59,6 +61,7 @@ interface Props {
 // Quick actions for agent - bank app style
 const quickActions = [
     { label: useI18nStore.getState().t('agent.dashboard.inspect'), icon: ClipboardCheck, href: '/agent/inspections/create', color: 'bg-blue-500' },
+    { label: useI18nStore.getState().t('agent.dashboard.scan'), icon: ScanLine, href: '/agent/scanner', color: 'bg-violet-500' },
     { label: useI18nStore.getState().t('agent.dashboard.history'), icon: Target, href: '/agent/inspections', color: 'bg-emerald-500' },
 ];
 

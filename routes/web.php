@@ -218,6 +218,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('agent')->name('agent.')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Agent\FieldControlController::class, 'dashboard'])
             ->name('dashboard');
+        Route::get('/scanner', [App\Http\Controllers\Agent\FieldControlController::class, 'scanner'])
+            ->name('scanner');
 
         Route::get('/taxpayers/search', [App\Http\Controllers\Agent\FieldControlController::class, 'searchTaxpayers'])
             ->name('taxpayers.search');
