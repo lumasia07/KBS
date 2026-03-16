@@ -24,6 +24,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'password_changed',
         'phone_number',
         'employee_id',
         'user_type',
@@ -74,6 +75,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'password_changed' => 'boolean',
         'last_password_change' => 'datetime',
         'last_login_at' => 'datetime',
         'locked_until' => 'datetime',

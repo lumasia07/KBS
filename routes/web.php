@@ -69,7 +69,7 @@ Route::get('/portal/login', function () {
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'password_change_required'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------

@@ -89,33 +89,50 @@ class ReportController extends Controller
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
-            'margin_left' => 15,
-            'margin_right' => 15,
-            'margin_top' => 16,
-            'margin_bottom' => 16,
-            'margin_header' => 9,
-            'margin_footer' => 9
+            'orientation' => 'L',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 35,
+            'margin_bottom' => 15,
+            'margin_header' => 10,
+            'margin_footer' => 10
         ]);
 
         $mpdf->SetHTMLHeader('
-            <div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="font-size: 20px; font-weight: bold;">' . ucfirst($filters['report_type']) . ' Report</td>
-                        <td style="text-align: right; font-size: 10px;">Generated: ' . now()->format('Y-m-d H:i:s') . '</td>
-                    </tr>
-                </table>
-            </div>
+            <table class="header-table">
+                <tr>
+                    <td class="logo-container" style="text-align: left;">
+                        <img src="' . public_path('KBS_logo.png') . '" alt="RCEKIN Logo" style="height: 40px;">
+                    </td>
+                    <td class="content-container" style="text-align: left;">
+                        <h2 style="margin: 0; text-transform: uppercase; color: #2833a7;">Systeme integre d\'estampillage de Kinshasa</h2>
+                        <p style="margin: 0; text-transform: capitalize;">Email: info@rcekin.com</p>
+                        <p style="margin: 0; text-transform: capitalize;">Telephone:</p>
+                        <h3 style="margin: 0; text-transform: uppercase;">' . ucfirst($filters['report_type']) . ' Report</h3>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="border-bottom-3"></div>
+            <div class="border-bottom-1"></div>
         ');
 
         $mpdf->SetHTMLFooter('
-            <div style="border-top: 1px solid #ddd; padding-top: 5px; font-size: 10px; text-align: center;">
-                Page {PAGENO} of {nbpg}
-            </div>
+        <div class="border-bottom-1"></div>
+        <table class="footer-table">
+            <tr>
+                <td style="text-align: left;">
+                    Generated at: {DATE Y-m-d H:i:s}
+                </td>
+                <td style="text-align: right;">
+                    Page {PAGENO} of {nbpg}
+                </td>
+            </tr>
+        </table>
         ');
 
         $mpdf->WriteHTML($html);
-        return $mpdf->Output($filename . '.pdf', 'D');
+        return $mpdf->Output($filename . '.pdf', 'I');
     }
 
     private function downloadExcel($filters, $filename)
