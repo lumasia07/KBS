@@ -150,8 +150,8 @@ class CategorySeeder extends Seeder
         // ──────────────────────────────────────────────
         // 2. Top-level Categories (Decree Annex I–XVII)
         // ──────────────────────────────────────────────
-        $foodStandards   = ['Codex', 'ISO 22000', 'ISO/TS 22005', 'GS1', 'CE', 'ISO', 'HACCP'];
-        $petroStandards  = ['API', 'ASTM', 'D975', 'ISO 8217', 'REACH', 'GHS', 'ATEX/IECEX', 'ISO 9001'];
+        $foodStandards = ['Codex', 'ISO 22000', 'ISO/TS 22005', 'GS1', 'CE', 'ISO', 'HACCP'];
+        $petroStandards = ['API', 'ASTM', 'D975', 'ISO 8217', 'REACH', 'GHS', 'ATEX/IECEX', 'ISO 9001'];
         $electroStandards = ['IEC 62941', 'ISO/IEC 15408', 'GS1 SGTIN', 'CE', 'ATEX'];
         $textileStandards = ['ISO 1833', 'ISO 3758', 'GS1', 'CE', 'ISO 9001'];
         $constructStandards = ['ISO 9001', 'EN 197-1', 'CE'];
@@ -166,106 +166,225 @@ class CategorySeeder extends Seeder
 
         $topCategories = [
             // I. Local Agro-Food Products
-            ['name' => 'Local Agro-Food Products', 'slug' => 'local-agro-food', 'decree_reference' => 'I',
-             'description' => 'Locally produced agro-food products and assimilated (industrial & artisanal)',
-             'origin_type' => 'local', 'production_type' => null,
-             'applicable_standards' => $foodStandards, 'requires_certificate' => true, 'sort_order' => 1],
+            [
+                'name' => 'Local Agro-Food Products',
+                'slug' => 'local-agro-food',
+                'decree_reference' => 'I',
+                'description' => 'Locally produced agro-food products and assimilated (industrial & artisanal)',
+                'origin_type' => 'local',
+                'production_type' => null,
+                'applicable_standards' => $foodStandards,
+                'requires_certificate' => true,
+                'sort_order' => 1
+            ],
 
             // II. Imported Agro-Food Products
-            ['name' => 'Imported Agro-Food Products', 'slug' => 'imported-agro-food', 'decree_reference' => 'II',
-             'description' => 'Imported agro-food products and assimilated',
-             'origin_type' => 'imported', 'production_type' => null,
-             'applicable_standards' => $foodStandards, 'requires_certificate' => true, 'sort_order' => 2],
+            [
+                'name' => 'Imported Agro-Food Products',
+                'slug' => 'imported-agro-food',
+                'decree_reference' => 'II',
+                'description' => 'Imported agro-food products and assimilated',
+                'origin_type' => 'imported',
+                'production_type' => null,
+                'applicable_standards' => $foodStandards,
+                'requires_certificate' => true,
+                'sort_order' => 2
+            ],
 
             // III. Local Industrial Beverages
-            ['name' => 'Local Industrial Beverages', 'slug' => 'local-industrial-beverages', 'decree_reference' => 'III',
-             'description' => 'Locally produced industrial beverages and assimilated',
-             'origin_type' => 'local', 'production_type' => 'industrial',
-             'applicable_standards' => $foodStandards, 'requires_certificate' => true, 'sort_order' => 3],
+            [
+                'name' => 'Local Industrial Beverages',
+                'slug' => 'local-industrial-beverages',
+                'decree_reference' => 'III',
+                'description' => 'Locally produced industrial beverages and assimilated',
+                'origin_type' => 'local',
+                'production_type' => 'industrial',
+                'applicable_standards' => $foodStandards,
+                'requires_certificate' => true,
+                'sort_order' => 3
+            ],
 
             // IV. Local Artisanal Beverages & Food Liquids
-            ['name' => 'Local Artisanal Beverages', 'slug' => 'local-artisanal-beverages', 'decree_reference' => 'IV',
-             'description' => 'Locally produced artisanal beverages and food liquids',
-             'origin_type' => 'local', 'production_type' => 'artisanal',
-             'applicable_standards' => $foodStandards, 'requires_certificate' => true, 'sort_order' => 4],
+            [
+                'name' => 'Local Artisanal Beverages',
+                'slug' => 'local-artisanal-beverages',
+                'decree_reference' => 'IV',
+                'description' => 'Locally produced artisanal beverages and food liquids',
+                'origin_type' => 'local',
+                'production_type' => 'artisanal',
+                'applicable_standards' => $foodStandards,
+                'requires_certificate' => true,
+                'sort_order' => 4
+            ],
 
             // V. Imported Beverages
-            ['name' => 'Imported Beverages', 'slug' => 'imported-beverages', 'decree_reference' => 'V',
-             'description' => 'Imported beverages and assimilated',
-             'origin_type' => 'imported', 'production_type' => null,
-             'applicable_standards' => $foodStandards, 'requires_certificate' => true, 'sort_order' => 5],
+            [
+                'name' => 'Imported Beverages',
+                'slug' => 'imported-beverages',
+                'decree_reference' => 'V',
+                'description' => 'Imported beverages and assimilated',
+                'origin_type' => 'imported',
+                'production_type' => null,
+                'applicable_standards' => $foodStandards,
+                'requires_certificate' => true,
+                'sort_order' => 5
+            ],
 
             // VI. Petroleum Products
-            ['name' => 'Petroleum Products', 'slug' => 'petroleum-products', 'decree_reference' => 'VI',
-             'description' => 'Petroleum products and assimilated (chemical, colorimetric and electronic marking)',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $petroStandards, 'requires_certificate' => true, 'sort_order' => 6],
+            [
+                'name' => 'Petroleum Products',
+                'slug' => 'petroleum-products',
+                'decree_reference' => 'VI',
+                'description' => 'Petroleum products and assimilated (chemical, colorimetric and electronic marking)',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $petroStandards,
+                'requires_certificate' => true,
+                'sort_order' => 6
+            ],
 
             // VII. Electronics & Household Appliances
-            ['name' => 'Electronics & Household Appliances', 'slug' => 'electronics-appliances', 'decree_reference' => 'VII',
-             'description' => 'Electronic products, household appliances and assimilated',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $electroStandards, 'requires_certificate' => true, 'sort_order' => 7],
+            [
+                'name' => 'Electronics & Household Appliances',
+                'slug' => 'electronics-appliances',
+                'decree_reference' => 'VII',
+                'description' => 'Electronic products, household appliances and assimilated',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $electroStandards,
+                'requires_certificate' => true,
+                'sort_order' => 7
+            ],
 
             // VIII. Textile Products
-            ['name' => 'Textile Products', 'slug' => 'textile-products', 'decree_reference' => 'VIII',
-             'description' => 'Textile products and assimilated',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $textileStandards, 'requires_certificate' => false, 'sort_order' => 8],
+            [
+                'name' => 'Textile Products',
+                'slug' => 'textile-products',
+                'decree_reference' => 'VIII',
+                'description' => 'Textile products and assimilated',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $textileStandards,
+                'requires_certificate' => false,
+                'sort_order' => 8
+            ],
 
             // IX. Construction Materials
-            ['name' => 'Construction Materials', 'slug' => 'construction-materials', 'decree_reference' => 'IX',
-             'description' => 'Construction materials and assimilated',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $constructStandards, 'requires_certificate' => true, 'sort_order' => 9],
+            [
+                'name' => 'Construction Materials',
+                'slug' => 'construction-materials',
+                'decree_reference' => 'IX',
+                'description' => 'Construction materials and assimilated',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $constructStandards,
+                'requires_certificate' => true,
+                'sort_order' => 9
+            ],
 
             // X. Luxury Products
-            ['name' => 'Luxury Products', 'slug' => 'luxury-products', 'decree_reference' => 'X',
-             'description' => 'Luxury products and assimilated (jewelry, watches, perfumes, premium alcohols)',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $luxuryStandards, 'requires_certificate' => true, 'sort_order' => 10],
+            [
+                'name' => 'Luxury Products',
+                'slug' => 'luxury-products',
+                'decree_reference' => 'X',
+                'description' => 'Luxury products and assimilated (jewelry, watches, perfumes, premium alcohols)',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $luxuryStandards,
+                'requires_certificate' => true,
+                'sort_order' => 10
+            ],
 
             // XI. Industrial & Commercial Parcels
-            ['name' => 'Industrial & Commercial Parcels', 'slug' => 'industrial-commercial-parcels', 'decree_reference' => 'XI',
-             'description' => 'Industrial and commercial parcels and assimilated',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $parcelStandards, 'requires_certificate' => false, 'sort_order' => 11],
+            [
+                'name' => 'Industrial & Commercial Parcels',
+                'slug' => 'industrial-commercial-parcels',
+                'decree_reference' => 'XI',
+                'description' => 'Industrial and commercial parcels and assimilated',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $parcelStandards,
+                'requires_certificate' => false,
+                'sort_order' => 11
+            ],
 
             // XII. Tobacco & Cigarettes
-            ['name' => 'Tobacco & Cigarettes', 'slug' => 'tobacco', 'decree_reference' => 'XII',
-             'description' => 'Tobacco products, cigarettes, e-liquids and heated tobacco',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $tobaccoStandards, 'requires_certificate' => true, 'sort_order' => 12],
+            [
+                'name' => 'Tobacco & Cigarettes',
+                'slug' => 'tobacco',
+                'decree_reference' => 'XII',
+                'description' => 'Tobacco products, cigarettes, e-liquids and heated tobacco',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $tobaccoStandards,
+                'requires_certificate' => true,
+                'sort_order' => 12
+            ],
 
             // XIII. Cosmetic Products
-            ['name' => 'Cosmetic Products', 'slug' => 'cosmetics', 'decree_reference' => 'XIII',
-             'description' => 'Cosmetic products including skin care, makeup, hair care, personal hygiene',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $cosmeticStandards, 'requires_certificate' => true, 'sort_order' => 13],
+            [
+                'name' => 'Cosmetic Products',
+                'slug' => 'cosmetics',
+                'decree_reference' => 'XIII',
+                'description' => 'Cosmetic products including skin care, makeup, hair care, personal hygiene',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $cosmeticStandards,
+                'requires_certificate' => true,
+                'sort_order' => 13
+            ],
 
             // XIV. Pharmaceutical Products
-            ['name' => 'Pharmaceutical Products', 'slug' => 'pharmaceuticals', 'decree_reference' => 'XIV',
-             'description' => 'Medicines, biological products, vitamins, veterinary products',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $pharmaStandards, 'requires_certificate' => true, 'sort_order' => 14],
+            [
+                'name' => 'Pharmaceutical Products',
+                'slug' => 'pharmaceuticals',
+                'decree_reference' => 'XIV',
+                'description' => 'Medicines, biological products, vitamins, veterinary products',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $pharmaStandards,
+                'requires_certificate' => true,
+                'sort_order' => 14
+            ],
 
             // XV. Chemical Products
-            ['name' => 'Chemical Products', 'slug' => 'chemicals', 'decree_reference' => 'XV',
-             'description' => 'Industrial, agricultural, domestic, pharmaceutical, cosmetic and laboratory chemicals',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $chemicalStandards, 'requires_certificate' => true, 'sort_order' => 15],
+            [
+                'name' => 'Chemical Products',
+                'slug' => 'chemicals',
+                'decree_reference' => 'XV',
+                'description' => 'Industrial, agricultural, domestic, pharmaceutical, cosmetic and laboratory chemicals',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $chemicalStandards,
+                'requires_certificate' => true,
+                'sort_order' => 15
+            ],
 
             // XVI. Surfactants (Agents de Surface)
-            ['name' => 'Surfactants', 'slug' => 'surfactants', 'decree_reference' => 'XVI',
-             'description' => 'Surfactants, solvents, complexing agents, abrasives, disinfectants',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $surfactantStandards, 'requires_certificate' => true, 'sort_order' => 16],
+            [
+                'name' => 'Surfactants',
+                'slug' => 'surfactants',
+                'decree_reference' => 'XVI',
+                'description' => 'Surfactants, solvents, complexing agents, abrasives, disinfectants',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $surfactantStandards,
+                'requires_certificate' => true,
+                'sort_order' => 16
+            ],
 
             // XVII. Transport & Pneumatic Products
-            ['name' => 'Transport & Pneumatic Products', 'slug' => 'transport-pneumatics', 'decree_reference' => 'XVII',
-             'description' => 'Spare parts, car accessories, lubricants, tires, inflation equipment',
-             'origin_type' => null, 'production_type' => null,
-             'applicable_standards' => $transportStandards, 'requires_certificate' => true, 'sort_order' => 17],
+            [
+                'name' => 'Transport & Pneumatic Products',
+                'slug' => 'transport-pneumatics',
+                'decree_reference' => 'XVII',
+                'description' => 'Spare parts, car accessories, lubricants, tires, inflation equipment',
+                'origin_type' => null,
+                'production_type' => null,
+                'applicable_standards' => $transportStandards,
+                'requires_certificate' => true,
+                'sort_order' => 17
+            ],
         ];
 
         // Upsert top-level categories
@@ -283,7 +402,7 @@ class CategorySeeder extends Seeder
         }
 
         // Helper to get a parent category id
-        $parentId = fn (string $slug) => DB::table('categories')->where('slug', $slug)->value('id');
+        $parentId = fn(string $slug) => DB::table('categories')->where('slug', $slug)->value('id');
 
         // ──────────────────────────────────────────────
         // 3. Sub-categories per decree section
@@ -478,9 +597,9 @@ class CategorySeeder extends Seeder
         DB::table('categories')->where('slug', 'other')->delete();
         // Remove old generic "Food" / "Beverages" that have been replaced by origin-specific categories
         DB::table('categories')->where('slug', 'food')->whereNull('parent_id')
-          ->where('decree_reference', null)->delete();
+            ->where('decree_reference', null)->delete();
         DB::table('categories')->where('slug', 'beverages')->whereNull('parent_id')
-          ->where('decree_reference', null)->delete();
+            ->where('decree_reference', null)->delete();
 
         // ──────────────────────────────────────────────
         // 4. Category → Certificate Type Relations
@@ -625,11 +744,5 @@ class CategorySeeder extends Seeder
                 );
             }
         }
-
-        $this->command->info('Categories seeded per Decree N°SC/0208/CAB/GVK/DBL/2025');
-        $this->command->info('Top-level categories: ' . DB::table('categories')->whereNull('parent_id')->count());
-        $this->command->info('Sub-categories: ' . DB::table('categories')->whereNotNull('parent_id')->count());
-        $this->command->info('Certificate types: ' . DB::table('certificate_types')->count());
-        $this->command->info('Category-certificate relations: ' . DB::table('category_certificate_type')->count());
     }
 }

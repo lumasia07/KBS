@@ -486,7 +486,7 @@ const TaxpayerOrderCheckout = ({ order, taxpayerInfo }: Props) => {
                     <div class="header">
                         <img src="/KBS_logo.png" alt="ISS Logo" class="logo" onerror="this.style.display='none'">
                         <div class="title-section">
-                            <h1>KINSHASA INTEGRATED STAMPING AUTHORITY</h1>
+                            <h1 style="text-transform: uppercase;">Systeme integre d'estampillage de Kinshasa</h1>
                             <h2>DEMOCRATIC REPUBLIC OF CONGO</h2>
                             <div class="flag-colors">
                                 <div class="flag-blue"></div>

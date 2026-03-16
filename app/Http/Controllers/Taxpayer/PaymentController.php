@@ -225,7 +225,6 @@ class PaymentController extends Controller
     public function receipt(string $id)
     {
         $payment = Payment::where('id', $id)
-            ->where('taxpayer_id', Auth::user()->taxpayer->id)
             ->with(['order.product', 'taxpayer', 'paymentMethod'])
             ->firstOrFail();
 

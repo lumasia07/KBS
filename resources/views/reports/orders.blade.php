@@ -4,52 +4,11 @@
 <head>
     <meta charset="utf-8">
     <title>Orders Report</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 10pt;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th {
-            background: #f0f0f0;
-            font-weight: bold;
-            text-align: left;
-            padding: 8px;
-            border: 1px solid #ddd;
-        }
-
-        td {
-            padding: 6px;
-            border: 1px solid #ddd;
-        }
-
-        .summary-box {
-            background: #f9f9f9;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-        }
-
-        .summary-item {
-            display: inline-block;
-            margin-right: 20px;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ public_path('css/report.css') }}">
 </head>
 
 <body>
     <div class="summary-box">
-        <h3>Summary</h3>
         <div class="summary-item">Total Orders: {{ $data['summary']['total_orders'] }}</div>
         <div class="summary-item">Total Quantity: {{ number_format($data['summary']['total_quantity']) }}</div>
         <div class="summary-item">Grand Total: {{ number_format($data['summary']['grand_total'], 2) }}</div>
